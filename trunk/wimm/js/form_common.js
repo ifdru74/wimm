@@ -35,7 +35,7 @@ function submit_myform(frm_id, act, f_act)
 {
     var my_form = document.getElementById(frm_id);
     my_form.action=act;
-    my_form.FRM_ACTION.value=f_act;
+    my_form.FRM_MODE.value=f_act;
     my_form.submit();        
     //submit_myform_c(frm_id, act, f_act, false);
 }
