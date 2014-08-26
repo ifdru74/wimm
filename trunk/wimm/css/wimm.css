@@ -1,0 +1,384 @@
+BODY
+{
+    border-right: thin;
+    border-top: thin;
+    font-size: 10pt;
+    page-break-before : auto;
+    page-break-after: auto;
+    border-left: thin;
+    color: black;
+    line-height: normal;
+    border-bottom: thin;
+    font-family: Tahoma;
+    letter-spacing: normal;
+    background-color: transparent;
+}
+FORM
+{
+    border-right: thin;
+    border-top: thin;
+    font-size: 10pt;
+    border-left: thin;
+    color: black;
+    border-bottom: thin;
+    font-family: Tahoma;
+    background-color: transparent;
+}
+TABLE.visual
+{
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    width: 100%;
+}
+TABLE.hidden
+{
+    border-collapse: collapse;
+    border-right: none;
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+}
+P
+{
+    font-size: 10pt;
+    color: black;
+    font-family: Tahoma;
+    background-color: lavender;
+}
+P.error
+{
+    font-size: 10pt;
+    color: red;
+    font-family: Tahoma;
+    background-color: #FFC6C6;
+}
+TR
+{
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+}
+TR.hidden
+{
+    border-collapse: collapse;
+    border-right: none;
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+}
+TR.dark
+{
+    background-color: silver;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+}
+TR.white
+{
+    background-color: white;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+}
+TR.white_bold
+{
+    background-color: white;
+    font-weight: bold;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+}
+TR.plan
+{
+    background-color: yellow;
+    font-weight: bold;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+TR.error
+{
+    color: red;
+    font-weight: bold;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+TD
+{
+    font-size: 10pt;
+    color: black;
+    font-family: Tahoma;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+}
+TH.dark
+{
+    font-size: 10pt;
+    color: black;
+    font-family: Tahoma;
+    font-weight: bold;
+    border-right: black thin solid;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    background-color: lavender
+}
+TH
+{
+    font-size: 10pt;
+    color: black;
+    font-family: Tahoma;
+    font-weight: bold;
+    border-right: black thin solid;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+}
+TD.dark
+{
+    background-color: silver;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+TD.white
+{
+    background-color: white;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+TD.white_bold
+{
+    background-color: white;
+    font-weight: bold;
+    border-collapse: collapse;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+
+TD.error
+{
+    color: red;
+    font-weight: bold;
+    border-collapse: collapse;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+TD.plan
+{
+    background-color: yellow;
+    font-weight: bold;
+    border-collapse: collapse;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+TD.hidden
+{
+    font-size: 10pt;
+    color: black;
+    font-family: Tahoma;
+    text-decoration: none;
+    border-collapse: collapse;
+    border-right: none;
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+}
+
+TD.diff_absent
+{
+    background-color: yellow;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+
+TD.diff_types
+{
+    background-color: #80FF00;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+
+TD.diff_time
+{
+    background-color: #8080FF;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+
+TD.diff_bad
+{
+    background-color: #FF8080;
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+    text-decoration: none;
+}
+
+DIV.dlg_box
+{
+    left: 50%;
+    margin-left: -500px;
+    position: absolute;
+    width: 400px;
+    top: 50%;
+    margin-top: -50px;
+    z-index: 3;
+    border: activeborder;
+    border-width: thin;
+    border-style: solid;
+    background-color:buttonface;
+}
+
+DIV.dlg_box_cap
+{
+    background-color:activecaption;
+    color: captiontext;
+    font-weight: bold;
+    text-align: center;
+}
+
+DIV.dlg_box_text
+{
+    text-align: left;
+    background-color:buttonface;
+    color: buttontext;
+    text-indent: 1%;
+    margin-top: 1%;
+    margin-bottom: 1%;
+    margin-left: 1%;
+    margin-right: 1%;
+}
+
+DIV.dlg_box_btns
+{
+    text-align: center;
+    background-color:buttonface;
+    color: windowtext;
+}
+
+input.DLG_BTN
+{
+    width: 75px;
+}
+div.input_caption
+{
+    width: 30%;
+    min-width: 150px;
+    background-color: inherit;
+    float: left;
+    display:table-cell;
+    text-align: right;
+}
+
+    .dialog_row
+    {
+        margin: 0px auto; 
+        width: 500px; 
+        height: 30px;
+    }
+
+    .dialog_lbl
+    {
+        float:left;
+        width:100px;
+    }
+
+    .dialog_ctl
+    {
+        float:right; 
+        width:380px;
+    }
+
+    .dialog_btn
+    {
+        width:100px;
+    }    
+
+@media only screen 
+    and (min-device-width : 320px) 
+    and (max-device-width : 480px) {
+    .dialog_row
+    {
+        width: 480px;
+        height: 70px;
+    }
+    .dialog_ctl
+    {
+        float:right; 
+        width:270px;
+        height: 50px;
+        font-size: x-large;
+    }
+    .dialog_lbl
+    {
+        float:left;
+        width:100px;
+        font-size: x-large;
+    }
+    .dialog_btn
+    {
+        width:120px;
+        height: 50px;
+        font-size: x-large;
+        margin-left: 10px;
+    }
+}
