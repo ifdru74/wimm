@@ -37,6 +37,19 @@ currency_sign TEXT,
 user_id INTEGER,
 FOREIGN KEY(user_id) references m_users (user_id));
 
+create table if not exists m_currency_rate (
+currency_rate_id INTEGER PRIMARY KEY,
+currency_from INTEGER,
+exchange_rate_from REAL,
+currency_to INTEGER,
+exchange_rate_to REAL,
+open_date TEXT,
+close_date TEXT,
+user_id INTEGER,
+FOREIGN KEY(currency_from) references m_currency (currency_id),
+FOREIGN KEY(currency_to) references m_currency (currency_id),
+FOREIGN KEY(user_id) references m_users (user_id));
+
 create table if not exists m_budget (
 budget_id INTEGER PRIMARY KEY,
 budget_name TEXT,
