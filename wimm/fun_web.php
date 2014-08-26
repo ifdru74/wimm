@@ -57,25 +57,6 @@ function print_head($title)
 
 function print_body_title($title)
 {
-/*	print "<SCRIPT LANGUAGE=\"JavaScript\" type='text/javascript'>\n";
-	print "function showNavBar(elem,ebtn)\n";
-	print "{\n";
-	print "        if (elem.style.display == \"inline\")\n";
-	print "        {\n";
-	print "		ebtn.src=\"picts/drop_down.gif\";\n";
-	print "                elem.style.display=\"none\";\n";
-	print "                elem.title='Показать панель навигации'\n";
-	//print "                document.getElementById('show_navbar_h').value=0;\n";
-	print "        }\n";
-	print "        else\n";
-	print "        {\n";
-	print "		ebtn.src=\"picts/hide_up.gif\";\n";
-	print "                elem.style.display=\"inline\";\n";
-	print "                elem.title='Скрыть панель навигации'\n";
-	//print "                document.getElementById('show_navbar_h').value=1;\n";
-	print "        }\n";
-	print "}\n";
-	print "</SCRIPT>\n";*/
 	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
 	print "\t<TR class=\"hidden\">\n";
 	print "\t\t<TD class=\"hidden\" width=\"75%\"><H2>$title</H2></TD>\n";
@@ -119,4 +100,24 @@ function text4sql($txt)
 {
     return str_replace(str_replace(str_replace(str_replace(str_replace($txt,"--","&mdash;")),'/*',''),'*/',''),"'","\'");
 }
-?>
+
+function init_superglobals()
+{
+    if (!ini_get('register_globals')) {
+       $superglobals = array($_SERVER, $_ENV,
+           $_FILES, $_COOKIE, $_POST, $_GET);
+       if (isset($_SESSION)) {
+           array_unshift($superglobals, $_SESSION);
+       }
+       foreach ($superglobals as $superglobal) {
+           extract($superglobal, EXTR_SKIP);
+       }
+    }
+}
+
+function isMSIE()
+{
+    $s = $_SERVER['HTTP_USER_AGENT'];
+    echo "<!-- $s -->" . PHP_EOL;
+    return (strpos($s,"MSIE ")>0);
+}

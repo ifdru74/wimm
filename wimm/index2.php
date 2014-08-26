@@ -1,21 +1,33 @@
 <?php
-	if (!ini_get('register_globals')) {
-	   $superglobals = array($_SERVER, $_ENV,
-	       $_FILES, $_COOKIE, $_POST, $_GET);
-	   if (isset($_SESSION)) {
-	       array_unshift($superglobals, $_SESSION);
-	   }
-	   foreach ($superglobals as $superglobal) {
-	       extract($superglobal, EXTR_SKIP);
-	   }
-	}
+	include_once ("fun_web.php");
+        include_once ("fun_mysql.php");
+        init_superglobals();
 	session_start();
-	include("fun_web.php");
-	auth_check('UID');
-	print_head("Семейный бюджет");
+	//auth_check('UID');
 ?>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="windows-1251">
+        <link rel="STYLESHEET" href="css/wimm.css" type="text/css"/>
+        <link rel="SHORTCUT ICON" href="picts/favicon.ico">
+        <title>Семейный бюджет</title>
+    </head>
 <body>
     <script language="JavaScript" type="text/JavaScript" src="js/form_common.js"></script>
+<?php    
+    if(isMSIE())   {
+?>        
+    <script language="JavaScript" type="text/JavaScript" src="js/jquery-1.11.1.js"></script>
+    <script language="JavaScript" type="text/JavaScript" src="js/json2.js"></script>
+<?php    
+    }
+    else {
+?>        
+    <script language="JavaScript" type="text/JavaScript" src="js/jquery-2.1.1.js"></script>
+<?php    
+    }
+?>        
     <script language="JavaScript" type="text/JavaScript">
         function sel_row(row_id)
         {
@@ -28,91 +40,62 @@
             objDiv.style.left = x.toString()+"px";
             objDiv.style.display="inline";
             var s1;
-            set_elem_value("HIDDEN_ID", row_id);
             if(row_id.length<1) {
-                set_elem_value("OK_BTN", "Добавить");
-                set_elem_value("FRM_MODE", "insert");
-                set_elem_text("dlg_box_cap","Добавление записи");
-                set_elem_value("t_sum", "");
-                set_elem_value("t_name", "");
-                set_elem_value("t_user", "");
-                set_elem_value("t_curr", "");
-                set_elem_value("t_date", "");
+                $("#HIDDEN_ID").val(0);
+                $("#OK_BTN").val("Добавить");
+                $("#FRM_MODE").val("insert");
+                $("#dlg_box_cap").text("Добавление записи");
+                s1 = "";
+                $("#t_sum").val(s1);
+                $("#t_curr").val(s1);
+                $("#t_date").val(s1);
+                s1 = "<?php echo getRequestParam("UID", "");?>";
+                $("#t_user").val(s1);
             }
             else    {
-                set_elem_value("OK_BTN", "Изменить");
-                set_elem_value("FRM_MODE", "update");
-                set_elem_text("dlg_box_cap","Добавление записи");
-                field = document.getElementById("t_name");
-                field.value = get_elem_text("TNAME[" + row_id + "]");
-                field = document.getElementById("t_sum");
-                field.value = get_elem_text("T_SUMM[" + row_id + "]");
-                field = document.getElementById("t_sum");
-                set_elem_text("dlg_box_cap","Изменение записи");
+                alert(row_id);
+                $("#HIDDEN_ID").val(row_id);
+                $("#OK_BTN").val("Изменить");
+                $("#FRM_MODE").val("update");
+                $("#dlg_box_cap").text("Изменение записи");
+                $("#t_name").val($("TNAME[" + row_id + "]").text());
+                $("#t_sum").val($("T_SUMM[" + row_id + "]").text());
             }
-
-        }
-        function doEdit(s1)
-        {	if(s1=="add")	{
-                        expenses.HIDDEN_ID.value="0";
-                        expenses.action="wimm_edit.php";
-                        expenses.submit();
-                }
-                else if(s1=="edit")	{
-                        expenses.action="wimm_edit.php";
-                        coll = expenses.elements;
-                        if(expenses.FRM_MODE.value==="update" && expenses.HIDDEN_ID.value.length>0)
-                                expenses.submit();
-                        else
-                                alert("Запись для редактирования не выбрана");
-                }	else if(s1=="del")	{
-                        coll = expenses.elements;
-                        for(i=0; i<coll.length; i++)             {
-                                v = coll.item(i);
-                                s_1 = v.name.substr(0,2);
-                                s2 = v.id;
-                                if(s_1=="ID")	{
-                                        if(v.checked)	{
-                                                expenses.HIDDEN_ID.value=s2;
-                                                expenses.FRM_MODE.value="delete";
-                                                break;
-                                        }
-                                }
-                        }
-                        if(expenses.FRM_MODE.value=="delete")
-                                expenses.submit();
-                        else
-                                alert("Запись для удаления не выбрана");
-                }	else if(s1=="exit")	{
-                        expenses.action="wimm_exit.php";
-                        expenses.submit();
-                }
         }
     </script>
 <?php
-include ("fun_mysql.php");
 function print_buttons($bd="",$ed="", $bg="-1")
 {	
-    print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
+?>
+    <div style="display: block; width: 100%;">
+<?php
     if(strlen($bd)>0)	{
-            print "\t<TR class=\"hidden\">\n";
-            print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Дата начала периода:<input name=\"BDATE\" type=\"text\" value=\"$bd\"></TD>\n";
-            print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Дата окончания периода:<input name=\"EDATE\" type=\"text\" value=\"$ed\"></TD>\n";
-            print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Бюджет:<select size=\"1\" name=\"f_budget\">\n";
+?>
+        <div style="display: block; width: 100%;">
+            <label for="BDATE">Дата начала периода:</label>
+            <input id="BDATE" name="BDATE" type="text" value="<?php echo $bd;?>">
+            <label for="EDATE">Дата окончания периода:</label>
+            <input id="EDATE" name="EDATE" type="text" value="<?php echo $ed;?>">
+            <label for="f_budget">Бюджет:</label>
+            <select size="1" id="f_budget" name="f_budget">
+<?php
             $sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
-            f_set_sel_options2($sql, $bg, 1, 2);
-            print "</select></TD>\n";
-            print "\t</TR>\n";
+            //f_set_sel_options2($sql, $bg, 1, 2);
+?>
+            </select>
+        </div>
+<?php
     }
-    print "\t<TR class=\"hidden\">\n";
-    print "\t\t<TD class=\"hidden\"><input type=\"submit\" value=\"Обновить\"></TD>\n";
-    print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Добавить\" onclick=\"sel_row('')\"></TD>\n";
-    print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Изменить\" onclick=\"doEdit('edit')\"></TD>\n";
-    print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Удалить\" onclick=\"doEdit('del')\"></TD>\n";
-    print "\t\t<TD class=\"hidden\"><input type=\"reset\" value=\"Снять выделение\"></TD>\n";
-    print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Выход\" onclick=\"doEdit('exit')\"></TD>\n";
-    print "\t</TR>\n";
-    print "</TABLE>\n";
+?>
+        <div style="display: block; width: 100%;">
+            <input type="submit" value="Обновить">
+            <input type="button" value="Добавить" onclick="sel_row('');">
+            <input type="button" value="Удалить" onclick="doEdit('del');">
+            <input type="reset" value="Снять выделение">
+            <input type="button" value="Выход" onclick="submit_myform('expenses','wimm_exit.php','exit');">
+        </div>
+    </div>
+<?php
 }
 $conn = f_get_connection();
 if($conn)	{
@@ -128,7 +111,6 @@ if($conn)	{
 		$sql .= "$s,";
 		$s1 = getRequestParam("t_sum",0);
 		if(strpos($s1,",")===false)	{
-			//print "$fm - Fuck $s in ,\n";
 			$s = $s1;
 		}
 		else	{
@@ -162,77 +144,101 @@ if($conn)	{
 		$m = "0" . $m;
 	$ed = update_param("EDATE", "END_DATE", "$y-$m-01");
 	print_body_title("Расходы с $bd по $ed");
-	print "<form name=\"expenses\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
-		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
+		print "	<input ID=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
 		mysql_query($sql, $conn);
 		mysql_query("commit",$conn);
 	}
-	print "<input id=\"FRM_MODE\" name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
-	print "<input id=\"HIDDEN_ID\" name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
-	print "<input name=\"UID\" type=\"hidden\" value=\"" . $_REQUEST["UID"] ."\">\n";
-        print "\t<DIV class=\"dlg_box\" id=\"dialog_box\" style=\"width:600px;display:none;\">\n";
-        print "\t\t<DIV class=\"dlg_box_cap\" id=\"dlg_box_cap\">Изменение записи</DIV>\n";
-        print "\t\t<DIV class=\"dlg_box_text\" id=\"dlg_box_text\" >\n";
-	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
-	print "<TR class=\"hidden\">\n";
-	print "<TD WIDTH=\"30%\" class=\"hidden\">Пользователь:</TD><TD class=\"hidden\"><select size=\"1\" id=\"t_user\" name=\"t_user\">\n";
+?>
+	<form id="expenses" name="expenses" method="post">
+            <input id="FRM_MODE" name="FRM_MODE" type="hidden" value="refresh">
+            <input id="HIDDEN_ID" name="HIDDEN_ID" type="hidden" value="0">
+            <input name="UID" type="hidden" value="<?php echo getRequestParam("UID", "");?>">
+            <DIV class="dlg_box" id="dialog_box" style="width:600px;display:none;">
+                <DIV class="dlg_box_cap" id="dlg_box_cap">Изменение записи</DIV>
+                <DIV class="dlg_box_text" id="dlg_box_text" >
+                    <TABLE WIDTH="100%" class="hidden">
+                        <div class="dialog_row">
+                            <label class="dialog_lbl" for="t_user">Пользователь:</label>
+                            <select class="dialog_ctl" size="1" id="t_user" name="t_user">
+<?php
 	$sql = "select user_id, user_name from m_users where close_date is null";
-	f_set_sel_options2($sql, $s, $s, 2);
-	print "</select></TD></TR>\n";
-	print "<TR class=\"hidden\">\n";
-	print "<TD WIDTH=\"30%\" class=\"hidden\">Наименование:</TD><TD class=\"hidden\"><input name=\"t_name\" id=\"t_name\" type=\"text\" value=\"$s\"></TD>\n";
-	print "</TR>\n";
-	print "<TR class=\"hidden\">\n";
-	print "<TD class=\"hidden\">Тип:</TD><TD class=\"hidden\"><select size=\"1\" name=\"t_type\">\n";
+	//f_set_sel_options2($sql, $s, $s, 2);
+?>
+                            </select>
+                        </div>
+                        <div class="dialog_row">
+                            <label class="dialog_lbl" for="t_name">Наименование:</label>
+                            <input class="dialog_ctl" name="t_name" id="t_name" type="text" value="">
+                        </div>
+                        <div class="dialog_row">
+                            <label class="dialog_lbl" for="t_type">Тип:</label>
+                            <select class="dialog_ctl" size="1" name="t_type" id="t_type">
+<?php
 	$sql = "SELECT t_type_id, t_type_name FROM m_transaction_types  WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 1, 2);
-	print "</select></TD>\n";
-	print "</TR>\n";
-	print "<TR class=\"hidden\">\n";
-	print "<TD class=\"hidden\">Валюта:</TD><TD class=\"hidden\"><select size=\"1\" name=\"t_curr\">\n";
+	//f_set_sel_options2($sql, $s, 1, 2);
+?>
+                            </select>
+                        </div>
+                        <div class="dialog_row">
+                            <label class="dialog_lbl" for="t_curr">Валюта:</label>
+                            <select class="dialog_ctl" size="1" id="t_curr" name="t_curr">
+<?php
 	$sql = "SELECT currency_id, concat(currency_name,' (',currency_abbr,')') as c_name FROM m_currency WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 2, 2);
-	print "</select></TD>\n";
-	print "</TR>\n";
-	print "<TR class=\"hidden\">\n";
-	print "<TD class=\"hidden\">Сумма:</TD><TD class=\"hidden\"><input id=\"t_sum\" name=\"t_sum\" type=\"text\" value=\"$s\"></TD>\n";
-	print "</TR>\n";
-	print "<TR class=\"hidden\">\n";
-	print "<TD class=\"hidden\">Дата:</TD><TD class=\"hidden\"><input id=\"t_date\" name=\"t_date\" type=\"text\" value=\"$s\"></TD>\n";
-	print "</TR>\n";
-	print "<TR class=\"hidden\">\n";
-	print "<TD class=\"hidden\">Место:</TD><TD class=\"hidden\"><select size=\"1\" id=\"t_place\" name=\"t_place\">\n";
+	//f_set_sel_options2($sql, $s, 2, 2);
+?>
+                            </select>
+                        </div>
+                        <div class="dialog_row">
+                            <label class="dialog_lbl" for="t_sum">Сумма:</label>
+                            <input class="dialog_ctl" id="t_sum" name="t_sum" type="text" value="">
+                        </div>
+                        <div class="dialog_row">
+                            <label class="dialog_lbl" for="t_date">Дата:</label>
+                            <input class="dialog_ctl" id="t_date" name="t_date" type="text" value="$s">
+                        </div>
+                        <div class="dialog_row">
+                            <label class="dialog_lbl" for="t_place">Место:</label>
+                            <select class="dialog_ctl" size="1" id="t_place" name="t_place">
+<?php
 	$sql = "SELECT place_id, place_name FROM m_places WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 1, 2);
-	print "</select></TD>\n";
-	print "</TR>\n";
-
-	print "<TR class=\"hidden\">\n";
-	print "<TD class=\"hidden\">Бюджет:</TD><TD class=\"hidden\"><select size=\"1\" id=\"t_budget\" name=\"t_budget\">\n";
+	//f_set_sel_options2($sql, $s, 1, 2);
+?>
+                            </select>
+                        </div>
+                        <div class="dialog_row">
+                            <label class="dialog_lbl" for="t_budget">Бюджет:</label>
+                            <select class="dialog_ctl" size="1" id="t_budget" name="t_budget">
+<?php
 	$sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 1, 2);
-	print "</select></TD>\n";
-	print "</TR>\n";
-
-	print "</TABLE>\n";
-        print "\t\t</DIV>\n";
-        print "\t\t<DIV class=\"dlg_box_btns\" id=\"dlg_box_btns\">\n";
-        print "<input id=\"OK_BTN\" type=\"submit\" value=\"ОК\">\n";
-        print "<input type=\"button\" value=\"Отмена\" onclick=\"hide_elem('dialog_box');\">\n";
-        print "\t\t</DIV>\n";
-        print "\t</DIV>";
+	//f_set_sel_options2($sql, $s, 1, 2);
+?>
+                            </select>
+                        </div>
+                    </TABLE>
+                </DIV>
+                <DIV class="dlg_box_btns" id="dlg_box_btns">
+                    <input id="OK_BTN" type="submit" value="ОК">
+                    <input type="button" value="Отмена" onclick="$('#dialog_box').hide();">
+                </DIV>
+            </DIV>
+<?php
 	$bg = getRequestParam("f_budget","-1");
 	print_buttons($bd,$ed,$bg);
-	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
-	print "<TR>\n";
-	print "<TH WIDTH=\"5%\">&nbsp</TH>\n";
-	print "<TH WIDTH=\"33%\">Описание</TH>\n";
-	print "<TH WIDTH=\"10%\">Сумма</TH>\n";
-	print "<TH WIDTH=\"15%\">Дата и время</TH>\n";
-	print "<TH WIDTH=\"17%\">Кто</TH>\n";
-	print "<TH WIDTH=\"20%\">Где</TH>\n";
-	print "</TR>\n";
+?>
+            <TABLE WIDTH="100%" BORDER="1">
+                <thead>
+                    <TR>
+                        <TH WIDTH="5%">&nbsp</TH>
+                        <TH WIDTH="33%">Описание</TH>
+                        <TH WIDTH="10%">Сумма</TH>
+                        <TH WIDTH="15%">Дата и время</TH>
+                        <TH WIDTH="17%">Кто</TH>
+                        <TH WIDTH="20%">Где</TH>
+                    </TR>
+                </thead>
+                <tbody>
+<?php
 	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
 	$sql = "select transaction_id, t_type_name, transaction_name, transaction_sum, Type_sign, transaction_date, user_name, place_name, " .
                 " place_descr, t.currency_id t_cid, mcu.currency_sign, mb.currency_id as bc_id " .
@@ -253,13 +259,7 @@ if($conn)	{
 	$locale_info = localeconv();
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
 		while ($row = mysql_fetch_assoc($res)) {
-                        print "<TR class=\"$c_class\">\n";
-			if(strcmp($c_class,"dark")==0)	{
-				$c_class = "white";
-			}
-			else	{
-				$c_class = "dark";
-			}
+                        print "<TR class=\"expenses\">\n";
 			$row_pk = $row['transaction_id'];
 			print "<TD><input name=\"ROW_ID\" ID=\"ROW_$row_pk\" type=\"radio\" value=\"$row_pk\" onclick=\"sel_row('$row_pk');\">";
                         print "<input class=\"multiselect\" style=\"display:none;\" name=\"MROW[$row_pk]\" ID=\"CHK_$row_pk\" type=\"radio\" value=\"$row_pk\"></TD>\n";
@@ -305,8 +305,9 @@ if($conn)	{
 			print "<TD TITLE=\"$t\">$s</TD>\n";
 			print "</TR>\n";
 		}	}
-	else	{		$message  = f_get_error_text($conn, "Invalid query: ");
-		print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
+	else	{
+            $message  = f_get_error_text($conn, "Invalid query: ");
+            print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
 	}
 	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\" ALIGN=\"RIGHT\">";
 	$t = number_format($sd,2,","," ");
@@ -323,12 +324,12 @@ if($conn)	{
 		$c_class = $plus_pict;
 	print "<TR  class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Расходы - Доходы\" ALIGN=\"RIGHT\">";
 	print "Итого, разница:</TD><TD COLSPAN=\"4\"><IMG SRC=\"$c_class\">&nbsp;$t</TD></TR>\n";
-	print "</TABLE>\n";
+	print "</tbody></TABLE>\n";
 	print_buttons();
-	print "</form>\n";
 }
 
 ?>
+                    </form>
 </body>
 
 </html>
