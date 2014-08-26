@@ -89,6 +89,26 @@ TR.white
     border-left: black thin solid;
     border-bottom: black thin solid;
 }
+TR.expenses
+{
+    border-collapse: collapse;
+    border-right: black thin solid;
+    border-top: black thin solid;
+    border-left: black thin solid;
+    border-bottom: black thin solid;
+}
+
+TR.expenses:nth-child:odd
+{
+    background-color: white;
+}
+
+TR.expenses:nth-last-child
+{
+    background-color: white;
+    font-weight: bold;
+}
+
 TR.white_bold
 {
     background-color: white;
