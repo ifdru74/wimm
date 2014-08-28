@@ -1,9 +1,13 @@
 <?php
-	include_once ("fun_web.php");
-        include_once ("fun_mysql.php");
-        init_superglobals();
-	session_start();
-	//auth_check('UID');
+    include_once ("fun_web.php");
+    include_once ("fun_mysql.php");
+    init_superglobals();
+    session_start();
+    //auth_check('UID');
+    /**
+     * @var $conn PDO 
+     */
+    $conn = f_get_connection();
 ?>
 <!DOCTYPE html>
 <html>
@@ -64,7 +68,7 @@
         }
     </script>
 <?php
-function print_buttons($bd="",$ed="", $bg="-1")
+function print_buttons($conn, $bd="",$ed="", $bg="-1")
 {	
 ?>
     <div style="display: block; width: 100%;">
@@ -80,7 +84,7 @@ function print_buttons($bd="",$ed="", $bg="-1")
             <select size="1" id="f_budget" name="f_budget">
 <?php
             $sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
-            //f_set_sel_options2($sql, $bg, 1, 2);
+            f_set_sel_options2($conn, $sql, $bg, 1, 2);
 ?>
             </select>
         </div>
@@ -97,7 +101,6 @@ function print_buttons($bd="",$ed="", $bg="-1")
     </div>
 <?php
 }
-$conn = f_get_connection();
 if($conn)	{
 	$fm = getRequestParam("FRM_MODE","refresh");
 	$sql = "";
@@ -146,8 +149,8 @@ if($conn)	{
 	print_body_title("Расходы с $bd по $ed");
 	if(strlen($sql)>0)	{
 		print "	<input ID=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-		mysql_query($sql, $conn);
-		mysql_query("commit",$conn);
+		$conn->query($sql);
+		$conn->commit();
 	}
 ?>
 	<form id="expenses" name="expenses" method="post">
@@ -163,7 +166,7 @@ if($conn)	{
                             <select class="dialog_ctl" size="1" id="t_user" name="t_user">
 <?php
 	$sql = "select user_id, user_name from m_users where close_date is null";
-	//f_set_sel_options2($sql, $s, $s, 2);
+	f_set_sel_options2($conn, $sql, $s, $s, 2);
 ?>
                             </select>
                         </div>
@@ -176,7 +179,7 @@ if($conn)	{
                             <select class="dialog_ctl" size="1" name="t_type" id="t_type">
 <?php
 	$sql = "SELECT t_type_id, t_type_name FROM m_transaction_types  WHERE close_date is null";
-	//f_set_sel_options2($sql, $s, 1, 2);
+	f_set_sel_options2($conn, $sql, $s, 1, 2);
 ?>
                             </select>
                         </div>
@@ -185,7 +188,7 @@ if($conn)	{
                             <select class="dialog_ctl" size="1" id="t_curr" name="t_curr">
 <?php
 	$sql = "SELECT currency_id, concat(currency_name,' (',currency_abbr,')') as c_name FROM m_currency WHERE close_date is null";
-	//f_set_sel_options2($sql, $s, 2, 2);
+	f_set_sel_options2($conn, $sql, $s, 2, 2);
 ?>
                             </select>
                         </div>
@@ -202,7 +205,7 @@ if($conn)	{
                             <select class="dialog_ctl" size="1" id="t_place" name="t_place">
 <?php
 	$sql = "SELECT place_id, place_name FROM m_places WHERE close_date is null";
-	//f_set_sel_options2($sql, $s, 1, 2);
+	f_set_sel_options2($conn, $sql, $s, 1, 2);
 ?>
                             </select>
                         </div>
@@ -211,7 +214,7 @@ if($conn)	{
                             <select class="dialog_ctl" size="1" id="t_budget" name="t_budget">
 <?php
 	$sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
-	//f_set_sel_options2($sql, $s, 1, 2);
+	f_set_sel_options2($conn, $sql, $s, 1, 2);
 ?>
                             </select>
                         </div>
@@ -224,7 +227,7 @@ if($conn)	{
             </DIV>
 <?php
 	$bg = getRequestParam("f_budget","-1");
-	print_buttons($bd,$ed,$bg);
+	print_buttons($conn, $bd,$ed,$bg);
 ?>
             <TABLE WIDTH="100%" BORDER="1">
                 <thead>
@@ -250,7 +253,9 @@ if($conn)	{
 		$sql .= " and t.budget_id=$bg ";
 	}
 	$sql .= "order by transaction_date";
-	$res = mysql_query($sql,$conn);
+        $stmt = $conn->prepare($sql);
+        $stmt->execute();
+	//$res = mysql_query($sql,$conn);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
@@ -258,53 +263,54 @@ if($conn)	{
 	$minus_pict = "picts/minus.gif";
 	$locale_info = localeconv();
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-		while ($row = mysql_fetch_assoc($res)) {
-                        print "<TR class=\"expenses\">\n";
-			$row_pk = $row['transaction_id'];
-			print "<TD><input name=\"ROW_ID\" ID=\"ROW_$row_pk\" type=\"radio\" value=\"$row_pk\" onclick=\"sel_row('$row_pk');\">";
-                        print "<input class=\"multiselect\" style=\"display:none;\" name=\"MROW[$row_pk]\" ID=\"CHK_$row_pk\" type=\"radio\" value=\"$row_pk\"></TD>\n";
-                        $t = $row['t_type_name'];
-			$s = $row['transaction_name'];
-			print "<TD TITLE=\"$t\"><LABEL id=\"TNAME[$row_pk]\" FOR=\"ROW_$row_pk\">$s</LABEL></TD>\n";
-                        $cid = $row['t_cid'];
-                        $bid = $row['bc_id'];
-                        if($cid!=$bid) {
-                            $cs = $row['currency_sign'];
-                            $s = f_get_exchange_rate($row['t_cid'],$row['transaction_date'],$row['transaction_sum'] );
-                        }
-                        else    {
-                            $cs = "";
-                            $s = $row['transaction_sum'];
-                        }
-			$ts = $row['Type_sign'];
-			if($ts>0)	{
-				$pn = $plus_pict;
-				$sd += $s;
-			}
-			else	if($ts<0)	{
-				$pn = $minus_pict;
-				$sm += $s;
-			}
-			else	{
-				$pn = "";
-			}
-                        $t = number_format($s,2,","," ");
-			print "<TD TITLE=\"$t\">";
-			if(strlen($pn)>0)	{
-				print "<IMG SRC=$pn>&nbsp;";
-			}
-			$t = number_format($row['transaction_sum'],2,","," ");
-			print "$cs<LABEL ID=\"T_SUMM[$row_pk]\">$t</LABEL></TD>\n";
-			$t = $row['transaction_date'];
-			$s = f_get_disp_date($t);
-			print "<TD TITLE=\"$t\">$s</TD>\n";
-			$s = $row['user_name'];
-			print "<TD>$s</TD>\n";
-			$s = $row['place_name'];
-			$t = $row['place_descr'];
-			print "<TD TITLE=\"$t\">$s</TD>\n";
-			print "</TR>\n";
-		}	}
+            while ($row =  $stmt->fetch(PDO::FETCH_ASSOC)) {
+                print "<TR class=\"expenses\">\n";
+                $row_pk = $row['transaction_id'];
+                print "<TD><input name=\"ROW_ID\" ID=\"ROW_$row_pk\" type=\"radio\" value=\"$row_pk\" onclick=\"sel_row('$row_pk');\">";
+                print "<input class=\"multiselect\" style=\"display:none;\" name=\"MROW[$row_pk]\" ID=\"CHK_$row_pk\" type=\"radio\" value=\"$row_pk\"></TD>\n";
+                $t = $row['t_type_name'];
+                $s = $row['transaction_name'];
+                print "<TD TITLE=\"$t\"><LABEL id=\"TNAME[$row_pk]\" FOR=\"ROW_$row_pk\">$s</LABEL></TD>\n";
+                $cid = $row['t_cid'];
+                $bid = $row['bc_id'];
+                if($cid!=$bid) {
+                    $cs = $row['currency_sign'];
+                    $s = f_get_exchange_rate($conn, $row['t_cid'],$row['transaction_date'],$row['transaction_sum'] );
+                }
+                else    {
+                    $cs = "";
+                    $s = $row['transaction_sum'];
+                }
+                $ts = $row['Type_sign'];
+                if($ts>0)	{
+                        $pn = $plus_pict;
+                        $sd += $s;
+                }
+                else	if($ts<0)	{
+                        $pn = $minus_pict;
+                        $sm += $s;
+                }
+                else	{
+                        $pn = "";
+                }
+                $t = number_format($s,2,","," ");
+                print "<TD TITLE=\"$t\">";
+                if(strlen($pn)>0)	{
+                        print "<IMG SRC=$pn>&nbsp;";
+                }
+                $t = number_format($row['transaction_sum'],2,","," ");
+                print "$cs<LABEL ID=\"T_SUMM[$row_pk]\">$t</LABEL></TD>\n";
+                $t = $row['transaction_date'];
+                $s = f_get_disp_date($t);
+                print "<TD TITLE=\"$t\">$s</TD>\n";
+                $s = $row['user_name'];
+                print "<TD>$s</TD>\n";
+                $s = $row['place_name'];
+                $t = $row['place_descr'];
+                print "<TD TITLE=\"$t\">$s</TD>\n";
+                print "</TR>\n";
+            }	
+        }
 	else	{
             $message  = f_get_error_text($conn, "Invalid query: ");
             print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
@@ -325,7 +331,7 @@ if($conn)	{
 	print "<TR  class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Расходы - Доходы\" ALIGN=\"RIGHT\">";
 	print "Итого, разница:</TD><TD COLSPAN=\"4\"><IMG SRC=\"$c_class\">&nbsp;$t</TD></TR>\n";
 	print "</tbody></TABLE>\n";
-	print_buttons();
+	print_buttons($conn);
 }
 
 ?>
