@@ -57,7 +57,6 @@
                 $("#t_user").val(s1);
             }
             else    {
-                alert(row_id);
                 $("#HIDDEN_ID").val(row_id);
                 $("#OK_BTN").val("Изменить");
                 $("#FRM_MODE").val("update");
@@ -198,7 +197,7 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_date">Дата:</label>
-                            <input class="dialog_ctl" id="t_date" name="t_date" type="text" value="$s">
+                            <input class="dialog_ctl" id="t_date" name="t_date" type="text" value="">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_place">Место:</label>
