@@ -79,11 +79,11 @@
 				showError("Неверное имя пользователя или пароль ($cnt)");
 			print "</TD></TR>\n";		}
 ?>
-            <DIV style="height: 25px; width:300px;margin: 0px auto;">
+            <DIV style="height: 30px; width:300px;margin: 0px auto;">
                 <label for="UNAME">Имя пользователя:</LABEL>
                 <input style="float: right;" id="UNAME" name="UNAME" type="text" value="<?php echo $user;?>" autofocus="on">
             </div>
-            <DIV style="height: 25px; width:300px;margin: 0px auto;">
+            <DIV style="height: 30px; width:300px;margin: 0px auto;">
                 <label for="UPASS">Пароль:</LABEL>
                 <input style="float: right;" id="UPASS" name="UPASS" type="password" value="<?php echo $passwd;?>">
             </DIV>
