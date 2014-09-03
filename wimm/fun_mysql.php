@@ -167,3 +167,24 @@ function value4db($val)
     return addslashes (str_replace("\\","", $s2));
 }
 
+/**
+ * 
+ * @param PDO $conn
+ * @param string $val
+ * @return string
+ */
+function formatSQL($conn, $sql) {
+    switch($conn->getAttribute(PDO::ATTR_DRIVER_NAME))
+    {
+        case "sqlite":
+            return str_replace("#NOW#", "datetime()", $sql);
+            break;
+        case "mysql":
+            return str_replace("#NOW#", "NOW()", $sql);
+            break;
+        case "oracle":
+            return str_replace("#NOW#", "SYSDATE", $sql);
+            break;
+    }
+    return $sql;
+}
