@@ -11,8 +11,10 @@
 	}
 	session_start();
 	include("fun_web.php");
+        include ("fun_mysql.php");
 	auth_check('UID');
 	print_head("Семейный бюджет");
+        $conn = f_get_connection();
 ?>
 <body>
 <script language="JavaScript" type="text/JavaScript">
@@ -99,7 +101,6 @@ function doEdit(s1)
 }
 </script>
 <?php
-include ("fun_mysql.php");
 function print_buttons($bd="",$ed="", $bg="-1")
 {	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
 	if(strlen($bd)>0)	{
@@ -207,9 +208,11 @@ if($conn)	{
 		mysql_query($sql, $conn);
 		mysql_query("commit",$conn);
 	}
+        $uid = getRequestParam("UID","");
+        $s = "";
 	print "<input id=\"FRM_MODE\" name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	print "<input id=\"HIDDEN_ID\" name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
-	print "<input name=\"UID\" type=\"hidden\" value=\"" . $_REQUEST["UID"] ."\">\n";
+	print "<input name=\"UID\" type=\"hidden\" value=\"" . $uid ."\">\n";
         print "\t<DIV class=\"dlg_box\" id=\"dialog_box\" style=\"width:600px;display:none;\">\n";
         print "\t\t<DIV class=\"dlg_box_cap\" id=\"dlg_box_cap\" name=\"dlg_box_cap\">Изменение записи</DIV>\n";
         print "\t\t<DIV class=\"dlg_box_text\" id=\"dlg_box_text\" >\n";

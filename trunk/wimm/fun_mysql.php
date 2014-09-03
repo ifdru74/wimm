@@ -43,6 +43,7 @@ function f_get_error_text($conn,$caption)
  */
 function f_get_disp_date($sdate)
 {
+    $s = "";
     if(strlen($sdate)>0)	{
         $s = substr($sdate,8,2);
         $s = $s . "/" . substr($sdate,5,2);
