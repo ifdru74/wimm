@@ -160,53 +160,54 @@ function print_buttons($bd="")
 	print "<TH  WIDTH=\"20%\">Кто автор</TH>\n";
 	print "</TR>\n";
 	$sql = "SELECT t_type_id, t_type_name, parent_type_id, type_sign, mtt.open_date, is_repeat, period, user_name FROM m_transaction_types mtt, m_users mu where mtt.user_id=mu.user_id";
-	$res = mysql_query($sql,$conn);
+	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
 	if($res)	{
-		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-		$plus_pict = "picts/plus.gif";
-		$minus_pict = "picts/minus.gif";
-		while ($row = mysql_fetch_assoc($res)) {
-			print "<TR class=\"$c_class\">\n";
-			if(strcmp($c_class,"dark")==0)	{
-				$c_class = "white";
-			}
-			else	{
-				$c_class = "dark";
-			}
-			$s = $row['t_type_id'];
-			$sn = $row['t_type_name'];
-			$sd = $row['parent_type_id'];
-			print "<TD><input name=\"ID$s\" ID=\"$s\"type=\"radio\" value=\"$s\" onclick=\"doSel('$s','$sn','$sd')\">";
-			print "</TD>\n";
-			$s = $row['t_type_name'];
-			print "<TD>$s</TD>\n";
-			$s = $row['parent_type_id'];
-			print "<TD>$s</TD>\n";
-			$s = $row['type_sign'];
-			print "<TD TITLE=\"$s\"><CENTER>";
-			if($s<0)
-				print "<IMG SRC=\"$minus_pict\">";
-			else
-				if($s>0)
-					print "<IMG SRC=\"$plus_pict\">";
-				else
-					print "&nbsp;";
-			print "</CENTER></TD>\n";
-			$t = $row['open_date'];
-			$s = f_get_disp_date($t);
-			print "<TD>$s</TD>\n";
-			$s = $row['user_name'];
-			print "<TD>$s</TD>\n";
-			print "</TR>\n";
-		}
+            //print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
+            $plus_pict = "picts/plus.gif";
+            $minus_pict = "picts/minus.gif";
+            while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
+                print "<TR class=\"$c_class\">\n";
+                if(strcmp($c_class,"dark")==0)	{
+                    $c_class = "white";
+                }
+                else	{
+                    $c_class = "dark";
+                }
+                $s = $row['t_type_id'];
+                $sn = $row['t_type_name'];
+                $sd = $row['parent_type_id'];
+                print "<TD><input name=\"ID$s\" ID=\"$s\"type=\"radio\" value=\"$s\" onclick=\"doSel('$s','$sn','$sd')\">";
+                print "</TD>\n";
+                $s = $row['t_type_name'];
+                print "<TD>$s</TD>\n";
+                $s = $row['parent_type_id'];
+                print "<TD>$s</TD>\n";
+                $s = $row['type_sign'];
+                print "<TD TITLE=\"$s\"><CENTER>";
+                if($s<0)
+                    print "<IMG SRC=\"$minus_pict\">";
+                else
+                    if($s>0)
+                        print "<IMG SRC=\"$plus_pict\">";
+                    else
+                        print "&nbsp;";
+                print "</CENTER></TD>\n";
+                $t = $row['open_date'];
+                $s = f_get_disp_date($t);
+                print "<TD>$s</TD>\n";
+                $s = $row['user_name'];
+                print "<TD>$s</TD>\n";
+                print "</TR>\n";
+            }
 	}
 	else	{
-		$message  = f_get_error_text($conn, "Invalid query: ");
-		print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
-	}	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Итого</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
+            $message  = f_get_error_text($conn, "Invalid query: ");
+            print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
+	}
+        print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Итого</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
 	print "</TABLE>\n";
 	print_buttons();
 	print "</form>\n";
