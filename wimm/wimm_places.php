@@ -137,14 +137,15 @@ if($conn)	{
 	}
 	else if(strcmp($fm,"delete")==0)	{
 		$s = getRequestParam("HIDDEN_ID",0);
-		$sql = "delete from m_places where place_id=$s";
+		//$sql = "delete from m_places where place_id=$s";
+                $sql = "update m_places set close_date=NOW() where place_id=$s";
 	}
 	print_body_title($p_title);
 	print "<form name=\"places\" action=\"wimm_places.php\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-		mysql_query($sql, $conn);
-		mysql_query("commit",$conn);
+		$conn->query($sql, $conn);
+		$conn->commit();
 	}
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
@@ -160,13 +161,13 @@ if($conn)	{
 	print "</TR>\n";
 	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
 	$sql = "select place_id, place_name, tp.open_date, tp.close_date, place_descr, user_name from m_places tp, m_users tu where tp.user_id=tu.user_id order by place_name";
-	$res = mysql_query($sql,$conn);
+	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
 	if($res)	{
 		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-		while ($row = mysql_fetch_assoc($res)) {
+		while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			print "<TR class=\"$c_class\">\n";
 			if(strcmp($c_class,"dark")==0)	{
 				$c_class = "white";			}

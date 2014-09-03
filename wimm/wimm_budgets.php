@@ -144,8 +144,8 @@ if($conn)	{
 	print "<form name=\"places\" action=\"wimm_budgets.php\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-		mysql_query($sql, $conn);
-		mysql_query("commit",$conn);
+		$conn->query($sql, $conn);
+		$conn->commit();
 	}
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
@@ -161,13 +161,13 @@ if($conn)	{
 	print "</TR>\n";
 	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
 	$sql = "select budget_id, budget_name, budget_descr, tp.open_date, tp.close_date, user_name from m_budget tp, m_users tu where tp.user_id=tu.user_id order by budget_name";
-	$res = mysql_query($sql,$conn);
+	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
 	if($res)	{
 		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-		while ($row = mysql_fetch_assoc($res)) {
+		while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			print "<TR class=\"$c_class\">\n";
 			if(strcmp($c_class,"dark")==0)	{
 				$c_class = "white";			}

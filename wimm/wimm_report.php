@@ -83,33 +83,35 @@ if($conn)	{
 		$sql .= " and mt.budget_id=$bg ";
 	}
 	$sql .= " group by mt.place_id order by 2 desc";
-	$res = mysql_query($sql,$conn);
+	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
 	$plus_pict = "picts/plus.gif";
 	$minus_pict = "picts/minus.gif";
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-		while ($row = mysql_fetch_assoc($res)) {
-			print "<TR class=\"$c_class\">\n";
-			if(strcmp($c_class,"dark")==0)	{
-				$c_class = "white";			}
-			else	{
-				$c_class = "dark";
-			}
-			$s = $row['place_name'];
-			print "<TD>$s</TD>\n";
-			$s = $row['s_um'];
-			print "<TD>$s</TD>\n";
-			$s = $row['ltd'];
-			print "<TD>$s</TD>\n";
-			$s = $row['cnt'];
-			print "<TD>$s</TD>\n";
-			print "</TR>\n";
-		}	}
+            while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
+                print "<TR class=\"$c_class\">\n";
+                if(strcmp($c_class,"dark")==0)	{
+                    $c_class = "white";
+                }
+                else	{
+                    $c_class = "dark";
+                }
+                $s = $row['place_name'];
+                print "<TD>$s</TD>\n";
+                $s = $row['s_um'];
+                print "<TD>$s</TD>\n";
+                $s = $row['ltd'];
+                print "<TD>$s</TD>\n";
+                $s = $row['cnt'];
+                print "<TD>$s</TD>\n";
+                print "</TR>\n";
+            }
+        }
 	else	{
-		$message  = f_get_error_text($conn, "Invalid query: ");
-		print "<TR><TD COLSPAN=\"6\">SQL=\"$sql\"<BR>$message</TD></TR>\n";
+            $message  = f_get_error_text($conn, "Invalid query: ");
+            print "<TR><TD COLSPAN=\"6\">SQL=\"$sql\"<BR>$message</TD></TR>\n";
 	}
 	print "</TABLE>\n";
 	print_title("На что потратили деньги с $bd по $ed");
@@ -126,34 +128,34 @@ if($conn)	{
 		$sql .= " and mt.budget_id=$bg ";
 	}
 	$sql .= " group by mt.t_type_id order by 2 desc";
-	$res = mysql_query($sql,$conn);
+	$res =$conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
-	$plus_pict = "picts/plus.gif";
-	$minus_pict = "picts/minus.gif";
 	if($res)	{
-		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-		while ($row = mysql_fetch_assoc($res)) {
-			print "<TR class=\"$c_class\">\n";
-			if(strcmp($c_class,"dark")==0)	{
-				$c_class = "white";			}
-			else	{
-				$c_class = "dark";
-			}
-			$s = $row['t_type_name'];
-			print "<TD>$s</TD>\n";
-			$s = $row['s_um'];
-			print "<TD>$s</TD>\n";
-			$s = $row['ltd'];
-			print "<TD>$s</TD>\n";
-			$s = $row['cnt'];
-			print "<TD>$s</TD>\n";
-			print "</TR>\n";
-		}	}
+            //print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
+            while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
+                print "<TR class=\"$c_class\">\n";
+                if(strcmp($c_class,"dark")==0)	{
+                    $c_class = "white";
+                }
+                else	{
+                    $c_class = "dark";
+                }
+                $s = $row['t_type_name'];
+                print "<TD>$s</TD>\n";
+                $s = $row['s_um'];
+                print "<TD>$s</TD>\n";
+                $s = $row['ltd'];
+                print "<TD>$s</TD>\n";
+                $s = $row['cnt'];
+                print "<TD>$s</TD>\n";
+                print "</TR>\n";
+            }
+        }
 	else	{
-		$message  = f_get_error_text($conn, "Invalid query: ");
-		print "<TR><TD COLSPAN=\"6\">SQL=\"$sql\"<BR>$message</TD></TR>\n";
+            $message  = f_get_error_text($conn, "Invalid query: ");
+            print "<TR><TD COLSPAN=\"6\">SQL=\"$sql\"<BR>$message</TD></TR>\n";
 	}
 	print "</TABLE>\n";
 	print_title("Потребительская активность с $bd по $ed");
@@ -170,40 +172,40 @@ if($conn)	{
 		$sql .= " and mt.budget_id=$bg ";
 	}
 	$sql .= " group by mt.user_id, mtt.Type_sign order by mu.user_name";
-	$res = mysql_query($sql,$conn);
+	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
-	$plus_pict = "picts/plus.gif";
-	$minus_pict = "picts/minus.gif";
 	if($res)	{
-		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-		while ($row = mysql_fetch_assoc($res)) {
-			print "<TR class=\"$c_class\">\n";
-			if(strcmp($c_class,"dark")==0)	{
-				$c_class = "white";			}
-			else	{
-				$c_class = "dark";
-			}
-			$s = $row['user_name'];
-			print "<TD>$s</TD>\n";
-			$s = $row['s_um'];
-			print "<TD>";
-			$t = $row['Type_sign'];
-			if($t<0)
-				print "<IMG SRC=\"$minus_pict\">";
-			else if($t>0)
-				print "<IMG SRC=\"$plus_pict\">";
-			print "$s</TD>\n";
-			$s = $row['ltd'];
-			print "<TD>$s</TD>\n";
-			$s = $row['cnt'];
-			print "<TD>$s</TD>\n";
-			print "</TR>\n";
-		}	}
+            //print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
+            while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
+                print "<TR class=\"$c_class\">\n";
+                if(strcmp($c_class,"dark")==0)	{
+                    $c_class = "white";
+                }
+                else	{
+                    $c_class = "dark";
+                }
+                $s = $row['user_name'];
+                print "<TD>$s</TD>\n";
+                $s = $row['s_um'];
+                print "<TD>";
+                $t = $row['Type_sign'];
+                if($t<0)
+                        print "<IMG SRC=\"$minus_pict\">";
+                else if($t>0)
+                        print "<IMG SRC=\"$plus_pict\">";
+                print "$s</TD>\n";
+                $s = $row['ltd'];
+                print "<TD>$s</TD>\n";
+                $s = $row['cnt'];
+                print "<TD>$s</TD>\n";
+                print "</TR>\n";
+            }
+        }
 	else	{
-		$message  = f_get_error_text($conn, "Invalid query: ");
-		print "<TR><TD COLSPAN=\"6\">SQL=\"$sql\"<BR>$message</TD></TR>\n";
+            $message  = f_get_error_text($conn, "Invalid query: ");
+            print "<TR><TD COLSPAN=\"6\">SQL=\"$sql\"<BR>$message</TD></TR>\n";
 	}
 	print "</TABLE>\n";
 	print_buttons();
