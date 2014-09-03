@@ -252,8 +252,7 @@ if($conn)	{
 		$sql .= " and t.budget_id=$bg ";
 	}
 	$sql .= "order by transaction_date";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
+        $res = $conn->query($sql);
 	//$res = mysql_query($sql,$conn);
 	$sm = 0;
 	$sd = 0;
@@ -262,7 +261,7 @@ if($conn)	{
 	$minus_pict = "picts/minus.gif";
 	$locale_info = localeconv();
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-            while ($row =  $stmt->fetch(PDO::FETCH_ASSOC)) {
+            while ($row =  $res->fetch(PDO::FETCH_ASSOC)) {
                 print "<TR class=\"expenses\">\n";
                 $row_pk = $row['transaction_id'];
                 print "<TD><input name=\"ROW_ID\" ID=\"ROW_$row_pk\" type=\"radio\" value=\"$row_pk\" onclick=\"sel_row('$row_pk');\">";

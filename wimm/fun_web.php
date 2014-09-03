@@ -91,7 +91,7 @@ function print_title($title)
 function update_param($rname,$sname,$defval)
 {
 	$ed = getRequestParam($rname,getSessionParam($sname,$defval));
-	if(strcmp($_SESSION[$sname],$ed)!=0)
+	if(!key_exists($sname,$_SESSION) || strcmp($_SESSION[$sname],$ed)!=0)
 		$_SESSION[$sname] = $ed;
 	return $ed;
 }
