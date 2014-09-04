@@ -138,13 +138,13 @@ if($conn)	{
 	else if(strcmp($fm,"delete")==0)	{
 		$s = getRequestParam("HIDDEN_ID",0);
 		//$sql = "delete from m_places where place_id=$s";
-                $sql = "update m_places set close_date=NOW() where place_id=$s";
+                $sql = "update m_places set close_date=#NOW# where place_id=$s";
 	}
 	print_body_title($p_title);
 	print "<form name=\"places\" action=\"wimm_places.php\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-		$conn->query($sql, $conn);
+		$conn->query(formatSQL($sql));
 		$conn->commit();
 	}
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
