@@ -19,7 +19,6 @@
     </head>
     <body onload="$('#dialog_box').draggable();$('#OK_BTN').draggable();">
     <script language="JavaScript" type="text/JavaScript" src="js/form_common.js"></script>
-    <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
 <?php    
     if(isMSIE())   {
 ?>        
@@ -33,6 +32,7 @@
 <?php    
     }
 ?>        
+    <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
     <script language="JavaScript" type="text/JavaScript">
         function sel_row(row_id)
         {
@@ -66,6 +66,8 @@
                 $("#t_place").val($("#T_PLACE_" + row_id).val());
                 $("#t_budget").val($("#T_BUDG_" + row_id).val());
                 $("#t_date").val($("#T_DATE_" + row_id).attr('title'));
+                $('#t_type').val($("#T_TYPE_" + row_id).val());
+                $('#t_curr').val($("#T_CURR_" + row_id).val());
             }
         }
     </script>
@@ -248,7 +250,7 @@ if($conn)	{
 <?php
 	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
 	$sql = "select transaction_id, t_type_name, transaction_name, transaction_sum, Type_sign, transaction_date, user_name, place_name, " .
-                " place_descr, t.currency_id t_cid, mcu.currency_sign, mb.currency_id as bc_id, t.place_id, t.budget_id, t.user_id " .
+                " place_descr, t.currency_id t_cid, mcu.currency_sign, mb.currency_id as bc_id, t.place_id, t.budget_id, t.user_id, t.t_type_id " .
                 " from m_transactions t, m_transaction_types tt, m_users tu, m_places tp, m_currency mcu, m_budget mb " .
                 " where t.t_type_id=tt.t_type_id and t.user_id=tu.user_id and t.place_id=tp.place_id and t.currency_id=mcu.currency_id and " .
                 " t.budget_id=mb.budget_id and transaction_date>='$bd' and  transaction_date<'$ed' ";
@@ -303,8 +305,11 @@ if($conn)	{
                 }
                 $ts = $row['transaction_sum'];
                 $t = number_format($ts,2,","," ");
-                printf('%s<LABEL ID="T_SUMM_%s" FOR="%s" title="%s">%s</LABEL></TD>%s',
-                        $cs, $row_pk, $row_id, $ts, $t, PHP_EOL);
+                printf('%s<LABEL ID="T_SUMM_%s" FOR="%s" title="%s">%s</LABEL>'.
+                        '<input type="hidden" id="T_TYPE_%s" value="%s">'.
+                        '<input type="hidden" id="T_CURR_%s" value="%s"></TD>%s',
+                        $cs, $row_pk, $row_id, $ts, $t, $row_pk, 
+                        filter_array($row, 't_type_id', ''), $row_pk, $cid, PHP_EOL);
                 $t = $row['transaction_date'];
                 $s = f_get_disp_date($t);
                 print "<TD id=\"T_DATE_$row_pk\" TITLE=\"$t\">$s</TD>\n";
