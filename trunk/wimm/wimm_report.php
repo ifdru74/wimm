@@ -24,7 +24,7 @@ function doEdit(s1)
 </script>
 <body>
 <?php
-include ("fun_mysql.php");
+include_once 'fun_dbms.php';
 function print_buttons($bd="",$ed="", $bg="-1")
 {	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
 	print "\t<TR class=\"hidden\">\n";

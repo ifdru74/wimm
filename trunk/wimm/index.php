@@ -11,7 +11,7 @@
 	}
 	session_start();
 	include("fun_web.php");
-        include ("fun_mysql.php");
+        include_once 'fun_dbms.php';
 	auth_check('UID');
 	print_head("Семейный бюджет");
         $conn = f_get_connection();

@@ -12,6 +12,7 @@
     $dest_page = "wimm_auth.php";
     session_start();
     include("fun_web.php");
+    include_once 'fun_dbms.php';
     $uid = getSessionParam("UID",0);
     if($uid!=0)	{
         update_param("UID",0);

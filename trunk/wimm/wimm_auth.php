@@ -12,7 +12,7 @@
 	session_start();
 	$uid = 0;
 	include("fun_web.php");
-	include("fun_mysql.php");
+	include_once 'fun_dbms.php';
 	$user_name = getRequestParam("UNAME","");
 	$cnt = "-1";
 //	if(strlen($user_name)>0)	{

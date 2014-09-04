@@ -11,6 +11,7 @@
 	}
 	session_start();
 	include("fun_web.php");
+        include_once 'fun_dbms.php';
 	auth_check('UID');
 	$id = $_REQUEST["HIDDEN_ID"];
 	if(strlen($id)<1)
@@ -73,7 +74,6 @@ function doFocus()
 <form name="wimm_edit" action="index.php" method="post">
 
 <?php
-	include ("fun_mysql.php");
 	print_body_title($t);
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"$frm_mode\">\n";
 	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"$id\">\n";
