@@ -101,7 +101,7 @@ function doEdit(s1)
 }
 </script>
 <?php
-function print_buttons($bd="",$ed="", $bg="-1")
+function print_buttons($conn, $bd="",$ed="", $bg="-1")
 {	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
 	if(strlen($bd)>0)	{
 		print "\t<TR class=\"hidden\">\n";
@@ -109,7 +109,7 @@ function print_buttons($bd="",$ed="", $bg="-1")
 		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Дата окончания периода:<input name=\"EDATE\" type=\"text\" value=\"$ed\"></TD>\n";
 		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Бюджет:<select size=\"1\" name=\"f_budget\">\n";
 		$sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
-		f_set_sel_options2($sql, $bg, 1, 2);
+		f_set_sel_options2($conn, $sql, $bg, 1, 2);
 		print "</select></TD>\n";
 		print "\t</TR>\n";
 	}
@@ -205,8 +205,8 @@ if($conn)	{
 	print "<form name=\"expenses\" action=\"index.php\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-		mysql_query($sql, $conn);
-		mysql_query("commit",$conn);
+		$conn->query($sql);
+		$conn->commit();
 	}
         $uid = getRequestParam("UID","");
         $s = "";
@@ -220,7 +220,7 @@ if($conn)	{
 	print "<TR class=\"hidden\">\n";
 	print "<TD WIDTH=\"30%\" class=\"hidden\">Пользователь:</TD><TD class=\"hidden\"><select size=\"1\" id=\"t_user\" name=\"t_user\">\n";
 	$sql = "select user_id, user_name from m_users where close_date is null";
-	f_set_sel_options2($sql, $s, $s, 2);
+	f_set_sel_options2($conn, $sql, $s, $s, 2);
 	print "</select></TD></TR>\n";
 	print "<TR class=\"hidden\">\n";
 	print "<TD WIDTH=\"30%\" class=\"hidden\">Наименование:</TD><TD class=\"hidden\"><input name=\"t_name\" id=\"t_name\" type=\"text\" value=\"$s\"></TD>\n";
@@ -228,13 +228,13 @@ if($conn)	{
 	print "<TR class=\"hidden\">\n";
 	print "<TD class=\"hidden\">Тип:</TD><TD class=\"hidden\"><select size=\"1\" name=\"t_type\">\n";
 	$sql = "SELECT t_type_id, t_type_name FROM m_transaction_types  WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 1, 2);
+	f_set_sel_options2($conn, $sql, $s, $s, 2);
 	print "</select></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	print "<TD class=\"hidden\">Валюта:</TD><TD class=\"hidden\"><select size=\"1\" name=\"t_curr\">\n";
 	$sql = "SELECT currency_id, concat(currency_name,' (',currency_abbr,')') as c_name FROM m_currency WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 2, 2);
+	f_set_sel_options2($conn, $sql, $s, $s, 2);
 	print "</select></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
@@ -246,14 +246,15 @@ if($conn)	{
 	print "<TR class=\"hidden\">\n";
 	print "<TD class=\"hidden\">Место:</TD><TD class=\"hidden\"><select size=\"1\" id=\"t_place\" name=\"t_place\">\n";
 	$sql = "SELECT place_id, place_name FROM m_places WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 1, 2);
+	f_set_sel_options2($conn, $sql, $s, $s, 2);
 	print "</select></TD>\n";
 	print "</TR>\n";
 
 	print "<TR class=\"hidden\">\n";
 	print "<TD class=\"hidden\">Бюджет:</TD><TD class=\"hidden\"><select size=\"1\" id=\"t_budget\" name=\"t_budget\">\n";
 	$sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 1, 2);
+        $s = getRequestParam("t_budget");
+	f_set_sel_options2($conn, $sql, $s, $s, 2);
 	print "</select></TD>\n";
 	print "</TR>\n";
 
@@ -265,7 +266,7 @@ if($conn)	{
         print "\t\t</DIV>\n";
         print "\t</DIV>";
 	$bg = getRequestParam("f_budget","-1");
-	print_buttons($bd,$ed,$bg);
+	print_buttons($conn, $bd,$ed,$bg);
 	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
 	print "<TR>\n";
 	print "<TH WIDTH=\"5%\">&nbsp</TH>\n";
@@ -286,7 +287,7 @@ if($conn)	{
 		$sql .= " and t.budget_id=$bg ";
 	}
 	$sql .= "order by transaction_date";
-	$res = mysql_query($sql,$conn);
+	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
@@ -294,7 +295,7 @@ if($conn)	{
 	$minus_pict = "picts/minus.gif";
 	$locale_info = localeconv();
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-		while ($row = mysql_fetch_assoc($res)) {
+		while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                         print "<TR class=\"$c_class\">\n";
 			if(strcmp($c_class,"dark")==0)	{
 				$c_class = "white";
@@ -366,7 +367,7 @@ if($conn)	{
 	print "<TR  class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Расходы - Доходы\" ALIGN=\"RIGHT\">";
 	print "Итого, разница:</TD><TD COLSPAN=\"4\"><IMG SRC=\"$c_class\">&nbsp;$t</TD></TR>\n";
 	print "</TABLE>\n";
-	print_buttons();
+	print_buttons($conn);
 	print "</form>\n";
 }
 
