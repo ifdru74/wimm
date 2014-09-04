@@ -11,6 +11,7 @@
 	}
 	session_start();
 	include("fun_web.php");
+        include_once 'fun_dbms.php';
 	//auth_check('UID');
 	$p_title = "Редактор бюджетов, в рамках которых тратятся деньги";
 	print_head($p_title);
@@ -88,7 +89,6 @@ function doEdit(s1)
 </script>
 <body>
 <?php
-include ("fun_mysql.php");
 function print_buttons($bd="")
 {
 	if(strlen($bd)>0)	{

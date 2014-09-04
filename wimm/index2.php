@@ -1,6 +1,6 @@
 <?php
     include_once ("fun_web.php");
-    include_once ("fun_mysql.php");
+    include_once 'fun_dbms.php';
     init_superglobals();
     session_start();
     //auth_check('UID');

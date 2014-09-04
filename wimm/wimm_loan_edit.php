@@ -47,17 +47,12 @@ function doCancel(s1)
     wimm_loan_edit.FRM_MODE.value=s1;
 }
 
-function doFocus()
-{
-    wimm_loan_edit.t_name.focus();
-}
-
 </script>
-    <body onbodyload='doFocus()'>
+    <body>
     <form name="wimm_loan_edit" action="wimm_loans.php" method="post">
         <?php
         // put your code here
-	include ("fun_mysql.php");
+	include_once 'fun_dbms.php';
 	print_body_title($t);
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"$frm_mode\">\n";
 	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"$id\">\n";
@@ -72,9 +67,9 @@ function doFocus()
 	$sql = $sql . " WHERE loan_id=$id";
 	$conn = f_get_connection();
 	if($conn)	{
-		$res = mysql_query($sql,$conn);
+		$res = $conn->query($sql);
 		if($res)	{
-			$row = mysql_fetch_assoc($res);
+			$row = $res->fetch(PDO::FETCH_ASSOC);
 		}
 	}
 	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
@@ -83,12 +78,12 @@ function doFocus()
 	$s = f_get_col($row,"user_id",$uid);
 	print "<TD WIDTH=\"30%\" class=\"hidden\">Пользователь:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_user\">\n";
 	$sql = "select user_id, user_name from m_users where close_date is null";
-	f_set_sel_options2($sql, $s, $s, 2);
+	f_set_sel_options2($conn, $sql, $s, $s, 2);
 	print "</select></TD></TR>\n";
 	// name
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"loan_name","Кредит!");
-	print "<TD WIDTH=\"30%\" class=\"hidden\">Наименование:</TD><TD class=\"hidden\"><input name=\"l_name\" type=\"text\" value=\"$s\"></TD>\n";
+	print "<TD WIDTH=\"30%\" class=\"hidden\">Наименование:</TD><TD class=\"hidden\"><input name=\"l_name\" type=\"text\" value=\"$s\" autofocus></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"loan_rate",5);
@@ -98,7 +93,7 @@ function doFocus()
 	$s = f_get_col($row,"currency_id",2);
 	print "<TD class=\"hidden\">Валюта:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_curr\">\n";
 	$sql = "SELECT currency_id, concat(currency_name,' (',currency_abbr,')') as c_name FROM m_currency WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 2, 2);
+	f_set_sel_options2($conn, $sql, $s, 2, 2);
 	print "</select></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
@@ -117,14 +112,14 @@ function doFocus()
 	$s = f_get_col($row,"place_id","1");
 	print "<TD class=\"hidden\">Место выдачи:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_place\">\n";
 	$sql = "SELECT place_id, place_name FROM m_places WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 1, 2);
+	f_set_sel_options2($conn, $sql, $s, 1, 2);
 	print "</select></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"budget_id","1");
 	print "<TD class=\"hidden\">Бюджет:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_budget\">\n";
 	$sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
-	f_set_sel_options2($sql, $s, 1, 2);
+	f_set_sel_options2($conn, $sql, $s, 1, 2);
 	print "</select></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";

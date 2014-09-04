@@ -107,7 +107,8 @@ function print_buttons($bd="")
 	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Выход\" onclick=\"doEdit('exit')\"></TD>\n";
 	print "\t</TR>\n";
 	print "</TABLE>\n";
-}	include ("fun_mysql.php");
+}
+    include_once 'fun_dbms.php';
 
 	$uid = getSessionParam("UID",0);
 	if($uid==0)

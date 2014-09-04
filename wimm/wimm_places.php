@@ -88,7 +88,7 @@ function doEdit(s1)
 </script>
 <body>
 <?php
-include ("fun_mysql.php");
+include_once 'fun_dbms.php';
 function print_buttons($bd="")
 {
 	if(strlen($bd)>0)	{

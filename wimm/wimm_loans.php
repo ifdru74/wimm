@@ -215,8 +215,8 @@ function doEdit(s1)
 	print "<form name=\"loans\" action=\"wimm_loans.php\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-		mysql_query($sql, $conn);
-		mysql_query("commit",$conn);
+		$conn->query($sql);
+		$conn->commit();
 	}
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
@@ -244,12 +244,13 @@ function doEdit(s1)
 	}
 	$sql .= " order by end_date";
         print "	<input name=\"SQL2\" type=\"hidden\" value=\"$sql\">\n";
-	$res = mysql_query($sql,$conn);
+	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
-		while ($row = mysql_fetch_assoc($res)) {			print "<TR class=\"$c_class\">\n";
+		while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
+                    print "<TR class=\"$c_class\">\n";
 			if(strcmp($c_class,"dark")==0)	{
 				$c_class = "white";
 			}
