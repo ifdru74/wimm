@@ -138,12 +138,14 @@ function print_buttons($bd="")
 	else if(strcmp($fm,"delete")==0)	{
 		$s = getRequestParam("HIDDEN_ID",0);
 		//$sql = "delete from m_transaction_types where t_type_id=$s";
-                $sql = "update m_transaction_types set close_date=NOW() where t_type_id=$s";
+                $sql = "update m_transaction_types set close_date=#NOW# where t_type_id=$s";
 	}
 	print_body_title($p_title);
 	print "<form name=\"ttypes\" action=\"wimm_ttypes.php\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
+                $conn->query(formatSQL($sql));
+                $conn->commit();
 		//mysql_query($sql, $conn);
 		//mysql_query("commit",$conn);
 	}
