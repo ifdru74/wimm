@@ -98,15 +98,14 @@ TR.expenses
     border-bottom: black thin solid;
 }
 
-TR.expenses:nth-child:odd
+TR.expenses:nth-child(odd)
 {
     background-color: white;
 }
 
-TR.expenses:nth-last-child
+TR.expenses:nth-child(even)
 {
-    background-color: white;
-    font-weight: bold;
+    background-color: lightgray;
 }
 
 TR.white_bold
