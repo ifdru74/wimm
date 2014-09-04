@@ -93,7 +93,7 @@ function f_set_sel_options2($conn, $sql, $sel, $sel2, $indent=2)
     $sql2 = $sql . " order by 2";
     try {
         $selitem = "";
-        $opt_fmt = "%s<OPTION value=\"%s\" selected>%s</OPTION>" . PHP_EOL;
+        $opt_fmt = "%s<OPTION value=\"%s\" %s>%s</OPTION>" . PHP_EOL;
         foreach ($conn->query($sql2) as $line)
         {
             $o = "";
@@ -107,7 +107,7 @@ function f_set_sel_options2($conn, $sql, $sel, $sel2, $indent=2)
                 $selitem = "selected";//print "$ind_s<OPTION value=\"$o\" selected>$odn</OPTION>\r\n";
             else
                 $selitem = "";//print "$ind_s<OPTION value=\"$o\">$odn</OPTION>\r\n";
-            printf($opt_fmt,$ind_s, $o, $odn);
+            printf($opt_fmt,$ind_s, $o, $selitem, $odn);
         }        
     } catch (PDOException $ex) {
         printf($opt_fmt, $ind_s, $ex->getCode(), $ex->getMessage());
