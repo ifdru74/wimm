@@ -76,7 +76,7 @@ function onTxComplete(jqXHR, textStatus )
                 }
             }
             else
-                alert("РџСѓСЃС‚РѕР№ РѕС‚РІРµС‚!");
+                alert("Пустой ответ!");
         }
     }
     else {
@@ -104,7 +104,7 @@ function tx_submit()
                         var nn = new Number(v);
                         if(nn<=a_fields[i].val)   {
                             inv_idx = i;
-                            msg = "РќРµРґРѕРїСѓСЃС‚РёРјРѕРµ Р·РЅР°С‡РµРЅРёРµ <=" + a_fields[i].val.toString();
+                            msg = "Недопустимое значение <=" + a_fields[i].val.toString();
                         }
                         else {
                             reqStr += ("&" + a_fields[i].id + "=" + encodeURIComponent(v));
@@ -121,12 +121,12 @@ function tx_submit()
             }
             else    {
                 inv_idx = i;
-                msg = "РЎР»РёС€РєРѕРј РєРѕСЂРѕС‚РєРѕРµ Р·РЅР°С‡РµРЅРёРµ"
+                msg = "Слишком короткое значение"
             }
         }
         else    {
             inv_idx = i;
-            msg = "Р—РЅР°С‡РµРЅРёРµ РЅРµ СѓСЃС‚Р°РЅРѕРІР»РµРЅРѕ"
+            msg = "Значение не установлено"
         }
     }
     if(inv_idx>=0&&inv_idx<a_fields.length)  {
@@ -161,7 +161,7 @@ function sel_row(row_id)
         $("#ADD_BTN").show();
         $("#OK_BTN").hide();
         $("#DEL_BTN").hide();
-        $("#dlg_box_cap").text("Р”РѕР±Р°РІР»РµРЅРёРµ Р·Р°РїРёСЃРё");
+        $("#dlg_box_cap").text("Добавление записи");
         s1 = "";
         for(i=0; i<a_fields.length; i++)    {
             if(a_fields[i].id.indexOf("t_user")==0)
@@ -176,7 +176,7 @@ function sel_row(row_id)
         $("#ADD_BTN").hide();
         $("#OK_BTN").show();
         $("#DEL_BTN").show();
-        $("#dlg_box_cap").text("РР·РјРµРЅРµРЅРёРµ Р·Р°РїРёСЃРё");
+        $("#dlg_box_cap").text("Изменение записи");
         s1 = "";
         for(i=0; i<a_fields.length; i++)    {
             s1 = "";
