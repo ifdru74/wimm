@@ -116,8 +116,7 @@ if($conn)	{
 	print_body_title("Расходы с $bd по $ed");
 	if(strlen($sql_dml)>0)	{
 		print "	<input ID=\"SQL\" type=\"hidden\" value=\"$sql_dml\">\n";
-		$conn->query($sql_dml);
-		$conn->commit();
+		$conn->exec($sql_dml);
 	}
         $s = "";
 ?>
@@ -191,6 +190,7 @@ if($conn)	{
                 <DIV class="dlg_box_btns" id="dlg_box_btns">
                     <input id="ADD_BTN" type="submit" value="Добавить">
                     <input id="OK_BTN" type="button" value="Сохранить" onclick="tx_submit();">
+                    <input id=DEL_BTN" type="button" value="Удалить" onclick="del_click()">
                     <input type="button" value="Отмена" onclick="doCancel();">
                 </DIV>
             </DIV>
