@@ -13,8 +13,8 @@ function f_get_connection()
     $password = 'wimm1';
     try {
         $conn = new PDO($dsn, $user, $password);
-        $conn->exec("SET NAMES utf8");
-//        $conn->query("SET COLLATION_CONNECTION=CP1251_GENERAL_CI");
+        $conn->query("SET NAMES CP1251");
+        $conn->query("SET COLLATION_CONNECTION=CP1251_GENERAL_CI");
     } catch (PDOException $e) {
         //echo 'Connection failed: ' . $e->getMessage();
         $conn = false;
@@ -32,8 +32,7 @@ function f_get_error_text($conn,$caption)
 {
     if(strlen($caption)<1)
 		$caption = "Invalid query:";
-    $err = $conn->errorInfo();
-    $message  = $caption . $err[2];
+    $message  = $caption . $conn->errorInfo();
     return $message;
 }
 
@@ -90,11 +89,11 @@ function f_set_sel_options2($conn, $sql, $sel, $sel2, $indent=2)
     $ind_s = "\t";
     for($i=1; $i<$indent; $i++)
         $ind_s .= "\t";
-    print "$ind_s<OPTION value=\"0\">-РќРµ РІС‹Р±СЂР°РЅ-</OPTION>\r\n";
+    print "$ind_s<OPTION value=\"0\">-Не выбран-</OPTION>\r\n";
     $sql2 = $sql . " order by 2";
     try {
         $selitem = "";
-        $opt_fmt = "%s<OPTION value=\"%s\" %s>%s</OPTION>" . PHP_EOL;
+        $opt_fmt = "%s<OPTION value=\"%s\" selected>%s</OPTION>" . PHP_EOL;
         foreach ($conn->query($sql2) as $line)
         {
             $o = "";
@@ -108,7 +107,7 @@ function f_set_sel_options2($conn, $sql, $sel, $sel2, $indent=2)
                 $selitem = "selected";//print "$ind_s<OPTION value=\"$o\" selected>$odn</OPTION>\r\n";
             else
                 $selitem = "";//print "$ind_s<OPTION value=\"$o\">$odn</OPTION>\r\n";
-            printf($opt_fmt,$ind_s, $o, $selitem, $odn);
+            printf($opt_fmt,$ind_s, $o, $odn);
         }        
     } catch (PDOException $ex) {
         printf($opt_fmt, $ind_s, $ex->getCode(), $ex->getMessage());
