@@ -33,44 +33,7 @@
     }
 ?>        
     <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
-    <script language="JavaScript" type="text/JavaScript">
-        function sel_row(row_id)
-        {
-            var objDiv = document.getElementById("dialog_box");
-            objDiv.style.top = (f_get_scroll_y()+200).toString()+"px";
-            //var x = (window.innerWidth||document.body.clientWidth);
-            var x = (f_get_scroll_x()-600)/2+500;
-            if(x<0)
-                x = 500;
-            objDiv.style.left = x.toString()+"px";
-            objDiv.style.display="inline";
-            var s1;
-            if(row_id.length<1) {
-                $("#HIDDEN_ID").val(0);
-                $("#OK_BTN").val("Добавить");
-                $("#dlg_box_cap").text("Добавление записи");
-                s1 = "";
-                $("#t_sum").val(s1);
-                $("#t_curr").val(s1);
-                $("#t_date").val(s1);
-                s1 = "<?php echo getRequestParam("UID", "");?>";
-                $("#t_user").val(s1);
-            }
-            else    {
-                $("#HIDDEN_ID").val(row_id);
-                $("#OK_BTN").val("Изменить");
-                $("#dlg_box_cap").text("Изменение записи");
-                $("#t_name").val($("#TNAME_" + row_id).text());
-                $("#t_sum").val($("#T_SUMM_" + row_id).attr('title'));
-                $("#t_user").val($("#T_USR_" + row_id).val());
-                $("#t_place").val($("#T_PLACE_" + row_id).val());
-                $("#t_budget").val($("#T_BUDG_" + row_id).val());
-                $("#t_date").val($("#T_DATE_" + row_id).attr('title'));
-                $('#t_type').val($("#T_TYPE_" + row_id).val());
-                $('#t_curr').val($("#T_CURR_" + row_id).val());
-            }
-        }
-    </script>
+    <script language="JavaScript" type="text/JavaScript" src="js/index_aj.js"></script>
 <?php
 function print_buttons($conn, $bd="",$ed="", $bg="-1")
 {	
@@ -85,7 +48,7 @@ function print_buttons($conn, $bd="",$ed="", $bg="-1")
             <label for="EDATE">Дата окончания периода:</label>
             <input id="EDATE" name="EDATE" type="text" value="<?php echo $ed;?>">
             <label for="f_budget">Бюджет:</label>
-            <select size="1" id="f_budget" name="f_budget" onchange="$('#expenses').submit();">
+            <select size="1" id="f_budget" name="f_budget" onchange="$('#FRM_MODE').val('refresh'); $('#expenses').submit();">
 <?php
             $sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
             f_set_sel_options2($conn, $sql, $bg, $bg, 2);
@@ -226,8 +189,9 @@ if($conn)	{
                     </TABLE>
                 </DIV>
                 <DIV class="dlg_box_btns" id="dlg_box_btns">
-                    <input id="OK_BTN" type="submit" value="ОК">
-                    <input type="button" value="Отмена" onclick="$('#dialog_box').hide();">
+                    <input id="ADD_BTN" type="submit" value="Добавить">
+                    <input id="OK_BTN" type="button" value="Сохранить" onclick="tx_submit();">
+                    <input type="button" value="Отмена" onclick="doCancel();">
                 </DIV>
             </DIV>
 <?php
@@ -315,7 +279,7 @@ if($conn)	{
                 print "<TD id=\"T_DATE_$row_pk\" TITLE=\"$t\">$s</TD>\n";
                 $s = $row['user_name'];
                 $u = filter_array($row, 'user_id', '');
-                print "<TD><label FOR=\"$row_id\">$s</label>" .
+                print "<TD><label id=\"L_USR_$row_pk\"FOR=\"$row_id\">$s</label>" .
                         "<input type=\"hidden\" id=\"T_USR_$row_pk\" value=\"$u\">".
                         "</TD>" . PHP_EOL;
                 $s = $row['place_name'];
