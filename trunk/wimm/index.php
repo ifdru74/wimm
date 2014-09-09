@@ -206,7 +206,6 @@ if($conn)	{
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
 		$conn->query($sql);
-		$conn->commit();
 	}
         $uid = getRequestParam("UID","");
         $s = "";
