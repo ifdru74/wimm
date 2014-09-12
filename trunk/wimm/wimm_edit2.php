@@ -1,32 +1,31 @@
 <?php
-include_once 'fun_dbms.php';
+    header("Cache-Control: no-cache, must-revalidate");
+    include_once 'fun_dbms.php';
+    include_once 'fun_web.php';
+//    $t = time() - 60;
+//    header("Expires: " . date("D, d M Y H:i:s T", $t));
+
 /* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-    if (!ini_get('register_globals')) {
-       $superglobals = array($_SERVER, $_ENV,
-           $_FILES, $_COOKIE, $_POST, $_GET);
-       if (isset($_SESSION)) {
-           array_unshift($superglobals, $_SESSION);
-       }
-       foreach ($superglobals as $superglobal) {
-           extract($superglobal, EXTR_SKIP);
-       }
-    }
     session_start();
-    include("fun_web.php");
+    init_superglobals();
     $user = getSessionParam("UID","");
-    if(strlen($user)<=0)
-        die();
     $a_ret = array();
+    $fm = getRequestParam("FRM_MODE","refresh");
+    $a_ret['request'] = $fm;
+    if(strlen($user)<=0)    {
+        //die("{id:-1,err:'empty user'}");
+        $a_ret['err'] = 'empty user';
+        die(json_encode($a_ret));
+    }
     $conn = f_get_connection();
     $xxx = "";
     if($conn)	{
-        $fm = getRequestParam("FRM_MODE","refresh");
         $tid = getRequestParam("HIDDEN_ID",0);
-        $t_name = iconv("utf-8", "CP1251", value4db(urldecode(getRequestParam("t_name",""))));
+        $t_name = value4db(urldecode(getRequestParam("t_name","")));
         $sql = "";
         switch($fm) {
             case "insert":
@@ -110,9 +109,9 @@ include_once 'fun_dbms.php';
                     "user_id, open_date, close_date, place_id, budget_id ".
                     "transaction_date, from m_transactions where transaction_id=$tid";
                 $xxx = $sql;
-                $result = mysql_query($sql);
+                $result = $conn->query($sql);
                 if($result) {
-                    $line = mysql_fetch_array($result, MYSQL_ASSOC);
+                    $line = $result->fetch(PDO::FETCH_ASSOC);
                     if ($line)  {
                         foreach ($line as $col_name => $col_value) {
                             $a_ret[$col_name] = $col_value;
@@ -123,9 +122,11 @@ include_once 'fun_dbms.php';
         }
         $a_ret['xxx'] = $xxx;
         $a_ret['tname'] = $t_name;
-        echo json_encode($a_ret);
+        die(json_encode($a_ret));
     }
     else {
-        die();
+        //die("{id:-1,err:'bad connection'}");
+        $a_ret['err'] = 'bad connection';
+        die(json_encode($a_ret));
     }
 
