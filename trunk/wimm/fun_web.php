@@ -128,7 +128,14 @@ function print_title($title)
     print "</div>\n";
 }
 
-function update_param($rname,$sname,$defval)
+/**
+ * update session param
+ * @param string $rname request parameter name
+ * @param string $sname session parameter name
+ * @param mixed $defval default value
+ * @return mixed - new parameter value
+ */
+function update_param($rname, $sname, $defval='')
 {
     $ed = getRequestParam($rname,getSessionParam($sname,$defval));
     if(!key_exists($sname,$_SESSION) || strcmp($_SESSION[$sname],$ed)!=0)
