@@ -1,4 +1,6 @@
 <?php
+    $t = time() + 10;
+    header("Expires: " . date("D, d M Y H:i:s T", $t));
 	if (!ini_get('register_globals')) {
 	   $superglobals = array($_SERVER, $_ENV,
 	       $_FILES, $_COOKIE, $_POST, $_GET);
@@ -13,7 +15,7 @@
 	include("fun_web.php");
         include_once 'fun_dbms.php';
 	//auth_check('UID');
-	$p_title = "Редактор бюджетов, в рамках которых тратятся деньги";
+	$p_title = "Р РµРґР°РєС‚РѕСЂ Р±СЋРґР¶РµС‚РѕРІ, РІ СЂР°РјРєР°С… РєРѕС‚РѕСЂС‹С… С‚СЂР°С‚СЏС‚СЃСЏ РґРµРЅСЊРіРё";
 	print_head($p_title);
 ?>
 <script language="JavaScript" type="text/JavaScript">
@@ -61,7 +63,7 @@ function doEdit(s1)
 		if(places.FRM_MODE.value=="update")
 			places.submit();
 		else
-			alert("Запись для редактирования не выбрана");
+			alert("Р—Р°РїРёСЃСЊ РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РЅРµ РІС‹Р±СЂР°РЅР°");
 	}	else if(s1=="del")	{
 		coll = places.elements;
 		for(i=0; i<coll.length; i++)             {
@@ -79,7 +81,7 @@ function doEdit(s1)
 		if(places.FRM_MODE.value=="delete")
 			places.submit();
 		else
-			alert("Запись для удаления не выбрана");
+			alert("Р—Р°РїРёСЃСЊ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ РЅРµ РІС‹Р±СЂР°РЅР°");
 	}	else if(s1=="exit")	{
 		places.FRM_MODE.value="return";
 		places.action="index.php";
@@ -93,18 +95,18 @@ function print_buttons($bd="")
 {
 	if(strlen($bd)>0)	{
 		print "\t<TR class=\"hidden\">\n";
-		print "\t\t<TD class=\"hidden\" COLSPAN=\"3\">Наименование:<input name=\"p_name\" type=\"text\" size=\"50\" value=\"\"></TD>\n";
-		print "\t\t<TD class=\"hidden\" COLSPAN=\"3\">Описание:<input name=\"p_descr\" type=\"text\" size=\"50\" value=\"\"></TD>\n";
+		print "\t\t<TD class=\"hidden\" COLSPAN=\"3\">РќР°РёРјРµРЅРѕРІР°РЅРёРµ:<input name=\"p_name\" type=\"text\" size=\"50\" value=\"\"></TD>\n";
+		print "\t\t<TD class=\"hidden\" COLSPAN=\"3\">РћРїРёСЃР°РЅРёРµ:<input name=\"p_descr\" type=\"text\" size=\"50\" value=\"\"></TD>\n";
 		print "\t</TR>\n";
 	}
 	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
 	print "\t<TR class=\"hidden\">\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"submit\" value=\"Обновить\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Добавить\" onclick=\"doEdit('add')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Изменить\" onclick=\"doEdit('edit')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Удалить\" onclick=\"doEdit('del')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"reset\" value=\"Снять выделение\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Выход\" onclick=\"doEdit('exit')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"submit\" value=\"РћР±РЅРѕРІРёС‚СЊ\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Р”РѕР±Р°РІРёС‚СЊ\" onclick=\"doEdit('add')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"РР·РјРµРЅРёС‚СЊ\" onclick=\"doEdit('edit')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"РЈРґР°Р»РёС‚СЊ\" onclick=\"doEdit('del')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"reset\" value=\"РЎРЅСЏС‚СЊ РІС‹РґРµР»РµРЅРёРµ\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Р’С‹С…РѕРґ\" onclick=\"doEdit('exit')\"></TD>\n";
 	print "\t</TR>\n";
 	print "</TABLE>\n";
 }
@@ -118,7 +120,7 @@ if($conn)	{
 	$sql = "";
 	if(strcmp($fm,"insert")==0)	{
 		$sql = "INSERT INTO m_budget (budget_name, open_date, budget_descr, user_id) VALUES(";
-		$s = getRequestParam("p_name","Бюджет?");
+		$s = getRequestParam("p_name","Р‘СЋРґР¶РµС‚?");
 		$sql .= "'$s',";
 		$td = date("Y-m-d H:i:s");
 		$sql .= "'$td',";
@@ -127,7 +129,7 @@ if($conn)	{
 		$sql .= "$uid)";
 	}	else if(strcmp($fm,"update")==0)	{
 		$sql = "UPDATE m_budget SET ";
-		$s = getRequestParam("p_name","Бюджет?");
+		$s = getRequestParam("p_name","Р‘СЋРґР¶РµС‚?");
 		$sql .= "budget_name='$s',";
 		$s = getRequestParam("p_descr",1);
 		$sql .= "budget_descr='$s' ";
@@ -154,19 +156,19 @@ if($conn)	{
 	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
 	print "<TR>\n";
 	print "<TH>&nbsp</TH>\n";
-	print "<TH>Наименование</TH>\n";
-	print "<TH>Дата создания</TH>\n";
-	print "<TH>Дата закрытия</TH>\n";
-	print "<TH>Кто автор</TH>\n";
+	print "<TH>РќР°РёРјРµРЅРѕРІР°РЅРёРµ</TH>\n";
+	print "<TH>Р”Р°С‚Р° СЃРѕР·РґР°РЅРёСЏ</TH>\n";
+	print "<TH>Р”Р°С‚Р° Р·Р°РєСЂС‹С‚РёСЏ</TH>\n";
+	print "<TH>РљС‚Рѕ Р°РІС‚РѕСЂ</TH>\n";
 	print "</TR>\n";
-	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
+	//print "<TR><TD COLSPAN=\"6\">РџРѕРґРєР»СЋС‡С‘РЅ</TD></TR>\n";
 	$sql = "select budget_id, budget_name, budget_descr, tp.open_date, tp.close_date, user_name from m_budget tp, m_users tu where tp.user_id=tu.user_id order by budget_name";
 	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
 	if($res)	{
-		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
+		//print "<TR><TD COLSPAN=\"6\">Р—Р°РїСЂРѕСЃ РїРѕС€С‘Р»</TD></TR>\n";
 		while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			print "<TR class=\"$c_class\">\n";
 			if(strcmp($c_class,"dark")==0)	{
@@ -194,7 +196,7 @@ if($conn)	{
 	else	{
 		$message  = f_get_error_text($conn, "Invalid query: ");
 		print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
-	}	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество мест</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
+	}	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Р—Р°РїСЂРѕСЃ РІС‹РїРѕР»РЅРµРЅ " . date("d.m.Y H:i:s") . "\">РљРѕР»РёС‡РµСЃС‚РІРѕ РјРµСЃС‚</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
 	print "</TABLE>\n";
 	print_buttons();
 	print "</form>\n";
