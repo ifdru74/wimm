@@ -1,23 +1,41 @@
 <?php
-	if (!ini_get('register_globals')) {
-	   $superglobals = array($_SERVER, $_ENV,
-	       $_FILES, $_COOKIE, $_POST, $_GET);
-	   if (isset($_SESSION)) {
-	       array_unshift($superglobals, $_SESSION);
-	   }
-	   foreach ($superglobals as $superglobal) {
-	       extract($superglobal, EXTR_SKIP);
-	   }
-	}
-	session_start();
-	include("fun_web.php");
-	//auth_check('UID');
-	$p_title = "Редактор мест, где тратятся деньги";
-	print_head($p_title);
+    $t = time() + 10;
+    header("Expires: " . date("D, d M Y H:i:s T", $t));
+    include_once './fun_web.php';
+    init_superglobals();
+    session_start();
+    //auth_check('UID');
+    $p_title = "Р РµРґР°РєС‚РѕСЂ РјРµСЃС‚, РіРґРµ С‚СЂР°С‚СЏС‚СЃСЏ РґРµРЅСЊРіРё";
+    //print_head($p_title);
 ?>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="STYLESHEET" href="css/wimm.css" type="text/css"/>
+        <link rel="SHORTCUT ICON" href="picts/favicon.ico">
+        <title><?php echo $p_title;?></title>
+        <script language="JavaScript" type="text/JavaScript" src="js/form_common.js"></script>
+    </head>
+    <body onload="$('#dialog_box').draggable();">
+<?php    
+    if(isMSIE())   {
+?>        
+    <script language="JavaScript" type="text/JavaScript" src="js/jquery-1.11.1.js"></script>
+    <script language="JavaScript" type="text/JavaScript" src="js/json2.js"></script>
+<?php    
+    }
+    else {
+?>        
+    <script language="JavaScript" type="text/JavaScript" src="js/jquery-2.1.1.js"></script>
+<?php    
+    }
+?>        
+    <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
 <script language="JavaScript" type="text/JavaScript">
 function doSel(s1, s2, s3)
 {
+    if(s1!==null&&s1!=undefined&&s1.length>0)   {
 	sid=places.HIDDEN_ID.value;
 	coll = places.elements;
 	for(i=0; i<coll.length; i++)             {
@@ -31,9 +49,33 @@ function doSel(s1, s2, s3)
 			}
 		}
 	}
-	places.HIDDEN_ID.value=s1;
-	places.p_name.value=s2;
-	places.p_descr.value=s3;
+        $('#HIDDEN_ID').val(s1);
+        s2 = "#RPL_" + s1;
+        $('#p_name').val($(s2).text());
+        $('#p_descr').val($(s2).attr('title'));
+        $('#dlg_box_cap').text('РР·РјРµРЅРёС‚СЊ РјРµСЃС‚Рѕ');
+        $('#OK_BTN').show();
+        $('#DEL_BTN').show();
+        $('#ADD_BTN').hide();
+    }
+    else    {
+        $('#dlg_box_cap').text('Р”РѕР±Р°РІРёС‚СЊ РјРµСЃС‚Рѕ');
+        $('#OK_BTN').hide();
+        $('#DEL_BTN').hide();
+        $('#ADD_BTN').show();
+        $('#dialog_box').show();
+    }
+    var objDiv = document.getElementById("dialog_box");
+    var y = (f_get_scroll_y()+200).toString()+"px";
+    objDiv.style.top = y;
+    //var x = (window.innerWidth||document.body.clientWidth);
+    var x = (f_get_scroll_x()-50)/2+500;
+    if(x<0)
+        x = 500;
+    x = x.toString()+"px";
+    objDiv.style.left = x;
+    //$('#dialog_box').show();
+    objDiv.style.display="inline";
 }
 
 function doEdit(s1)
@@ -60,7 +102,7 @@ function doEdit(s1)
 		if(places.FRM_MODE.value=="update")
 			places.submit();
 		else
-			alert("Запись для редактирования не выбрана");
+			alert("Р—Р°РїРёСЃСЊ РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РЅРµ РІС‹Р±СЂР°РЅР°");
 	}	else if(s1=="del")	{
 		coll = places.elements;
 		for(i=0; i<coll.length; i++)             {
@@ -78,7 +120,7 @@ function doEdit(s1)
 		if(places.FRM_MODE.value=="delete")
 			places.submit();
 		else
-			alert("Запись для удаления не выбрана");
+			alert("Р—Р°РїРёСЃСЊ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ РЅРµ РІС‹Р±СЂР°РЅР°");
 	}	else if(s1=="exit")	{
 		places.FRM_MODE.value="return";
 		places.action="index.php";
@@ -86,27 +128,20 @@ function doEdit(s1)
 	}
 }
 </script>
-<body>
 <?php
 include_once 'fun_dbms.php';
 function print_buttons($bd="")
 {
-	if(strlen($bd)>0)	{
-		print "\t<TR class=\"hidden\">\n";
-		print "\t\t<TD class=\"hidden\" COLSPAN=\"3\">Наименование:<input name=\"p_name\" type=\"text\" size=\"50\" value=\"\"></TD>\n";
-		print "\t\t<TD class=\"hidden\" COLSPAN=\"3\">Описание:<input name=\"p_descr\" type=\"text\" size=\"50\" value=\"\"></TD>\n";
-		print "\t</TR>\n";
-	}
-	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
-	print "\t<TR class=\"hidden\">\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"submit\" value=\"Обновить\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Добавить\" onclick=\"doEdit('add')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Изменить\" onclick=\"doEdit('edit')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Удалить\" onclick=\"doEdit('del')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"reset\" value=\"Снять выделение\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Выход\" onclick=\"doEdit('exit')\"></TD>\n";
-	print "\t</TR>\n";
-	print "</TABLE>\n";
+?>
+    <div>
+        <div class="dialog_row">
+            <input type="submit" value="РћР±РЅРѕРІРёС‚СЊ">
+            <input type="button" value="Р”РѕР±Р°РІРёС‚СЊ" onclick="doSel('');">
+            <input type="reset" value="РЎРЅСЏС‚СЊ РІС‹РґРµР»РµРЅРёРµ">
+            <input type="button" value="Р’С‹С…РѕРґ" onclick="doEdit('exit');">
+        </div>
+    </div>
+<?php
 }
 
 $uid = getSessionParam("UID",0);
@@ -118,7 +153,7 @@ if($conn)	{
 	$sql = "";
 	if(strcmp($fm,"insert")==0)	{
 		$sql = "INSERT INTO m_places (place_name, open_date, place_descr, user_id) VALUES(";
-		$s = getRequestParam("p_name","Место?");
+		$s = getRequestParam("p_name","РњРµСЃС‚Рѕ?");
 		$sql .= "'$s',";
 		$td = date("Y-m-d H:i:s");
 		$sql .= "'$td',";
@@ -127,7 +162,7 @@ if($conn)	{
 		$sql .= "$uid)";
 	}	else if(strcmp($fm,"update")==0)	{
 		$sql = "UPDATE m_places SET ";
-		$s = getRequestParam("p_name","Место?");
+		$s = getRequestParam("p_name","РњРµСЃС‚Рѕ?");
 		$sql .= "place_name='$s',";
 		$s = getRequestParam("p_descr",1);
 		$sql .= "place_descr='$s' ";
@@ -144,9 +179,29 @@ if($conn)	{
 	print "<form name=\"places\" action=\"wimm_places.php\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-		$conn->query(formatSQL($sql));
-		$conn->commit();
+		$conn->query(formatSQL($conn, $sql));
 	}
+?>
+    <div id="dialog_box" class="dlg_box ui-widget-content" style="width:500px;display:none;height:100px;" >
+        <div class="dlg_box_cap" id="dlg_box_cap">РР·РјРµРЅРёС‚СЊ</div>
+        <div class="dlg_box_text" id="dlg_box_text">
+            <div class="dialog_row">
+                <label for="p_name">РќР°РёРјРµРЅРѕРІР°РЅРёРµ:</label>
+                <input type="text" id="p_name" name="p_name" value="" size="50">
+            </div>
+            <div class="dialog_row">
+                <label for="p_descr">РћРїРёСЃР°РЅРёРµ:</label>
+                <input type="text" id="p_descr" name="p_descr" value="" size="50" style="float: right; margin-right: 15px;">
+            </div>
+        </div>
+        <div class="dlg_box_btns">
+            <input id="ADD_BTN" type="button" value="РЎРѕС…СЂР°РЅРёС‚СЊ" onclick="doEdit('add');">
+            <input id="OK_BTN" type="button" value="РР·РјРµРЅРёС‚СЊ" onclick="doEdit('edit');">
+            <input id="DEL_BTN" type="button" value="РЈРґР°Р»РёС‚СЊ" onclick="doEdit('del');">
+            <input id="CANCEL_BTN" type="button" value="РћС‚РјРµРЅР°" onclick="$('#HIDDEN_ID').val(); $('#dialog_box').hide();">
+        </div>
+    </div>
+<?php
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
 	print "<input name=\"UID\" type=\"hidden\" value=\"" . $uid ."\">\n";
@@ -154,19 +209,19 @@ if($conn)	{
 	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
 	print "<TR>\n";
 	print "<TH>&nbsp</TH>\n";
-	print "<TH>Наименование</TH>\n";
-	print "<TH>Дата создания</TH>\n";
-	print "<TH>Дата закрытия</TH>\n";
-	print "<TH>Кто автор</TH>\n";
+	print "<TH>РќР°РёРјРµРЅРѕРІР°РЅРёРµ</TH>\n";
+	print "<TH>Р”Р°С‚Р° СЃРѕР·РґР°РЅРёСЏ</TH>\n";
+	print "<TH>Р”Р°С‚Р° Р·Р°РєСЂС‹С‚РёСЏ</TH>\n";
+	print "<TH>РљС‚Рѕ Р°РІС‚РѕСЂ</TH>\n";
 	print "</TR>\n";
-	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
+	//print "<TR><TD COLSPAN=\"6\">РџРѕРґРєР»СЋС‡С‘РЅ</TD></TR>\n";
 	$sql = "select place_id, place_name, tp.open_date, tp.close_date, place_descr, user_name from m_places tp, m_users tu where tp.user_id=tu.user_id order by place_name";
 	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
 	if($res)	{
-		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
+		//print "<TR><TD COLSPAN=\"6\">Р—Р°РїСЂРѕСЃ РїРѕС€С‘Р»</TD></TR>\n";
 		while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
 			print "<TR class=\"$c_class\">\n";
 			if(strcmp($c_class,"dark")==0)	{
@@ -177,24 +232,24 @@ if($conn)	{
 			$s = $row['place_id'];
 			$sn = $row['place_name'];
 			$sd = $row['place_descr'];
-			print "<TD><input name=\"ID$s\" ID=\"$s\"type=\"radio\" value=\"$s\" onclick=\"doSel('$s','$sn','$sd')\">";
+			print "<TD><input name=\"ROW_ID\" ID=\"ROW_$s\" type=\"radio\" value=\"$s\" onclick=\"doSel('$s')\">";
 			print "</TD>\n";
-			print "<TD TITLE=\"$sd\">$sn</TD>\n";
+			print "<TD><label TITLE=\"$sd\" ID=\"RPL_$s\" for=\"ROW_$s\">$sn</label></TD>\n";
 			$t = $row['open_date'];
-			$s = f_get_disp_date($t);
-			print "<TD TITLE=\"$t\">$s</TD>\n";
+			$s1 = f_get_disp_date($t);
+			print "<TD><label TITLE=\"$t\" ID=\"ROL_$s\" for=\"ROW_$s\">$s1</label></TD>\n";
 			$t = $row['close_date'];
-			$s = f_get_disp_date($t);
-			print "<TD TITLE=\"$t\">$s</TD>\n";
-			$s = $row['user_name'];
-			print "<TD>$s</TD>\n";
+			$s1 = f_get_disp_date($t);
+			print "<TD><label TITLE=\"$t\" ID=\"REL_$s\" for=\"ROW_$s\">$s1</label></TD>\n";
+			$s1 = $row['user_name'];
+			print "<TD><label TITLE=\"$t\" ID=\"RUL_$s\" for=\"ROW_$s\">$s1</label></TD>\n";
 			print "</TR>\n";
 			$sm ++;
 		}	}
 	else	{
 		$message  = f_get_error_text($conn, "Invalid query: ");
 		print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
-	}	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество мест</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
+	}	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Р—Р°РїСЂРѕСЃ РІС‹РїРѕР»РЅРµРЅ " . date("d.m.Y H:i:s") . "\">РљРѕР»РёС‡РµСЃС‚РІРѕ РјРµСЃС‚</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
 	print "</TABLE>\n";
 	print_buttons();
 	print "</form>\n";
