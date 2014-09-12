@@ -28,6 +28,11 @@ function console_debug_log(s_msg)
     if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1)   {
         console.log(s_msg);
     }
+    else    {
+        if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)    {
+            console.log(s_msg);
+        }
+    }
 }
 
 function doCancel()
@@ -93,7 +98,8 @@ function tx_submit()
     var f,v;
     var inv_idx = -1;
     var msg = "";
-    var reqStr = "FRM_MODE=update&HIDDEN_ID=" + $("#HIDDEN_ID").val();
+    var currentdate = new Date(); 
+    var reqStr = "time=" + Date.now() + "&FRM_MODE=update&HIDDEN_ID=" + $("#HIDDEN_ID").val();
     for(i=0; i<a_fields.length; i++)    {
         f = $("#" + a_fields[i].id);
         v = f.val();
@@ -129,18 +135,25 @@ function tx_submit()
             msg = "Значение не установлено"
         }
     }
+    console_debug_log("request:"+reqStr);
     if(inv_idx>=0&&inv_idx<a_fields.length)  {
         if(msg.length>0)
             alert(msg);
         $("#" + a_fields[i].id).select();
         return;
     }
+    console_debug_log("query!");
     jqxr = $.ajax({
         type: "POST",
-        url: "wimm_edit2.php",
+        url: "/wimm/wimm_edit2.php",
         data: reqStr,
-        complete: onTxComplete,
+        complete: onTxComplete
     });
+//    if(jqxr.responseText.length>0)
+//        onTxComplete(jqxr, 'success');
+//    else
+//        console_debug_log("empty response!");
+    console_debug_log("end query!");
 }
 
 function sel_row(row_id)
@@ -167,7 +180,7 @@ function sel_row(row_id)
             if(a_fields[i].id.indexOf("t_user")==0)
                 $("#t_user").val($("#UID").val());
             else
-                $("#" + a_fields[i].id).val(s1);
+                $("#" + a_fields[i].id).val($("#" + a_fields[i].id + "_a").val());
         }
     }
     else    {
@@ -207,12 +220,12 @@ function del_click()
     var f,v;
     var inv_idx = -1;
     var msg = "";
-    var reqStr = "FRM_MODE=delete&HIDDEN_ID=" + $("#HIDDEN_ID").val();
+    var reqStr = "time=" + Date.now() + "&FRM_MODE=delete&HIDDEN_ID=" + $("#HIDDEN_ID").val();
     $("#FRM_MODE").val("delete");
     jqxr = $.ajax({
         type: "POST",
-        url: "wimm_edit2.php",
+        url: "/wimm/wimm_edit2.php",
         data: reqStr,
-        complete: onTxComplete,
+        complete: onTxComplete
     });
 }
