@@ -1,4 +1,6 @@
 ﻿<?php
+    $t = time() + 10;
+    header("Expires: " . date("D, d M Y H:i:s T", $t));
     include_once ("fun_web.php");
     include_once 'fun_dbms.php';
     init_superglobals();
@@ -125,7 +127,7 @@ if($conn)	{
             <input id="FRM_MODE" name="FRM_MODE" type="hidden" value="refresh">
             <input id="HIDDEN_ID" name="HIDDEN_ID" type="hidden" value="0">
             <input name="UID" type="hidden" value="<?php echo getRequestParam("UID", "");?>">
-            <DIV class="dlg_box" id="dialog_box" style="width:600px;display:none;" class='ui-widget-content'>
+            <DIV class="dlg_box ui-widget-content" id="dialog_box" style="width:600px;display:none;">
                 <DIV class="dlg_box_cap" id="dlg_box_cap">Изменение записи</DIV>
                 <DIV class="dlg_box_text" id="dlg_box_text" >
                         <div class="dialog_row">
@@ -212,6 +214,7 @@ if($conn)	{
                 <tbody>
 <?php
 	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
+    $a_vg = false;
 	$sql = "select transaction_id, t_type_name, transaction_name, transaction_sum, Type_sign, transaction_date, user_name, place_name, " .
                 " place_descr, t.currency_id t_cid, mcu.currency_sign, mb.currency_id as bc_id, t.place_id, t.budget_id, t.user_id, t.t_type_id " .
                 " from m_transactions t, m_transaction_types tt, m_users tu, m_places tp, m_currency mcu, m_budget mb " .
@@ -231,6 +234,23 @@ if($conn)	{
 	$locale_info = localeconv();
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
             while ($row =  $res->fetch(PDO::FETCH_ASSOC)) {
+                if($a_vg===false)   {
+                    $a_vg = array();
+                    foreach($row as $rk => $rv) {
+                        $a_vg[$rk] = array();
+                        $a_vg[$rk][$rv] = 1;
+                    }
+                }
+                else {
+                    foreach($row as $rk => $rv) {
+                        if(key_exists($rv, $a_vg[$rk])) {
+                            $a_vg[$rk][$rv] ++;
+                        }
+                        else {
+                            $a_vg[$rk][$rv] = 1;
+                        }
+                    }
+                }
                 $row_pk = $row['transaction_id'];
                 $row_id = "ROW_" . $row_pk;
                 print "<TR class=\"expenses\" id=\"TR_$row_pk\">\n";
@@ -313,6 +333,27 @@ if($conn)	{
 	print "Итого, разница:</TD><TD COLSPAN=\"4\"><IMG SRC=\"$c_class\">&nbsp;$t</TD></TR>\n";
 	print "</tbody></TABLE>\n";
 	print_buttons($conn);
+        if($a_vg)   {
+            $a_ctls = array('transaction_name'=>'t_name_a',
+                'transaction_sum'=>'t_sum_a',
+                'transaction_date'=>'t_date_a',
+                't_cid'=>'t_curr_a',
+                't_type_id'=>'t_type_a',
+                'place_id'=>'t_place_a',
+                'budget_id'=>'t_budget_a');
+            foreach ($a_vg as $vkey => $vvalue) {
+                if(key_exists($vkey, $a_ctls))   {
+                    $a2 = array_flip($vvalue);
+//                    $a1 = sort($a2);
+//            echo "<!--";
+//            print_r($vvalue);
+//            echo "-->" . PHP_EOL;
+                    //$a = each($vvalue);
+                    printf('<input type="hidden" id="%s" value="%s">%s', 
+                            $a_ctls[$vkey], current($a2), PHP_EOL);
+                }
+            }
+        }
 }
 
 ?>
