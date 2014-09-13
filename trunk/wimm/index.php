@@ -19,7 +19,7 @@
         <link rel="SHORTCUT ICON" href="picts/favicon.ico">
         <title>Семейный бюджет</title>
     </head>
-    <body onload="$('#dialog_box').draggable();$('#OK_BTN').draggable();">
+    <body onload="onLoad();">
     <script language="JavaScript" type="text/JavaScript" src="js/form_common.js"></script>
 <?php    
     if(isMSIE())   {
@@ -132,7 +132,7 @@ if($conn)	{
                 <DIV class="dlg_box_text" id="dlg_box_text" >
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_user">Пользователь:</label>
-                            <select class="dialog_ctl" size="1" id="t_user" name="t_user">
+                            <select class="dialog_ctl" size="1" id="t_user" name="t_user" autofocus="true">
 <?php
 	$sql = "select user_id, user_name from m_users where close_date is null";
 	f_set_sel_options2($conn, $sql, $s, $s, 2);
