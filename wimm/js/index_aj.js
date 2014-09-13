@@ -19,6 +19,21 @@ var a_fields = [
     {id:"t_budget",len:0,type:"n",val:0,in_tbl:"#T_BUDG_",tbl_type:"v"}];
 
 /**
+ * converts datetime string to display
+ * @param {String} sDate
+ * @returns {String}
+ */
+function format_date(sDate)
+{
+    var sRet = sDate;
+    if(sDate!==undefined && sDate!==null && sDate.length>18)    {
+        // 2014-06-01 08:05:50 -> 01/06 08:05:50
+        sRet = sDate.substring(8, 2) + "/" + sDate.substring(5, 2) + " " +
+                sDate.substring(11, 8);
+    }
+    return sRet;
+}
+/**
  * 
  * @param {object} s_msg
  * @returns {undefined}
@@ -69,8 +84,12 @@ function onTxComplete(jqXHR, textStatus )
                         v = $("#"+a_fields[i].id).val();
                         if(a_fields[i].tbl_type.indexOf("v"))
                             $(a_fields[i].in_tbl + row_id).val(v);
-                        if(a_fields[i].tbl_type.indexOf("t"))
-                            $(a_fields[i].in_tbl + row_id).text(v);
+                        if(a_fields[i].tbl_type.indexOf("t"))   {
+                            if(a_fields[i].id.indexOf('t_date')==0)
+                                $(a_fields[i].in_tbl + row_id).text(format_date(v));
+                            else
+                                $(a_fields[i].in_tbl + row_id).text(v);
+                        }
                         if(a_fields[i].tbl_type.indexOf("i"))
                             $(a_fields[i].in_tbl + row_id).attr("title",v);
                         if(a_fields[i].tbl_type.indexOf("x"))   {
@@ -165,7 +184,8 @@ function sel_row(row_id)
     if(x<0)
         x = 500;
     objDiv.style.left = x.toString()+"px";
-    objDiv.style.display="inline";
+    //objDiv.style.display="inline";
+    $("#dialog_box").show();
     var s1;
     var i;
     if(row_id===null || row_id===undefined || row_id.length<1) {
@@ -195,8 +215,14 @@ function sel_row(row_id)
             s1 = "";
             if(a_fields[i].tbl_type.indexOf("v")==0)
                 s1 = $(a_fields[i].in_tbl + row_id).val();
-            if(a_fields[i].tbl_type.indexOf("t")==0)
-                s1 = $(a_fields[i].in_tbl + row_id).text();
+            if(a_fields[i].tbl_type.indexOf("t")==0)    {
+                if(a_fields[i].id.indexOf('t_sum')==0)  {
+                    var s2 = $(a_fields[i].in_tbl + row_id).text();
+                    s1 = s2.replace(" ","");
+                }
+                else
+                    s1 = $(a_fields[i].in_tbl + row_id).text();
+            }
             if(a_fields[i].tbl_type.indexOf("i")==0)
                 s1 = $(a_fields[i].in_tbl + row_id).attr("title");
             console_debug_log(a_fields[i].in_tbl + row_id + "(" + a_fields[i].tbl_type + ")=" + s1);
@@ -228,4 +254,43 @@ function del_click()
         data: reqStr,
         complete: onTxComplete
     });
+}
+
+function onLoad()
+{
+    $('#dialog_box').draggable();
+    $('#OK_BTN').draggable();
+    $("body").keydown(function(e) {
+        onPageKey(e.keyCode);
+    });
+}
+
+function onPageKey(key)
+{
+    switch(key)
+    {
+        case 27:
+            if($('#dialog_box:visible').length > 0) {
+                doCancel();
+            }
+            break;
+        case 10:
+            if($('#dialog_box:visible').length > 0) {
+                if($('#OK_BTN:visible').length > 0) {
+                    tx_submit();
+                }
+                else    {
+                    if($('#ADD_BTN:visible').length > 0) {
+                        $('#expenses').submit();
+                    }
+                }
+            }
+            break;
+        case 116:
+            $("#sel_row_id").val("");
+            $("#FRM_MODE").val("refresh");
+            $('#expenses').submit();
+           break;
+    }
+
 }
