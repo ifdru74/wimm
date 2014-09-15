@@ -50,6 +50,7 @@ function doSel(s1, s2, s3)
 		}
 	}
         $('#HIDDEN_ID').val(s1);
+        $('#FRM_MODE').val('update');
         s2 = "#RPL_" + s1;
         $('#p_name').val($(s2).text());
         $('#p_descr').val($(s2).attr('title'));
@@ -60,6 +61,7 @@ function doSel(s1, s2, s3)
     }
     else    {
         $('#dlg_box_cap').text('Добавить место');
+        $('#FRM_MODE').val('insert');
         $('#OK_BTN').hide();
         $('#DEL_BTN').hide();
         $('#ADD_BTN').show();
@@ -81,9 +83,9 @@ function doSel(s1, s2, s3)
 function doEdit(s1)
 {
 	if(s1=="add")	{
-		places.FRM_MODE.value="insert";
-		places.HIDDEN_ID.value="0";
-		places.submit();
+            places.FRM_MODE.value="insert";
+            places.HIDDEN_ID.value="0";
+            places.submit();
 	}
 	else if(s1=="edit")	{
 		coll = places.elements;
@@ -201,10 +203,10 @@ if($conn)	{
             <input id="CANCEL_BTN" type="button" value="Отмена" onclick="$('#HIDDEN_ID').val(); $('#dialog_box').hide();">
         </div>
     </div>
+    <input type="hidden" name="FRM_MODE" id='FRM_MODE' value="refresh">
+    <input type="hidden" name="HIDDEN_ID" id='HIDDEN_ID' value="0">
+    <input type="hidden" name="UID" id='UID' value="<?php echo $uid; ?>">
 <?php
-	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
-	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
-	print "<input name=\"UID\" type=\"hidden\" value=\"" . $uid ."\">\n";
 	print_buttons("edit_boxes");
 	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
 	print "<TR>\n";
