@@ -43,13 +43,9 @@ function format_date(sDate)
  */
 function console_debug_log(s_msg)
 {
-    if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1)   {
+    if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1 ||
+            navigator.userAgent.toLowerCase().indexOf('chrome') > -1)   {
         console.log(s_msg);
-    }
-    else    {
-        if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)    {
-            console.log(s_msg);
-        }
     }
 }
 
@@ -180,6 +176,7 @@ function tx_submit()
 
 function sel_row(row_id)
 {
+    var focus2item = '#t_user';
     var objDiv = document.getElementById("dialog_box");
     objDiv.style.top = (f_get_scroll_y()+200).toString()+"px";
     //var x = (window.innerWidth||document.body.clientWidth);
@@ -201,7 +198,7 @@ function sel_row(row_id)
         s1 = "";
         for(i=0; i<a_fields.length; i++)    {
             if(a_fields[i].id.indexOf("t_user")==0)
-                $("#t_user").val($("#UID").val());
+                focus2item = '#t_name';
             else
                 $("#" + a_fields[i].id).val($("#" + a_fields[i].id + "_a").val());
         }
@@ -232,14 +229,11 @@ function sel_row(row_id)
             if(s1!==null && s1!==undefined && s1.length>0)
                 $("#"+a_fields[i].id).val(s1);
         }
-/*        $("#t_name").val($("#TNAME_" + row_id).text());
-        $("#t_sum").val($("#T_SUMM_" + row_id).attr('title'));
-        $("#t_user").val($("#T_USR_" + row_id).val());
-        $("#t_place").val($("#T_PLACE_" + row_id).val());
-        $("#t_budget").val($("#T_BUDG_" + row_id).val());
-        $("#t_date").val($("#T_DATE_" + row_id).attr('title'));
-        $('#t_type').val($("#T_TYPE_" + row_id).val());
-        $('#t_curr').val($("#T_CURR_" + row_id).val());*/
+        console_debug_log('focus to: ' + focus2item);
+         focus2item = document.getElementById('t_name');
+         setInputSelection(focus2item,0,2);
+
+        console_debug_log('focus out: ' + focus2item);
     }
 }
 
@@ -266,6 +260,7 @@ function onLoad()
     $("body").keydown(function(e) {
         onPageKey(e.keyCode);
     });
+    setHandlers(".dtp");
 }
 
 function onPageKey(key)
