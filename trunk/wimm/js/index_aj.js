@@ -3,7 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-var jqxr = null;
+var bCtrlHit = false;   // ctrl held down
+var aParts = [[0,4,-1,0], [5,2,12,1], [8,2,31,1], [11,2,23,0], [14,2,59,0], [17,2,59,0]];   // text parts
+var aDays = [0,31,28,31,30,31,30,31,31,30,31,30,31];    // month's days
+var jqxr = null;    // jQuery ajax request
 // type - value type "s" - text, "n" - numeric, "d" - date
 // tbl_type - table disp type "t" - text, "v" - value, i - title
 var a_fields = [
@@ -293,4 +296,193 @@ function onPageKey(key)
            break;
     }
 
+}
+
+/**
+ * set selection range in text box
+ * @param {Object} el - DOM element
+ * @param {Number} nStart - start selection
+ * @param {Number} nEnd - end of selection
+ * @returns {undefined}
+*/
+function setInputSelection(el, nStart, nEnd) {
+    var start = 0, end = 0, normalizedValue, range,
+        textInputRange, len, endRange;
+
+    if (typeof el.selectionStart === "number" && typeof el.selectionEnd === "number") {
+        el.selectionStart = nStart;
+        el.selectionEnd = nEnd;
+    } 
+}
+
+/**
+ * get selection range from text box
+ * @param {Object} el - DOM element
+ * @returns {getInputSelection.index_ajAnonym$2}
+ */
+function getInputSelection(el) {
+    var start = 0, end = 0, normalizedValue, range,
+        textInputRange, len, endRange;
+
+    if (typeof el.selectionStart === "number" && typeof el.selectionEnd === "number") {
+        start = el.selectionStart;
+        end = el.selectionEnd;
+    }
+    return {
+        start: start,
+        end: end
+    };
+}
+
+/**
+ * pad string from left to a desired legth
+ * @param {String} i
+ * @param {Number} l
+ * @param {String} f
+ * @returns {String} - padded string 
+ */
+function formatNumber(i, l, f)
+{
+    var s1 = i.toString();
+    var len = s1.length;
+    var sRet = "";
+    if(len<l)   {
+        for(i=0; i<l-len; i++)
+            sRet += f.substring(0,1);
+        sRet += s1;
+    }
+    else {
+        if(len>l)   {
+            sRet = s1.substring(0,l);
+        }
+        else
+            sRet = s1;
+    }
+    return sRet;
+}
+
+/**
+ * set event handlers with specified jQuery selector
+ * @param {String} jqSelector
+ * @returns {undefined}
+ */
+function setHandlers(jqSelector)
+{
+    bCtrlHit = false;
+    $(jqSelector).focus(function(e)
+    {
+        setInputSelection(e.currentTarget, aParts[0][0], 
+            aParts[0][0] + aParts[0][1]);
+        e.preventDefault();
+    });
+    $(jqSelector).keydown(function(e)
+    {
+        switch(e.keyCode)
+        {
+            case 17:
+                bCtrlHit = true;
+                break;
+        }
+    });
+    $(jqSelector).keyup(function(e)
+    {
+        var pos, len, val, i;
+        var caret = getInputSelection(e.currentTarget);
+        var month;
+        val = $(this).val();
+        len = val.length;
+        pos = caret.start;
+        month = new Number(val.substring(aParts[1][0],aParts[1][0]+aParts[1][1])).valueOf();
+        switch(e.keyCode)
+        {
+            case 17:
+                bCtrlHit = false;
+                break;
+            case 37://left
+                if(bCtrlHit)    {
+                    if(pos>=len)
+                        break;
+                    for(i=0; i<aParts.length; i++)
+                    {
+                        if(aParts[i][0]>=pos)    {
+                            if(i<1)
+                                break;
+                            setInputSelection(e.currentTarget, aParts[i-1][0], 
+                                aParts[i-1][0] + aParts[i-1][1]);
+                            break;
+                        }
+                    }
+                }
+                break;
+            case 39://right
+                if(bCtrlHit)    {
+                    if(pos<=0)
+                        break;
+                    for(i=0; i<aParts.length; i++)
+                    {
+                        if(aParts[i][0]>=pos)    {
+//                                        if(i<1)
+//                                            break;
+                            setInputSelection(e.currentTarget, aParts[i][0], 
+                                aParts[i][0] + aParts[i][1]);
+                            break;
+                        }
+                    }
+                }
+                break;
+            case 38://up
+                for(i=0; i<aParts.length; i++)
+                {
+                    if(aParts[i][0]>=pos)    {
+                        var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
+                        n1 ++;
+                        if(aParts[i][2]>=0)  {
+                            var nLim;
+                            if(i===2)
+                                nLim = aDays[month];
+                            else
+                                nLim = aParts[i][2];
+                            if(n1>nLim)
+                                n1 = aParts[i][3];
+                        }
+                        $(this).val(val.substring(0,aParts[i][0]) +
+                                formatNumber(n1.toString(),aParts[i][1],"0")+
+                                val.substring(aParts[i][0]+aParts[i][1]));
+                        setInputSelection(e.currentTarget, aParts[i][0], 
+                            aParts[i][0] + aParts[i][1]);
+                        break;
+                    }
+                }
+                break;
+            case 40://down
+                for(i=0; i<aParts.length; i++)
+                {
+                    if(aParts[i][0]>=pos)    {
+                        var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
+                        n1 --;
+                        if(aParts[i][3]>=0)  {
+                            if(n1<aParts[i][3]) {
+                                var nLim;
+                                if(i===2)
+                                    nLim = aDays[month];
+                                else
+                                    nLim = aParts[i][2];
+                                if(nLim>0)
+                                    n1 = nLim;
+                                else
+                                    n1 = aParts[i][3];
+                            }
+                        }
+                        $(this).val(val.substring(0,aParts[i][0]) +
+                                formatNumber(n1.toString(),aParts[i][1],"0")+
+                                val.substring(aParts[i][0]+aParts[i][1]));
+                        setInputSelection(e.currentTarget, aParts[i][0], 
+                            aParts[i][0] + aParts[i][1]);
+                        break;
+                    }
+                }
+                break;
+        }
+        //e.preventDefault();
+    });
 }
