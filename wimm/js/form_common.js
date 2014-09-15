@@ -47,12 +47,12 @@ function showNavBar(elem_id,btn_id)
     if (elem.style.display === "inline") {
         ebtn.src=ebtn.src.replace("hide_up.gif","drop_down.gif");//"picts/drop_down.gif";
         elem.style.display="none";
-        ebtn.title='Показать панель';
+        ebtn.title='РџРѕРєР°Р·Р°С‚СЊ РїР°РЅРµР»СЊ';
     }
     else    {
         ebtn.src=ebtn.src.replace("drop_down.gif","hide_up.gif");//"picts/hide_up.gif";
         elem.style.display="inline";
-        ebtn.title='Скрыть панель';
+        ebtn.title='РЎРєСЂС‹С‚СЊ РїР°РЅРµР»СЊ';
     }
 }
 
