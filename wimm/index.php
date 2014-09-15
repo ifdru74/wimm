@@ -5,7 +5,7 @@
     include_once 'fun_dbms.php';
     init_superglobals();
     session_start();
-    auth_check('UID');
+    $uid = auth_check('UID');
     /**
      * @var $conn PDO 
      */
@@ -46,9 +46,9 @@ function print_buttons($conn, $bd="",$ed="", $bg="-1")
 ?>
         <div style="display: block; width: 100%;">
             <label for="BDATE">Дата начала периода:</label>
-            <input id="BDATE" name="BDATE" type="text" value="<?php echo $bd;?>">
+            <input class="dtp" id="BDATE" name="BDATE" type="text" value="<?php echo $bd;?>">
             <label for="EDATE">Дата окончания периода:</label>
-            <input id="EDATE" name="EDATE" type="text" value="<?php echo $ed;?>">
+            <input class="dtp" id="EDATE" name="EDATE" type="text" value="<?php echo $ed;?>">
             <label for="f_budget">Бюджет:</label>
             <select size="1" id="f_budget" name="f_budget" onchange="$('#FRM_MODE').val('refresh'); $('#expenses').submit();">
 <?php
@@ -132,10 +132,10 @@ if($conn)	{
                 <DIV class="dlg_box_text" id="dlg_box_text" >
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_user">Пользователь:</label>
-                            <select class="dialog_ctl" size="1" id="t_user" name="t_user" autofocus="true">
+                            <select class="dialog_ctl" size="1" id="t_user" name="t_user">
 <?php
 	$sql = "select user_id, user_name from m_users where close_date is null";
-	f_set_sel_options2($conn, $sql, $s, $s, 2);
+	f_set_sel_options2($conn, $sql, $uid, $uid, 2);
 ?>
                             </select>
                         </div>
@@ -167,7 +167,7 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_date">Дата:</label>
-                            <input class="dialog_ctl" id="t_date" name="t_date" type="text" value="">
+                            <input class="dialog_ctl dtp" id="t_date" name="t_date" type="text" value="">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_place">Место:</label>
