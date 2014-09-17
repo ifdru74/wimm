@@ -229,12 +229,10 @@ function sel_row(row_id)
             if(s1!==null && s1!==undefined && s1.length>0)
                 $("#"+a_fields[i].id).val(s1);
         }
-        console_debug_log('focus to: ' + focus2item);
-         focus2item = document.getElementById('t_name');
-         setInputSelection(focus2item,0,2);
-
-        console_debug_log('focus out: ' + focus2item);
     }
+    $(focus2item).select();
+    $(focus2item).focus();
+
 }
 
 function del_click()
