@@ -377,6 +377,10 @@ function setHandlers(jqSelector)
             case 17:
                 bCtrlHit = true;
                 break;
+            case 38://up
+            case 40://down
+                e.preventDefault();
+                break;
         }
     });
     $(jqSelector).keyup(function(e)
@@ -426,54 +430,60 @@ function setHandlers(jqSelector)
                 }
                 break;
             case 38://up
-                for(i=0; i<aParts.length; i++)
-                {
-                    if(aParts[i][0]>=pos)    {
-                        var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
-                        n1 ++;
-                        if(aParts[i][2]>=0)  {
-                            var nLim;
-                            if(i===2)
-                                nLim = aDays[month];
-                            else
-                                nLim = aParts[i][2];
-                            if(n1>nLim)
-                                n1 = aParts[i][3];
-                        }
-                        $(this).val(val.substring(0,aParts[i][0]) +
-                                formatNumber(n1.toString(),aParts[i][1],"0")+
-                                val.substring(aParts[i][0]+aParts[i][1]));
-                        setInputSelection(e.currentTarget, aParts[i][0], 
-                            aParts[i][0] + aParts[i][1]);
-                        break;
-                    }
-                }
-                break;
-            case 40://down
-                for(i=0; i<aParts.length; i++)
-                {
-                    if(aParts[i][0]>=pos)    {
-                        var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
-                        n1 --;
-                        if(aParts[i][3]>=0)  {
-                            if(n1<aParts[i][3]) {
+                if(!bCtrlHit)    {
+                    for(i=0; i<aParts.length; i++)
+                    {
+                        if(aParts[i][0]>=pos)    {
+                            var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
+                            n1 ++;
+                            if(aParts[i][2]>=0)  {
                                 var nLim;
                                 if(i===2)
                                     nLim = aDays[month];
                                 else
                                     nLim = aParts[i][2];
-                                if(nLim>0)
-                                    n1 = nLim;
-                                else
+                                if(n1>nLim)
                                     n1 = aParts[i][3];
                             }
+                            $(this).val(val.substring(0,aParts[i][0]) +
+                                    formatNumber(n1.toString(),aParts[i][1],"0")+
+                                    val.substring(aParts[i][0]+aParts[i][1]));
+                            setInputSelection(e.currentTarget, aParts[i][0], 
+                                aParts[i][0] + aParts[i][1]);
+                            e.preventDefault();
+                            break;
                         }
-                        $(this).val(val.substring(0,aParts[i][0]) +
-                                formatNumber(n1.toString(),aParts[i][1],"0")+
-                                val.substring(aParts[i][0]+aParts[i][1]));
-                        setInputSelection(e.currentTarget, aParts[i][0], 
-                            aParts[i][0] + aParts[i][1]);
-                        break;
+                    }
+                }
+                break;
+            case 40://down
+                if(!bCtrlHit)    {
+                    for(i=0; i<aParts.length; i++)
+                    {
+                        if(aParts[i][0]>=pos)    {
+                            var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
+                            n1 --;
+                            if(aParts[i][3]>=0)  {
+                                if(n1<aParts[i][3]) {
+                                    var nLim;
+                                    if(i===2)
+                                        nLim = aDays[month];
+                                    else
+                                        nLim = aParts[i][2];
+                                    if(nLim>0)
+                                        n1 = nLim;
+                                    else
+                                        n1 = aParts[i][3];
+                                }
+                            }
+                            $(this).val(val.substring(0,aParts[i][0]) +
+                                    formatNumber(n1.toString(),aParts[i][1],"0")+
+                                    val.substring(aParts[i][0]+aParts[i][1]));
+                            setInputSelection(e.currentTarget, aParts[i][0], 
+                                aParts[i][0] + aParts[i][1]);
+                            e.preventDefault();
+                            break;
+                        }
                     }
                 }
                 break;
