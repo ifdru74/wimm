@@ -73,32 +73,54 @@ function print_buttons($conn, $bd="",$ed="", $bg="-1")
 if($conn)	{
 	$fm = getRequestParam("FRM_MODE","refresh");
 	$sql_dml = "";
+        $dup_id = false;
         $t_name = value4db(urldecode(getRequestParam("t_name","Покупка!")));
 	if(strcmp($fm,"insert")==0)	{
-		$sql_dml = "INSERT INTO m_transactions (transaction_name, t_type_id, currency_id, transaction_sum, transaction_date, user_id, open_date, place_id, budget_id) VALUES(";
-		$s = $t_name;
-		$sql_dml .= "'$s',";
-		$s = getRequestParam("t_type",1);
-		$sql_dml .= "$s,";
-		$s = getRequestParam("t_curr",2);
-		$sql_dml .= "$s,";
-		$s1 = getRequestParam("t_sum",0);
-		if(strpos($s1,",")===false)	{
-			$s = $s1;
+		$t_type = getRequestParam("t_type",1);
+		$t_curr = getRequestParam("t_curr",2);
+		$s2 = getRequestParam("t_sum",0);
+		if(strpos($s2,",")===false)	{
+			$t_sum = $s2;
 		}
 		else	{
-			$s = str_replace(",",".",$s1);
+			$t_sum = str_replace(",",".",$s2);
 		}
-		$sql_dml .= "$s,";
-		$td = getRequestParam("t_date",date("Y-m-d H:i:s"));
-		$sql_dml .= "'$td',";
-		$s = getRequestParam("t_user",1);
-		$sql_dml .= "$s,";
-		$sql_dml .= "'$td',";
-		$s = getRequestParam("t_place",0);
-		$sql_dml .= "$s,";
-		$s = getRequestParam("t_budget",0);
-		$sql_dml .= "$s)";
+		$td = getRequestParam("t_date",date("Y-m-d H:i:s"));//2014-09-01 20:30:57
+                $td1 = substr($td, 0, 16);
+		$t_user = getRequestParam("t_user",1);
+		$t_place = getRequestParam("t_place",0);
+		$t_budget = getRequestParam("t_budget",0);
+                $sql_pd = "SELECT transaction_id FROM m_transactions ".
+                        "where t_type_id=$t_type and currency_id=$t_curr ".
+                        "and transaction_sum=$t_sum ".
+                        "and substr(transaction_date,1,16)='$td1';";
+                $res_pd = $conn->query($sql_pd);
+                if($res_pd) {
+                    $row_pd = $res_pd->fetch(PDO::FETCH_ASSOC);
+                    if($row_pd) {
+                        $dup_id = $row_pd['transaction_id'];
+                    }
+                }
+                if($dup_id===false) {
+                    $sql_dml = "INSERT INTO m_transactions (transaction_name, ".
+                            "t_type_id, currency_id, transaction_sum, transaction_date, ".
+                            "user_id, open_date, place_id, budget_id) VALUES(";
+                    $sql_dml .= "'$t_name',";
+                    $sql_dml .= "$t_type,";
+                    $sql_dml .= "$t_curr,";
+                    $sql_dml .= "$t_sum,";
+                    $sql_dml .= "'$td',";
+                    $sql_dml .= "$t_user,";
+                    $sql_dml .= "'$td',";
+                    $sql_dml .= "$t_place,";
+                    $sql_dml .= "$t_budget)";
+                }
+                else {
+?>
+    <div>Дублирование записи <?php echo $dup_id;?></div>
+<?php
+                    
+                }
 	}
         $cd = getdate();
 	$m = $cd['mon'];
