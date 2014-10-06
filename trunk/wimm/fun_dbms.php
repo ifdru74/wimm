@@ -190,3 +190,30 @@ function formatSQL($conn, $sql) {
     }
     return $sql;
 }
+
+/**
+ * execute query with supposed scalar result
+ * @param PDO $conn
+ * @param string $sql
+ * @param mixed $def_val
+ */
+function f_get_single_value($conn, $sql, $def_val)
+{
+    $ret = $def_val;
+    if(strlen($sql)>0)  {
+        /**
+         * @var $res PDO::query
+         */
+        try {
+            $res = $conn->query($sql);
+            if($res)    {
+                $row = $res->fetch(PDO::FETCH_NUM);
+                if(is_array($row) && count($row)>0)
+                    $ret = $row[0];
+                $res->closeCursor();
+            }
+        } catch (PDOException $ex) {
+        }
+    }
+    return $ret;
+}
