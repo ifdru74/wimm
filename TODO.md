@@ -1,0 +1,15 @@
+#This page describe my vision about project development.
+
+# New Features (awaiting of development) #
+
+  * Loan accounting (store and compute details for every loan You've got)
+  * Predictive payents (try to predict month turnuver by computing average months payments)
+  * Stand alone module for Android to save all money spend within a day to split with main storage
+  * Stand alone module for Windows people who does not want to install Apache/PHP/MySQL
+
+# If You've got suggestions #
+
+Add your content here.  Format your content with:
+  * Text in **bold** or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
