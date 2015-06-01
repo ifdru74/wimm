@@ -86,11 +86,19 @@ function print_head($title)
     $sOut = "<!DOCTYPE html>\n<html>" . PHP_EOL . PHP_EOL;
     $sOut .= "<head>" . PHP_EOL;
     $sOut .= "\t<link rel=\"STYLESHEET\" href=\"css/wimm.css\" type=\"text/css\"/>" . PHP_EOL;
+    $sOut .= "\t<link rel=\"STYLESHEET\" href=\"css/jquery_autocomplete_ifd.css\" type=\"text/css\"/>" . PHP_EOL;
     $sOut .= "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">" . PHP_EOL;
     $sOut .= "\t<meta name=\"GENERATOR\" content=\"IFD\">" . PHP_EOL;
     $sOut .= "\t<link rel=\"SHORTCUT ICON\" href=\"picts/favicon.ico\">" . PHP_EOL;
     $sOut .= "\t<title>$title</title>" . PHP_EOL;
     $sOut .= "\t<script type=\"text/javascript\" src=\"js/form_common.js\"></script>" . PHP_EOL;
+    if(isMSIE())    {
+        $sOut .= "\t<script type=\"text/javascript\" src=\"js/jquery-1.11.1.js\"></script>" . PHP_EOL;
+    }
+    else {
+        $sOut .= "\t<script type=\"text/javascript\" src=\"js/jquery-2.1.1.js\"></script>" . PHP_EOL;
+    }
+    $sOut .= "\t<script type=\"text/javascript\" src=\"js/json2.js\"></script>" . PHP_EOL;
     $sOut .= "</head>" . PHP_EOL;
     echo $sOut;
 }
