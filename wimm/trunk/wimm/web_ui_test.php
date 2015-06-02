@@ -1,5 +1,5 @@
 <?php
-
+header("Expires: " . date("D, d M Y H:i:s T"), TRUE);
 /* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates

@@ -17,20 +17,28 @@ if (key_exists('str', $_REQUEST)) {
 else {
     $bs = '';
 }
-$a = array('first' => array(1 => "one", 2 => "two", 3 => "three", 4 => "four", 5 => "five", 6 => "ones"),
-    'second' => array(1 => "apple", 2 => "banana", 3 => "orange", 4 => "lemon", 5 => "nut", 
-        6=>"scroll", 7=>"scroll", 8=>"scroll", 9=>"scroll", 10=>"scroll", 11=>"scroll", 12=>"scroll", 13=>"scroll"));
+$a = ['first' => array(1 => "one", 2 => "two", 3 => "three", 4 => "four", 5 => "five", 6 => "ones"),
+    'second' => [1 => "apple", 2 => "banana", 3 => "orange", 4 => "lemon", 5 => "nut", 
+        6=>"scroll", 7=>"scroll", 8=>"scroll", 9=>"scroll", 10=>"scroll", 11=>"scroll", 12=>"scroll", 13=>"scroll"]];
 $aret = array();
 if (key_exists($sel, $a)) {
     $ta = $a[$sel];
     foreach ($ta as $key => $value) {
-        if(strpos($value, $bs)==0)
+        $n = strpos($value, $bs);
+        if(strlen($bs)>0 && $n!==false)
+        {
             $aret[] = array('id' => $key, 'text' => $value);
+        }
     }
 } else {
     $aret[] = array('id' => 'error', 'text' => "no values for $sel");
 }
+// Date: Tue, 15 Nov 1994 08:12:31 GMT
 if (count($aret) > 0) {
+    header("Expires: " . date("D, d M Y H:i:s T"), TRUE);
     $sout = json_encode($aret);
     echo $sout;
+}
+else {
+    header("Expires: " . date("D, d M Y H:i:s T"), TRUE, "404");
 }

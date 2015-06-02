@@ -22,6 +22,21 @@ var ac_box = null; // autocomplete div-box id
 var ac_txt = null; // autocomplete text box style
 
 /**
+ * scroll container to item (emilate combo box behaviour
+ * @param {type} containerID - container to scroll
+ * @param {type} itemID - item to show
+ * @returns {undefined} - nothing
+ */
+function scrollToItem(containerID, itemID)
+{
+    var container = $('#'+containerID),
+        scrollTo = $('#'+itemID);
+
+    container.scrollTop(
+        scrollTo.offset().top - container.offset().top + container.scrollTop()
+    );            
+}
+/**
  * action after autocomplete item has been selected
  * @param {string} boxID - autocomplete div id
  * @param {string} itemID - selected autocomplete item id
@@ -130,12 +145,7 @@ function changeSelection(boxID, how)
 //            console.log('changeSelection:new selection: ' + titem);
             $("#"+sel).removeClass("ac_bordered");
             $("#"+titem).addClass("ac_bordered");
-            if(!($("#" + titem).is(":visible")))
-            {
-                $("#"+boxID).animate({
-                    scrollTop: $("#" + titem).offset().top
-                }, 500);
-            }
+            scrollToItem(boxID, titem);
             $("#"+boxID).attr("selected_ac_item", titem);
         }
     }
@@ -192,18 +202,47 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     var arr = jsonData;
     var i;
     var item;
+    var sel_item_id;
+    var item_text = "";
     var html = "";
     var o;
+    var s1;
     o = document.getElementById(boxID);
     if(o!=null)
-        o.innerHTML = "";  // clear contents
-    for(i = 0; i < arr.length; i++)
     {
-        html += "<a href='#' id='aci_" + arr[i].id + "' class='ac_link'>" +
-                arr[i].text + "</a>";
-    }
-    if(o!=null)
+        o.innerHTML = "";  // clear contents
+        sel_item_id = o.getAttribute("for");
+        if(sel_item_id!=null && sel_item_id.length>0)
+        {
+            item_text = $("#"+sel_item_id).val();
+        }
+        sel_item_id = "";
+        for(i = 0; i < arr.length; i++)
+        {
+            if(sel_item_id.length<1 && item_text.length>0)
+            {
+                if(arr[i].text.toString().indexOf(item_text)==0)
+                    sel_item_id = arr[i].id;
+            }
+            s1 = "<a href='#' id='aci_" + arr[i].id;
+            if(arr[i].id.toString()==sel_item_id.toString())
+            {
+                s1 += "' class='ac_link ac_bordered'>";
+            }
+            else
+            {
+                s1 += "' class='ac_link'>";
+            }
+            s1 += (arr[i].text + "</a>");
+            html += s1;
+        }
         o.innerHTML = html;
+        if(sel_item_id.length>0)
+        {
+            o.setAttribute("selected_ac_item", sel_item_id);
+            scrollToItem(boxID, sel_item_id);
+        }
+    }
     else
         $("#"+boxID).text("!");
     $(".ac_link").click(function(e)
