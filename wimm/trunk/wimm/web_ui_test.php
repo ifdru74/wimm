@@ -5,9 +5,10 @@ header("Expires: " . date("D, d M Y H:i:s T"), TRUE);
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
+$inc = get_include_path();
+set_include_path($inc . ";cls\\table");
 include_once 'fun_web.php';
-
+include_once 'table.php';
 print_head("WEB UI test");
 ?>
 <body onload="onLoad();">
@@ -22,6 +23,16 @@ else {
 }
 if(strlen($s)>0)
     echo "<p>$s</p>";
+$tb = new table();
+$tb->setValue("id","table_id");
+$tb->setValue("name","table_name");
+$tb->setIndent(2);
+// header
+$tb->addColumn(new tcol("Столбец1"), TRUE);
+$tb->addColumn(new tcol("Столбец2"), TRUE);
+// body
+$tb->addColumn(new tcol('<input type="radio" id="row_=rid" name="trow" value="=rid">'), FALSE);
+$tb->addColumn(new tcol('<label for="row_=rid" id="tid_=rid">=text</label>'), FALSE);
 ?>
     <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
     <script language="JavaScript" type="text/JavaScript">
@@ -57,5 +68,17 @@ if(strlen($s)>0)
          * INPUT.ac_src    - autocomplete source URL
          * INPUT.ac_params - semicolon separated string of parameters "name=value"     
     -->
+<?php
+    $rows[] = array('rid'=>1,'text'=>"text1");
+    $rows[] = array('rid'=>2,'text'=>"text2");
+    $rows[] = array('rid'=>3,'text'=>"text4");
+    
+    echo $tb->htmlOpen();
+    foreach ($rows as $value) {
+        echo $tb->htmlRow($value);
+    }
+    echo $tb->htmlClose();
+?>
+    
 </body>
 </html>
