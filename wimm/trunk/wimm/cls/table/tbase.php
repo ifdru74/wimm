@@ -13,19 +13,28 @@
  */
 class tbase {
     //put your code here
-    protected static $sEmpty = "";     /** @var string empty string for internal purpose */
-    protected static $sSpace = " ";    /** @var string containing space for internal purpose */
-    protected static $sIndent = "    ";/** @var string containing indent spaces for internal purpose */
-    public static $PN_CLASS = "class"; /** @var string CSS class name combination for initial display */
-    public static $PN_STYLE = "style"; /** @var string CSS direct styles */
+    /** @var string empty string for internal purpose */
+    protected static $sEmpty = "";
+    /** @var string containing space for internal purpose */
+    protected static $sSpace = " ";
+    /** @var string containing indent spaces for internal purpose */
+    protected static $sIndent = "    ";
+    /** @var string CSS class name combination for initial display */
+    public static $PN_CLASS = "class";
+    /** @var string CSS direct styles */
+    public static $PN_STYLE = "style";
     /** 
      * @var string HTML tag name 
      */
     public static $PN_TAG = "html_tag";
-    public static $HSO_TAG = "<";      /** @var string HTML opening tag begin */
-    public static $HSC_TAG = "</";     /** @var string HTML closing tag begin */
-    public static $HSE_TAG = ">";      /** @var string HTML tag end */
-    protected  $properties;            /** @var array internal properties array */
+    /** @var string HTML opening tag begin */
+    public static $HSO_TAG = "<";
+    /** @var string HTML closing tag begin */
+    public static $HSC_TAG = "</";
+    /** @var string HTML tag end */
+    public static $HSE_TAG = ">";
+    /** @var array internal properties array */
+    protected  $properties;
     /**
      *
      * @var type @var integer indent to emphasize element
@@ -46,7 +55,7 @@ class tbase {
      * @param type $def_val - default value [oprional]
      * @return property value or default value if there is no such property
      */
-    public function getValue($prop_name, $def_val=self::sEmpty)
+    public function getValue($prop_name, $def_val=FALSE)
     {
         if(key_exists($prop_name, $this->properties))
         {
@@ -60,9 +69,12 @@ class tbase {
      * @param type $prop_name - name
      * @param type $prop_val - new value
      */
-    public function setValue($prop_name, $prop_val=self::sEmpty)
+    public function setValue($prop_name, $prop_val=FALSE)
     {
-        $this->properties[$prop_name] = $prop_val;
+        if($prop_val===FALSE)
+            $this->properties[$prop_name] = self::$sEmpty;
+        else
+            $this->properties[$prop_name] = $prop_val;
     }
 
     /**

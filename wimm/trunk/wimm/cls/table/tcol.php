@@ -16,7 +16,12 @@ class tcol extends tbase{
     //put your code here
     /** @var string format string for this column or none */
     protected $format_str;
-    public function __construct($fmtStr=FALSE) {
+    /**
+     * constructs new class intance
+     * @param string $fmtStr - format string for contents
+     * @param string $className - CSS class name for initial display
+     */
+    public function __construct($fmtStr=FALSE, $className=FALSE) {
         parent::__construct();
         $this->setValue(self::$PN_TAG,"td");
         if($fmtStr===FALSE)
@@ -27,6 +32,7 @@ class tcol extends tbase{
         {
             $this->format_str = $fmtStr;
         }
+        $this->setValue(self::$PN_CLASS, $className);
     }
     /**
      * returns format string

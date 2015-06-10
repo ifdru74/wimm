@@ -14,15 +14,24 @@
 include_once 'thead.php';
 include_once 'tcol.php';
 class tbody extends thead {
-    public static $PN_ROW_CLASS = "row_class"; /** @var string CSS class name combination for initial display for table row */
-    public static $PN_ROW_STYLE = "row_style"; /** @var string CSS direct styles for table row */
-    public static $PN_ROW_TAG = "html_row_tag";/** @var string HTML tag name for table row */
-    public $columns; /** @var array of tbase columns */
+    /** @var string CSS class name combination for initial display for table row */
+    public static $PN_ROW_CLASS = "row_class";
+    /** @var string CSS direct styles for table row */
+    public static $PN_ROW_STYLE = "row_style";
+    /** @var string HTML tag name for table row */
+    public static $PN_ROW_TAG = "html_row_tag";
+    /** @var array of tbase columns */
+    public $columns;
     //put your code here
-    public function __construct() {
-        parent::__construct();
+    /**
+     * constructs new instance
+     * @param string $className - CSS class name for initial display
+     */
+    public function __construct($className=FALSE, $rowClass=FALSE) {
+        parent::__construct($className);
         $this->columns = array();
         $this->setValue(self::$PN_TAG,"tbody");
+        $this->setValue(self::$PN_ROW_CLASS, $rowClass);
     }
     /**
      * produce row output

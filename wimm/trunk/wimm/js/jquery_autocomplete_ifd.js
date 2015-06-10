@@ -339,7 +339,7 @@ function queryAcItems(boxID, itemID)
         }
     }
     console.log('params parsed: ' + query_str);
-//    console.log('query to: ' + query_src);
+    console.log('query to: ' + query_src);
     // got query string - send request
     ac_jqxhr =  $.ajax({
         type: "POST",

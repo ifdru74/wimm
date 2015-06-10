@@ -16,10 +16,15 @@ include_once 'tcol.php';
 class thead extends tbase {
     public $columns; /** @var array of tbase columns */
     //put your code here
-    public function __construct() {
+    /**
+     * constructs new instance
+     * @param string $className - CSS class name for initial display
+     */
+    public function __construct($className=FALSE) {
         parent::__construct();
         $this->columns = array();
         $this->setValue(self::$PN_TAG,"thead");
+        $this->setValue(self::$PN_CLASS, $className);
     }
 
     public function html($indent=-1)
