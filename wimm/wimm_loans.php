@@ -1,42 +1,33 @@
 <!DOCTYPE html>
 <?php
-include ("fun_mysql.php");
-function print_buttons($bd="",$ed="", $bg="-1")
+include ("fun_dbms.php");
+function print_buttons($conn, $bd="",$ed="", $bg="-1")
 {	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
 	if(strlen($bd)>0)	{
 		print "\t<TR class=\"hidden\">\n";
-		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Дата начала периода:<input name=\"BDATE\" type=\"text\" value=\"$bd\"></TD>\n";
-		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Дата окончания периода:<input name=\"EDATE\" type=\"text\" value=\"$ed\"></TD>\n";
-		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Бюджет:<select size=\"1\" name=\"f_budget\">\n";
+		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Р”Р°С‚Р° РЅР°С‡Р°Р»Р° РїРµСЂРёРѕРґР°:<input name=\"BDATE\" type=\"text\" value=\"$bd\"></TD>\n";
+		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Р”Р°С‚Р° РѕРєРѕРЅС‡Р°РЅРёСЏ РїРµСЂРёРѕРґР°:<input name=\"EDATE\" type=\"text\" value=\"$ed\"></TD>\n";
+		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Р‘СЋРґР¶РµС‚:<select size=\"1\" name=\"f_budget\">\n";
 		$sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
-		f_set_sel_options2($sql, $bg, 1, 2);
+		f_set_sel_options2($conn, $sql, $bg, 1, 2);
 		print "</select></TD>\n";
 		print "\t</TR>\n";
 	}
 	print "\t<TR class=\"hidden\">\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"submit\" value=\"Обновить\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Добавить\" onclick=\"doEdit('add')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Изменить\" onclick=\"doEdit('edit')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Удалить\" onclick=\"doEdit('del')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"reset\" value=\"Снять выделение\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Выход\" onclick=\"doEdit('exit')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"submit\" value=\"РћР±РЅРѕРІРёС‚СЊ\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Р”РѕР±Р°РІРёС‚СЊ\" onclick=\"doEdit('add')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"РР·РјРµРЅРёС‚СЊ\" onclick=\"doEdit('edit')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"РЈРґР°Р»РёС‚СЊ\" onclick=\"doEdit('del')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"reset\" value=\"РЎРЅСЏС‚СЊ РІС‹РґРµР»РµРЅРёРµ\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Р’С‹С…РѕРґ\" onclick=\"doEdit('exit')\"></TD>\n";
 	print "\t</TR>\n";
 	print "</TABLE>\n";
 }
-	if (!ini_get('register_globals')) {
-	   $superglobals = array($_SERVER, $_ENV,
-	       $_FILES, $_COOKIE, $_POST, $_GET);
-	   if (isset($_SESSION)) {
-	       array_unshift($superglobals, $_SESSION);
-	   }
-	   foreach ($superglobals as $superglobal) {
-	       extract($superglobal, EXTR_SKIP);
-	   }
-	}
-	session_start();
 	include("fun_web.php");
-	auth_check('UID');
-	print_head("Кредиты");
+	$uid = page_pre();
+        if($uid===FALSE)
+            die();
+	print_head("РљСЂРµРґРёС‚С‹");
 ?>
 <script language="JavaScript" type="text/JavaScript">
 function doSel(s1, s2, s3)
@@ -85,7 +76,7 @@ function doEdit(s1)
 		if(loans.FRM_MODE.value=="update")
 			loans.submit();
 		else
-			alert("Запись для редактирования не выбрана");
+			alert("Р—Р°РїРёСЃСЊ РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ РЅРµ РІС‹Р±СЂР°РЅР°");
 	}	else if(s1=="del")	{
 		coll = loans.elements;
 		for(i=0; i<coll.length; i++)             {
@@ -103,7 +94,7 @@ function doEdit(s1)
 		if(loans.FRM_MODE.value=="delete")
 			loans.submit();
 		else
-			alert("Запись для удаления не выбрана");
+			alert("Р—Р°РїРёСЃСЊ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ РЅРµ РІС‹Р±СЂР°РЅР°");
 	}	else if(s1=="exit")	{
 		loans.FRM_MODE.value="return";
 		loans.action="index.php";
@@ -113,6 +104,7 @@ function doEdit(s1)
 </script>
     <body>
         <?php
+        $sql = '';
         // put your code here
         $fm = getRequestParam("FRM_MODE","refresh");
         print "<input type=hidden name=form_mode_from value=\"$fm\">\n";
@@ -123,7 +115,7 @@ function doEdit(s1)
                         "close_date, user_id, currency_id, budget_id, loan_sum) VALUES(";
 		$s = getRequestParam("l_place",1);
 		$sql .= "$s,";
-		$s = getRequestParam("l_name","Кредит!");
+		$s = getRequestParam("l_name","РљСЂРµРґРёС‚!");
 		$sql .= "'$s',";
 		$td = getRequestParam("l_bdate",date("Y-m-d H:i:s"));
 		$sql .= "'$td',";
@@ -211,27 +203,27 @@ function doEdit(s1)
 	if(strlen($m)<2)
 		$m = "0" . $m;
 	$ed = update_param("EDATE", "END_DATE", "$y-$m-01");
-	print_body_title("Кредиты, активные с $bd по $ed");
+	print_body_title("РљСЂРµРґРёС‚С‹, Р°РєС‚РёРІРЅС‹Рµ СЃ $bd РїРѕ $ed");
 	print "<form name=\"loans\" action=\"wimm_loans.php\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-		$conn->query($sql);
+		$conn->query(formatSQL($conn, $sql));
 		$conn->commit();
 	}
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
-	print "<input name=\"UID\" type=\"hidden\" value=\"" . $_REQUEST["UID"] ."\">\n";
+	print "<input name=\"UID\" type=\"hidden\" value=\"$uid\">\n";
 	$bg = getRequestParam("f_budget","-1");
-	print_buttons($bd,$ed,$bg);
+	print_buttons($conn, $bd,$ed,$bg);
  	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
 	print "<TR>\n";
 	print "<TH WIDTH=\"5%\">&nbsp</TH>\n";
-	print "<TH WIDTH=\"20%\">Наименование</TH>\n";
-	print "<TH WIDTH=\"10%\">Сумма</TH>\n";
-	print "<TH WIDTH=\"15%\">Взят</TH>\n";
-	print "<TH WIDTH=\"15%\">Срок до</TH>\n";
-	print "<TH WIDTH=\"15%\">Кто</TH>\n";
-	print "<TH WIDTH=\"20%\">Где</TH>\n";
+	print "<TH WIDTH=\"20%\">РќР°РёРјРµРЅРѕРІР°РЅРёРµ</TH>\n";
+	print "<TH WIDTH=\"10%\">РЎСѓРјРјР°</TH>\n";
+	print "<TH WIDTH=\"15%\">Р’Р·СЏС‚</TH>\n";
+	print "<TH WIDTH=\"15%\">РЎСЂРѕРє РґРѕ</TH>\n";
+	print "<TH WIDTH=\"15%\">РљС‚Рѕ</TH>\n";
+	print "<TH WIDTH=\"20%\">Р“РґРµ</TH>\n";
 	print "</TR>\n";
         $sql = "select loan_id, loan_name, loan_sum, start_date, end_date, user_name, ".
                 "place_name, ml.currency_id t_cid, mcu.currency_sign, mb.currency_id as bc_id " .
@@ -248,7 +240,7 @@ function doEdit(s1)
 	$sm = 0;
 	$sd = 0;
 	$c_class = "dark";
-	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
+	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Р—Р°РїСЂРѕСЃ РїРѕС€С‘Р»</TD></TR>\n";
 		while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                     print "<TR class=\"$c_class\">\n";
 			if(strcmp($c_class,"dark")==0)	{
@@ -294,12 +286,12 @@ function doEdit(s1)
             $message  = f_get_error_text($conn, "Invalid query: ");
             print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
 	}
-	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\" ALIGN=\"RIGHT\">";
+	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Р—Р°РїСЂРѕСЃ РІС‹РїРѕР»РЅРµРЅ " . date("d.m.Y H:i:s") . "\" ALIGN=\"RIGHT\">";
 	$t = number_format($sd,2,","," ");
-	print "Итого, набрали кредитов на:</TD><TD COLSPAN=\"5\">&nbsp;$t</TD></TR>\n";
+	print "РС‚РѕРіРѕ, РЅР°Р±СЂР°Р»Рё РєСЂРµРґРёС‚РѕРІ РЅР°:</TD><TD COLSPAN=\"5\">&nbsp;$t</TD></TR>\n";
 	$t = number_format($sm,2,","," ");
 	print "</TABLE>\n";
-	print_buttons();
+	print_buttons($conn);
 	print "</form>\n";
        ?>
     </body>

@@ -1,11 +1,9 @@
 ﻿<?php
-    $t = time() + 10;
-    header("Expires: " . date("D, d M Y H:i:s T", $t));
     include_once ("fun_web.php");
+    $uid = page_pre();
+    if($uid===FALSE)
+        die();
     include_once 'fun_dbms.php';
-    init_superglobals();
-    session_start();
-    $uid = auth_check('UID');
     /**
      * @var $conn PDO 
      */
@@ -60,7 +58,7 @@ function print_buttons($conn, $bd="",$ed="", $bg="-1")
 <?php
     }
 ?>
-        <div style="display: block; width: 100%;">
+        <div class="dialog_row">
             <input type="submit" value="Обновить">
             <input type="button" value="Добавить" onclick="sel_row('');">
             <input type="button" value="Удалить" onclick="doEdit('del');">

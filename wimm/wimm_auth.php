@@ -1,17 +1,8 @@
 <?php
-	if (!ini_get('register_globals')) {
-	   $superglobals = array($_SERVER, $_ENV,
-	       $_FILES, $_COOKIE, $_POST, $_GET);
-	   if (isset($_SESSION)) {
-	       array_unshift($superglobals, $_SESSION);
-	   }
-	   foreach ($superglobals as $superglobal) {
-	       extract($superglobal, EXTR_SKIP);
-	   }
-	}
+	include("fun_web.php");
+        init_superglobals();
 	session_start();
 	$uid = 0;
-	include("fun_web.php");
 	include_once 'fun_dbms.php';
 	$user_name = getRequestParam("UNAME","");
 	$cnt = "-1";
@@ -20,7 +11,7 @@
 	    if($conn)	{
 	    	$uname=value4db($user_name);
 			$upasswd=value4db(getRequestParam("UPASS",""));
-	    	$sql = "select user_id as cnt, user_name from m_users where user_login='$uname' and user_password=PASSWORD('$upasswd')";
+	    	$sql = formatSQL($conn, "select user_id as cnt, user_name from m_users where user_login='$uname' and user_password=#PASSWORD#('$upasswd')");
 	    	$res = $conn->query($sql);
 	    	if($res)	{
                     $row = $res->fetch(PDO::FETCH_ASSOC);
@@ -54,12 +45,11 @@
         <script language="JavaScript" type="text/JavaScript">
             function bodyOnLoad()
             {	auth.action = 'index.php';
-                    auth.submit();
+                auth.submit();
             }
         </script>
         <form name="auth" action="index.php" method="post">
             <P>Вы должны автоматически перейти на другую страницу. Если этого не происходит нажмите на кнопку</P>
-            <input name="UID" type="hidden" value="<?php echo $uid;?>">
             <input type="submit" value="Вход">
         </form>
 <?php

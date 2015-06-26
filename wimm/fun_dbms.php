@@ -8,12 +8,13 @@
  */
 function f_get_connection()
 {
-    $dsn = 'mysql:dbname=wimm;host=localhost';
-    $user = 'wimm';
-    $password = 'wimm1';
+//    $dsn = 'mysql:dbname=wimm;host=localhost';
+    $dsn = 'sqlite:C:\\Projects\\wimm\\wimm\\sqlite\\wimm.sqlite';
+    $user = '';//wimm';
+    $password = '';//'wimm1';
     try {
         $conn = new PDO($dsn, $user, $password);
-        $conn->exec("SET NAMES utf8");
+//        $conn->exec("SET NAMES utf8");
 //        $conn->query("SET COLLATION_CONNECTION=CP1251_GENERAL_CI");
     } catch (PDOException $e) {
         //echo 'Connection failed: ' . $e->getMessage();
@@ -179,13 +180,13 @@ function formatSQL($conn, $sql) {
     switch($conn->getAttribute(PDO::ATTR_DRIVER_NAME))
     {
         case "sqlite":
-            return str_replace("#NOW#", "datetime()", $sql);
+            return str_replace("#PASSWORD#","", str_replace("#NOW#", "datetime()", $sql));
             break;
         case "mysql":
-            return str_replace("#NOW#", "NOW()", $sql);
+            return str_replace("#PASSWORD#","PASSWORD", str_replace("#NOW#", "NOW()", $sql));
             break;
         case "oracle":
-            return str_replace("#NOW#", "SYSDATE", $sql);
+            return str_replace("#PASSWORD#","", str_replace("#NOW#", "SYSDATE", $sql));
             break;
     }
     return $sql;
