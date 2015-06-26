@@ -210,3 +210,35 @@ function set_elem_text(elem_id, txt)
         }
     }
 }
+
+function delete_table_row()
+{
+    var id=$("#e_row_id").val();
+    $("#row_"+id).parent().parent().remove();
+}
+function table_row_selected(sel_id, form_id)
+{
+    var db_id = $(sel_id).val();
+    var form_fields = $(form_id).find(".form_field");
+    var i;
+    var bt;
+    var bi;
+    for(i=0; i<form_fields.length; i++)
+    {
+        bt = form_fields[i].getAttribute("bind_row_type");
+        bi = "#" + form_fields[i].getAttribute("bind_row_id") + db_id;
+        console.log("bind type="+bt+", id="+bi);
+        switch(bt)
+        {
+        case 'value':
+            form_fields[i].value = ($(bi).val());
+            break;
+        case 'label':
+            form_fields[i].value = ($(bi).text());
+            break;
+        case 'title':
+            form_fields[i].value = ($(bi).attr('title'));
+            break;
+        }
+    }
+}
