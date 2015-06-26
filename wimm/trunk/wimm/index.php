@@ -1,18 +1,8 @@
 <?php
-	if (!ini_get('register_globals')) {
-	   $superglobals = array($_SERVER, $_ENV,
-	       $_FILES, $_COOKIE, $_POST, $_GET);
-	   if (isset($_SESSION)) {
-	       array_unshift($superglobals, $_SESSION);
-	   }
-	   foreach ($superglobals as $superglobal) {
-	       extract($superglobal, EXTR_SKIP);
-	   }
-	}
-	session_start();
 	include("fun_web.php");
+        if(page_pre()===FALSE)
+            die();
         include_once 'fun_dbms.php';
-	auth_check('UID');
 	print_head("Семейный бюджет");
         $conn = f_get_connection();
 ?>

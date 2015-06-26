@@ -29,12 +29,16 @@ var ac_txt = null; // autocomplete text box style
  */
 function scrollToItem(containerID, itemID)
 {
-    var container = $('#'+containerID),
-        scrollTo = $('#'+itemID);
-
-    container.scrollTop(
-        scrollTo.offset().top - container.offset().top + container.scrollTop()
-    );            
+    try {
+        var container = $('#'+containerID);
+        var scrollTo = $('#'+itemID);
+        container.scrollTop(
+            scrollTo.offset().top - container.offset().top + container.scrollTop()
+        );
+        
+    } catch (e) {
+        console.log(e.toString());
+    }
 }
 /**
  * action after autocomplete item has been selected
@@ -225,13 +229,15 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
                     sel_item_id = arr[i].id;
             }
             s1 = "<a href='#' id='aci_" + arr[i].id;
+            var jsc = " onclick=\"selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+
+                    arr[i].text + "');\" ";
             if(arr[i].id.toString()==sel_item_id.toString())
             {
-                s1 += "' class='ac_link ac_bordered'>";
+                s1 += "' class='ac_link ac_bordered'" + jsc +">";
             }
             else
             {
-                s1 += "' class='ac_link'>";
+                s1 += "' class='ac_link'" + jsc +">";
             }
             s1 += (arr[i].text + "</a>");
             html += s1;
@@ -289,6 +295,7 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     {
         $("#" + boxID).css( "overflow", "auto");
     }
+    $("#" + boxID).show();
     console.log('leaving parseResponse()');
 }
 /**
@@ -391,7 +398,7 @@ function displayAcBox(boxID, itemID)
             (!($(boxSel).is(":visible")) || // box not visible
             $(boxSel).attr("for")!=itemID)) // box not under item
     {
-        var p = $(itemSel).position();
+        var p = $(itemSel).offset();
         var s1 = $(itemSel).css( "height" );
         var n1 = 0;
         n1 = Number(s1.replace("px",""));

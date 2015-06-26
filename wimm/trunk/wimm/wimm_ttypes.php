@@ -1,17 +1,6 @@
 <?php
-	if (!ini_get('register_globals')) {
-	   $superglobals = array($_SERVER, $_ENV,
-	       $_FILES, $_COOKIE, $_POST, $_GET);
-	   if (isset($_SESSION)) {
-	       array_unshift($superglobals, $_SESSION);
-	   }
-	   foreach ($superglobals as $superglobal) {
-	       extract($superglobal, EXTR_SKIP);
-	   }
-	}
-	session_start();
 	include("fun_web.php");
-	//auth_check('UID');
+        $uid = page_pre();
 	$p_title = "Редактор того, на что тратятся деньги";
 	print_head($p_title);
 ?>
@@ -144,10 +133,8 @@ function print_buttons($bd="")
 	print "<form name=\"ttypes\" action=\"wimm_ttypes.php\" method=\"post\">\n";
 	if(strlen($sql)>0)	{
 		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-                $conn->query(formatSQL($sql));
+                $conn->query(formatSQL($conn, $sql));
                 $conn->commit();
-		//mysql_query($sql, $conn);
-		//mysql_query("commit",$conn);
 	}
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";

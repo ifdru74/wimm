@@ -136,7 +136,14 @@ function print_title($title)
     print "</div>\n";
 }
 
-function update_param($rname,$sname,$defval)
+/**
+ * update session param
+ * @param string $rname request parameter name
+ * @param string $sname session parameter name
+ * @param mixed $defval default value
+ * @return mixed - new parameter value
+ */
+function update_param($rname, $sname, $defval='')
 {
     $ed = getRequestParam($rname,getSessionParam($sname,$defval));
     if(!key_exists($sname,$_SESSION) || strcmp($_SESSION[$sname],$ed)!=0)
@@ -167,5 +174,16 @@ function isMSIE()
 {
     $s = $_SERVER['HTTP_USER_AGENT'];
     echo "<!-- $s -->" . PHP_EOL;
-    return (strpos($s,"MSIE ")>0);
+    return (strpos($s,"MSIE ")!==FALSE);
+}
+
+/**
+ * starts page pre-init and session, converts superglobals
+ */
+function page_pre()
+{
+    $t = time() + 10;
+    header("Expires: " . date("D, d M Y H:i:s T", $t));
+    init_superglobals();
+    session_start();
 }

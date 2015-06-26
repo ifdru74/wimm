@@ -33,10 +33,11 @@ class thead extends tbase {
         $sOut = $this->htmlOpen() . PHP_EOL;
         // assume all values in this array 
         // is a tbase descendants
+        $sOut .= "<tr>";
         foreach ($this->columns as $value) {
             $sOut .= ($indent_str . $value->html() . PHP_EOL);
         }
-        $sOut .= $this->htmlClose();
+        $sOut .= "</tr>" . $this->htmlClose();
         return $sOut;
     }
 
