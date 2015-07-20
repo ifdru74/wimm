@@ -125,7 +125,7 @@ function changeSelection(boxID, how)
                 i = getItemIndex(items, sel) - 11;
                 break;
             case 4:
-                titem = $("#"+boxID).attr("selected_ac_item");
+                titem = 'aci_' + $("#"+boxID).attr("selected_ac_item");
                 selectAcItem(boxID, titem, $("#"+titem).text());
                 return false;
 
@@ -254,7 +254,7 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     $(".ac_link").click(function(e)
     {
         console.log('acLink click');
-        selectAcItem(boxID, e.currentTarget.id, $(this).text());
+        selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
     });
     $(".ac_link").keyup(function(e)
     {
