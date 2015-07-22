@@ -4,6 +4,9 @@
     if($uid===FALSE)
         die();
     include_once 'fun_dbms.php';
+    $inc = get_include_path();
+    set_include_path($inc . ";trunk\\wimm\\cls\\table");
+    include_once 'table.php';
     /**
      * @var $conn PDO 
      */
@@ -14,6 +17,7 @@
     <head>
         <meta charset="utf-8">
         <link rel="STYLESHEET" href="css/wimm.css" type="text/css"/>
+        <link rel="STYLESHEET" href="css/jquery_autocomplete_ifd.css" type="text/css"/>
         <link rel="SHORTCUT ICON" href="picts/favicon.ico">
         <title>Семейный бюджет</title>
     </head>
@@ -34,6 +38,18 @@
 ?>        
     <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
     <script language="JavaScript" type="text/JavaScript" src="js/index_aj.js"></script>
+    <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
+    <script language="JavaScript" type="text/JavaScript">
+        function onLoad()
+        {
+            ac_init("ac", ".txt");
+            $(".row_sel").click(function(e)
+            {
+                $('.dlg_box').show();
+                table_row_selected("#"+e.currentTarget.id, "#expenses");
+            });
+        }
+    </script>
 <?php
 function print_buttons($conn, $bd="",$ed="", $bg="-1")
 {	
@@ -144,6 +160,7 @@ if($conn)	{
         $s = "";
 ?>
 	<form id="expenses" name="expenses" method="post" accept-charset="utf-8">
+            <div scroll_height="100" for="" selected_ac_item="" class="ac_list" id="ac"></div>
             <input id="FRM_MODE" name="FRM_MODE" type="hidden" value="refresh">
             <input id="HIDDEN_ID" name="HIDDEN_ID" type="hidden" value="0">
             <input name="UID" type="hidden" value="<?php echo getRequestParam("UID", "");?>">
@@ -165,21 +182,17 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_type">Тип:</label>
-                            <select class="dialog_ctl" size="1" name="t_type" id="t_type">
-<?php
-	$sql = "SELECT t_type_id, t_type_name FROM m_transaction_types  WHERE close_date is null";
-	f_set_sel_options2($conn, $sql, $s, 1, 2);
-?>
-                            </select>
+                            <input type="hidden" name="t_type" id="t_type" value="">
+                            <input type="text" class="dialog_ctl txt" value=""
+                                   autocomplete="off" bound_id="t_type" ac_src="/wimm2/ac_ref.php" 
+                                   ac_params="type=t_type;filter=" id="t_type_txt" scroll_height="10">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_curr">Валюта:</label>
-                            <select class="dialog_ctl" size="1" id="t_curr" name="t_curr">
-<?php
-	$sql = "SELECT currency_id, concat(currency_name,' (',currency_abbr,')') as c_name FROM m_currency WHERE close_date is null";
-	f_set_sel_options2($conn, $sql, $s, 2, 2);
-?>
-                            </select>
+                            <input type="hidden" name="t_curr" id="t_curr" value="">
+                            <input type="text" class="dialog_ctl txt" value=""
+                                   autocomplete="off" bound_id="t_curr" ac_src="/wimm2/ac_ref.php" 
+                                   ac_params="type=t_curr;filter=" id="t_curr_txt">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_sum">Сумма:</label>
@@ -191,21 +204,17 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_place">Место:</label>
-                            <select class="dialog_ctl" size="1" id="t_place" name="t_place">
-<?php
-	$sql = "SELECT place_id, place_name FROM m_places WHERE close_date is null";
-	f_set_sel_options2($conn, $sql, $s, 1, 2);
-?>
-                            </select>
+                            <input type="hidden" name="t_place" id="t_place" value="">
+                            <input type="text" class="dialog_ctl txt" value=""
+                                   autocomplete="off" bound_id="t_place" ac_src="/wimm2/ac_ref.php" 
+                                   ac_params="type=t_place;filter=" id="t_place_txt">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_budget">Бюджет:</label>
-                            <select class="dialog_ctl" size="1" id="t_budget" name="t_budget">
-<?php
-	$sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
-	f_set_sel_options2($conn, $sql, $s, 1, 2);
-?>
-                            </select>
+                            <input type="hidden" name="t_budget" id="t_budget" value="">
+                            <input type="text" class="dialog_ctl txt" value=""
+                                   autocomplete="off" bound_id="t_budget" ac_src="/wimm2/ac_ref.php" 
+                                   ac_params="type=t_budget;filter=" id="t_budget_txt">
                         </div>
                 </DIV>
                 <DIV class="dlg_box_btns" id="dlg_box_btns">
@@ -218,23 +227,47 @@ if($conn)	{
 <?php
 	$bg = getRequestParam("f_budget","-1");
 	print_buttons($conn, $bd, $ed, $bg);
+        $tb = new table();
+        $tb->setValue(tbase::$PN_CLASS, "visual");
+        $tb->setIndent(3);
+        // header
+        $tc = new tcol("Описание");
+        $tc->setValue("WIDTH", "38%");
+        $tb->addColumn($tc, TRUE);
+        $tc = new tcol("Сумма");
+        $tc->setValue("WIDTH", "10%");
+        $tb->addColumn($tc, TRUE);
+        $tc = new tcol("Дата и время");
+        $tc->setValue("WIDTH", "15%");
+        $tb->addColumn($tc, TRUE);
+        $tc = new tcol("Кто");
+        $tc->setValue("WIDTH", "17%");
+        $tb->addColumn($tc, TRUE);
+        $tc = new tcol("Где");
+        $tc->setValue("WIDTH", "20%");
+        $tb->addColumn($tc, TRUE);
+        // body
+        $tb->body->setValue(tbody::$PN_ROW_CLASS, "expenses");
+        $fmt_str = "<input name=\"ROW_ID\" ID=\"=transaction_id\" type=\"radio\" value=\"=transaction_id\">" .
+                "<input class=\"multiselect\" style=\"display:none;\" name=\"MROW[=transaction_id]\" ID=\"CHK_=transaction_id\" type=\"checkbox\" value=\"=transaction_id\">".
+                "<LABEL TITLE=\"=t_type_name\" id=\"TNAME_=transaction_id\" FOR=\"=transaction_id\">=transaction_name</LABEL>";
+        $tb->addColumn(new tcol($fmt_str), FALSE);
+        $fmt_str2 = '<LABEL class="=tl_class" ID="T_SUMM_=transaction_id" FOR="=transaction_id" title="=transaction_sum">=sum_txt</LABEL>'.
+                        '<input type="hidden" id="T_TYPE_=transaction_id" value="=t_type_id">'.
+                        '<input type="hidden" id="T_CURR_=transaction_id" value="=t_cid">';
+        $tb->addColumn(new tcol($fmt_str2), FALSE);
+        $tb->addColumn(new tcol('<label id="T_DATE_=transaction_id" for="=transaction_id" TITLE="=transaction_date">=disp_date</label>'), FALSE);
+        $tb->addColumn(new tcol("<label id=\"L_USR_=transaction_id\"FOR=\"=transaction_id\">=user_name</label>" .
+                        "<input type=\"hidden\" id=\"T_USR_=transaction_id\" value=\"=user_id\">"), FALSE);
+        $tb->addColumn(new tcol("<label TITLE=\"=place_descr\" FOR=\"=transaction_id\">=place_name</label>".
+                        "<input type=\"hidden\" id=\"T_PLACE_=transaction_id\" value=\"=place_id\">".
+                        "<input type=\"hidden\" id=\"T_BUDG_=transaction_id\" value=\"budget_id\">"), FALSE);
 ?>
             <input type="hidden" id="bg" value="<?php echo $bg;?>">
-            <TABLE WIDTH="100%" BORDER="1">
-                <thead>
-                    <TR>
-                        <TH WIDTH="5%">&nbsp</TH>
-                        <TH WIDTH="33%">Описание</TH>
-                        <TH WIDTH="10%">Сумма</TH>
-                        <TH WIDTH="15%">Дата и время</TH>
-                        <TH WIDTH="17%">Кто</TH>
-                        <TH WIDTH="20%">Где</TH>
-                    </TR>
-                </thead>
-                <tbody>
 <?php
+    echo $tb->htmlOpen();
 	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
-    $a_vg = false;
+        $a_vg = false;
 	$sql = "select transaction_id, t_type_name, transaction_name, transaction_sum, Type_sign, transaction_date, user_name, place_name, " .
                 " place_descr, t.currency_id t_cid, mcu.currency_sign, mb.currency_id as bc_id, t.place_id, t.budget_id, t.user_id, t.t_type_id " .
                 " from m_transactions t, m_transaction_types tt, m_users tu, m_places tp, m_currency mcu, m_budget mb " .
@@ -254,54 +287,30 @@ if($conn)	{
 	$locale_info = localeconv();
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
             while ($row =  $res->fetch(PDO::FETCH_ASSOC)) {
-                if($a_vg===false)   {
-                    $a_vg = array();
-                    foreach($row as $rk => $rv) {
-                        $a_vg[$rk] = array();
-                        $a_vg[$rk][$rv] = 1;
-                    }
-                }
-                else {
-                    foreach($row as $rk => $rv) {
-                        if(key_exists($rv, $a_vg[$rk])) {
-                            $a_vg[$rk][$rv] ++;
-                        }
-                        else {
-                            $a_vg[$rk][$rv] = 1;
-                        }
-                    }
-                }
-                $row_pk = $row['transaction_id'];
-                $row_id = "ROW_" . $row_pk;
-                print "<TR class=\"expenses\" id=\"TR_$row_pk\">\n";
-                print "<TD><input name=\"ROW_ID\" ID=\"$row_id\" type=\"radio\" value=\"$row_pk\" onclick=\"sel_row('$row_pk');\">";
-                print "<input class=\"multiselect\" style=\"display:none;\" name=\"MROW[$row_pk]\" ID=\"CHK_$row_pk\" type=\"radio\" value=\"$row_pk\"></TD>\n";
-                $t = $row['t_type_name'];
-                $s = $row['transaction_name'];
-                print "<TD TITLE=\"$t\"><LABEL id=\"TNAME_$row_pk\" FOR=\"$row_id\">$s</LABEL></TD>\n";
                 $cid = $row['t_cid'];
                 $bid = $row['bc_id'];
                 if($cid!=$bid) {
-                    $cs = $row['currency_sign'];
-                    $s = f_get_exchange_rate($conn, $row['t_cid'],$row['transaction_date'],$row['transaction_sum'] );
+                    $row['sum_txt'] = $row['currency_sign'] . number_format(
+                            f_get_exchange_rate($conn, $row['t_cid'],$row['transaction_date'],$row['transaction_sum'] ),2,","," ");
                 }
                 else    {
-                    $cs = "";
-                    $s = $row['transaction_sum'];
+                    $row['sum_txt'] = number_format($row['transaction_sum'],2,","," ");
                 }
                 $ts = $row['Type_sign'];
                 if($ts>0)	{
+                    $row['tl_class'] = "tl_plus";
                         $pn = $plus_pict;
                         $sd += $s;
                 }
                 else	if($ts<0)	{
+                    $row['tl_class'] = "tl_minus";
                         $pn = $minus_pict;
                         $sm += $s;
                 }
                 else	{
+                    $row['tl_class'] = "tl_none";
                         $pn = "";
                 }
-                $t = number_format($s,2,","," ");
                 print "<TD TITLE=\"$t\">";
                 if(strlen($pn)>0)	{
                         print "<IMG SRC=$pn>&nbsp;";
@@ -351,7 +360,7 @@ if($conn)	{
 		$c_class = $plus_pict;
 	print "<TR  class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Расходы - Доходы\" ALIGN=\"RIGHT\">";
 	print "Итого, разница:</TD><TD COLSPAN=\"4\"><IMG SRC=\"$c_class\">&nbsp;$t</TD></TR>\n";
-	print "</tbody></TABLE>\n";
+	echo $tb->htmlClose();
 	print_buttons($conn);
         if($a_vg)   {
             $a_ctls = array('transaction_name'=>'t_name_a',

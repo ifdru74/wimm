@@ -122,6 +122,8 @@ function print_body_title($title)
     $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_budgets.php\" TITLE=\"Бюджеты!\">Бюджеты</A></TD>";
     $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_report.php\" TITLE=\"Отчёт!\">Отчёт</A></TD>";
     $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_ttypes.php\" TITLE=\"Типы транзакций!\">Типы затрат</A></TD>";
+    $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_currency.php\" TITLE=\"Валюты!\">Валюты</A></TD>";
+    $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_curr_rate.php\" TITLE=\"Курсы валют!\">Обменник</A></TD>";
     $sOut .= "<TD class=\"hidden\"><A HREF=\"tree.php\" TITLE=\"Дерево типов!\">Дерево типов</A></TD>";
     $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_loans.php\" TITLE=\"Кредиты, набранные по жадности!\">Кредиты</A></TD>";
     $sOut .= "\t</TR>" . PHP_EOL;
