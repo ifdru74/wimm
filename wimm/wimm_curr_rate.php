@@ -26,6 +26,7 @@ function print_buttons($bd="")
         <script language="JavaScript" type="text/JavaScript">
             function onLoad()
             {
+                $('#dialog_box').draggable();
                 ac_init("ac", ".txt");
                 $(".row_sel").click(function(e)
                 {
@@ -124,7 +125,7 @@ function print_buttons($bd="")
                 <div class="dlg_box_btns">
                     <input id="OK_BTN" class="DLG_BTN" type="submit" value="Сохранить">
                     <input id="DEL_BTN" type="button" value="Удалить" onclick="send_submit('delete');">
-                    <input type="button" value="Отмена" onclick="$('#dialog_box').hide();">
+                    <input type="button" value="Отмена" onclick="$('#HIDDEN_ID').val(); $('#dialog_box').hide();">
                 </div>
             </div>
         <?php

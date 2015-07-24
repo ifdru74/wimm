@@ -46,23 +46,17 @@ function print_buttons($conn, $bd="",$ed="", $bg="-1")
 $conn = f_get_connection();
 if($conn)	{
 	$fm = getRequestParam("FRM_MODE","refresh");
-	$cd = getdate();
-	$m = $cd['mon'];
-	$y = $cd['year'];
-	if(strlen($m)<2)
-		$m = "0" . $m;
-	$bd = update_param("BDATE", "BEG_DATE", "$y-$m-01");
-	if($m==12)	{
-		$m = "01";
-		$y ++;
-	}
-	else	{
-		$m ++;
-	}
-	if(strlen($m)<2)
-		$m = "0" . $m;
-	$ed = update_param("EDATE", "END_DATE", "$y-$m-01");
-	print_body_title("Где потратили деньги с $bd по $ed");
+        $dtm = new DateTime();
+        $ldfmt = 'Y-m-01';//str_replace('d','01',getSessionParam('locale_date_format', 'd.m.Y'));
+	$bd = update_param("BDATE", "BEG_DATE", $dtm->format($ldfmt));
+        $dtm->add(new DateInterval('P1M'));
+	$ed = update_param("EDATE", "END_DATE", $dtm->format($ldfmt));
+        $dtm = DateTime::createFromFormat('Y-m-d', $bd);
+        $ldfmt = getSessionParam('locale_date_format', 'd.m.Y');
+        $dtm2 = DateTime::createFromFormat('Y-m-d', $ed);
+        $bfd = $dtm->format($ldfmt);
+        $efd = $dtm2->format($ldfmt);
+	print_body_title("Где потратили деньги с $bfd по $efd");
 	print "<form name=\"expenses\" action=\"wimm_report.php\" method=\"post\">\n";
 //	if(strlen($sql)>0)	{
 //		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
@@ -72,7 +66,7 @@ if($conn)	{
 	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	$bg = getRequestParam("f_budget","-1");
 	print_buttons($conn, $bd,$ed,$bg);
-	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
+	print "<TABLE class=\"visual\">\n";
 	print "<TR>\n";
 	print "<TH>Место</TH>\n";
 	print "<TH>Сумма</TH>\n";
@@ -93,7 +87,7 @@ if($conn)	{
 	$minus_pict = "picts/minus.gif";
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
             while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
-                print "<TR class=\"$c_class\">\n";
+                print "<TR class=\"expenses\">\n";
                 if(strcmp($c_class,"dark")==0)	{
                     $c_class = "white";
                 }
@@ -116,8 +110,8 @@ if($conn)	{
             print "<TR><TD COLSPAN=\"6\">SQL=\"$sql\"<BR>$message</TD></TR>\n";
 	}
 	print "</TABLE>\n";
-	print_title("На что потратили деньги с $bd по $ed");
-	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
+	print_title("На что потратили деньги с $bfd по $efd");
+	print "<TABLE class=\"visual\">\n";
 	print "<TR>\n";
 	print "<TH>Статья расходов</TH>\n";
 	print "<TH>Сумма</TH>\n";
@@ -137,7 +131,7 @@ if($conn)	{
 	if($res)	{
             //print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
             while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
-                print "<TR class=\"$c_class\">\n";
+                print "<TR class=\"expenses\">\n";
                 if(strcmp($c_class,"dark")==0)	{
                     $c_class = "white";
                 }
@@ -160,8 +154,8 @@ if($conn)	{
             print "<TR><TD COLSPAN=\"6\">SQL=\"$sql\"<BR>$message</TD></TR>\n";
 	}
 	print "</TABLE>\n";
-	print_title("Потребительская активность с $bd по $ed");
-	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
+	print_title("Кто и сколько потратил с $bfd по $efd");
+	print "<TABLE class=\"visual\">\n";
 	print "<TR>\n";
 	print "<TH>Кто</TH>\n";
 	print "<TH>Сумма</TH>\n";
@@ -181,7 +175,7 @@ if($conn)	{
 	if($res)	{
             //print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
             while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
-                print "<TR class=\"$c_class\">\n";
+                print "<TR class=\"expenses\">\n";
                 if(strcmp($c_class,"dark")==0)	{
                     $c_class = "white";
                 }

@@ -60,9 +60,9 @@ function print_buttons($conn, $bd="",$ed="", $bg="-1")
 ?>
         <div style="display: block; width: 100%;">
             <label for="BDATE">Дата начала периода:</label>
-            <input class="dtp" id="BDATE" name="BDATE" type="text" value="<?php echo $bd;?>">
+            <input class="dtp" id="BDATE" name="BDATE" type="date" value="<?php echo $bd;?>">
             <label for="EDATE">Дата окончания периода:</label>
-            <input class="dtp" id="EDATE" name="EDATE" type="text" value="<?php echo $ed;?>">
+            <input class="dtp" id="EDATE" name="EDATE" type="date" value="<?php echo $ed;?>">
             <label for="f_budget">Бюджет:</label>
             <select size="1" id="f_budget" name="f_budget" onchange="$('#FRM_MODE').val('refresh'); $('#expenses').submit();">
 <?php
@@ -136,23 +136,15 @@ if($conn)	{
                     
                 }
 	}
-        $cd = getdate();
-	$m = $cd['mon'];
-	$y = $cd['year'];
-	if(strlen($m)<2)
-		$m = "0" . $m;
-	$bd = update_param("BDATE", "BEG_DATE", "$y-$m-01");
-	if($m==12)	{
-		$m = "01";
-		$y ++;
-	}
-	else	{
-		$m ++;
-	}
-	if(strlen($m)<2)
-		$m = "0" . $m;
-	$ed = update_param("EDATE", "END_DATE", "$y-$m-01");
-	print_body_title("Расходы с $bd по $ed");
+        $dtm = new DateTime();
+        $ldfmt = 'Y-m-01';//str_replace('d','01',getSessionParam('locale_date_format', 'd.m.Y'));
+	$bd = update_param("BDATE", "BEG_DATE", $dtm->format($ldfmt));
+        $dtm->add(new DateInterval('P1M'));
+	$ed = update_param("EDATE", "END_DATE", $dtm->format($ldfmt));
+	        $dtm = DateTime::createFromFormat('Y-m-d', $bd);
+        $ldfmt = getSessionParam('locale_date_format', 'd.m.Y');
+        $dtm2 = DateTime::createFromFormat('Y-m-d', $ed);
+	print_body_title('Расходы с ' . $dtm->format($ldfmt) . ' по ' . $dtm2->format($ldfmt));
 	if(strlen($sql_dml)>0)	{
 		print "	<input ID=\"SQL\" type=\"hidden\" value=\"$sql_dml\">\n";
 		$conn->exec($sql_dml);
@@ -200,7 +192,7 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_date">Дата:</label>
-                            <input class="dialog_ctl dtp" id="t_date" name="t_date" type="text" value="">
+                            <input class="dtp dialog_ctl" id="t_date" name="t_date" type="text" value="">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_place">Место:</label>

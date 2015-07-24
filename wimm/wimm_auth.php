@@ -18,6 +18,17 @@
                     if($row)	{
                         $cnt = $row['cnt'];
                         $user_name = $row['user_name'];
+                        $posted_date = getRequestParam('dtst', FALSE);
+                        if(strpos($posted_date, '05')===0)
+                        {
+                            // day first
+                            $_SESSION['locale_date_format'] = 'd.m.Y';
+                        }
+                        else
+                        {
+                            // month first
+                            $_SESSION['locale_date_format'] = 'm.d.Y';
+                        }
                         if($cnt!=0)	{
                             $uid = $cnt;
                             $_SESSION["UID"] = $cnt;
@@ -44,7 +55,9 @@
     <BODY onload="bodyOnLoad();">
         <script language="JavaScript" type="text/JavaScript">
             function bodyOnLoad()
-            {	auth.action = 'index.php';
+            {
+                document.getElementById('dtst').value = (new Date(2015,01,05)).toLocaleString();
+                auth.action = 'index.php';
                 auth.submit();
             }
         </script>
@@ -57,11 +70,18 @@
 	else	{
 		session_destroy();
 ?>
-    <BODY>
+    <BODY onload="bodyOnLoad();">
+        <script language="JavaScript" type="text/JavaScript">
+            function bodyOnLoad()
+            {
+                document.getElementById('dtst').value = (new Date(2015,01,05)).toLocaleString();
+            }
+        </script>
 <?php
 		print_title("Авторизация");
 ?>
     <form name="auth" action="wimm_auth.php" method="post">
+        <input type="hidden" id="dtst" name="dtst" value="">
         <DIV style="margin: 0px auto;">
 <?php
 		if(strcmp($cnt,"1")!=0)	{

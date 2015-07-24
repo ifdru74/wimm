@@ -195,3 +195,50 @@ function page_pre()
     session_start();
     return auth_check('UID');
 }
+
+function getUsedLocale()
+{
+//    return $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+    $ret = getSessionParam('user_locale', FALSE);
+    if($ret===FALSE)
+    {
+        $default = 'ru';
+        $language = array();
+        if (($list = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']))) {
+            if (preg_match_all('/([a-z]{1,8}(?:-[a-z]{1,8})?)(?:;q=([0-9.]+))?/', $list, $list)) {
+                $language = array_combine($list[1], $list[2]);
+                foreach ($language as $n => $v)
+                    $language[$n] = $v ? $v : 1;
+                arsort($language, SORT_NUMERIC);
+            }
+        }
+        $langs=array(
+            'ru'=>array('ru','be','uk','ky','ab','mo','et','lv'),
+            'de'=>'de',
+            'en'=>'en'
+        );
+        $languages=array();
+        foreach ($langs as $lang => $alias) {
+            if (is_array($alias)) {
+                foreach ($alias as $alias_lang) {
+                    $languages[strtolower($alias_lang)] = strtolower($lang);
+                }
+            }
+            else {
+                $languages[strtolower($alias)]=strtolower($lang);
+            }
+        }
+
+        foreach ($language as $l => $v) {
+            $s = strtok($l, '-'); // убираем то что идет после тире в языках вида "en-us, ru-ru"
+            if (isset($languages[$s]))
+            {
+                $_SESSION['user_locale'] = $languages[$s];
+                return $languages[$s];
+            }
+        }
+        $_SESSION['user_locale'] = $default;
+        return $default;    
+    }
+    return $ret;
+}

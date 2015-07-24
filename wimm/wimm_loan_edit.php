@@ -1,7 +1,3 @@
-<!--
-To change this template, choose Tools | Templates
-and open the template in the editor.
--->
 <!DOCTYPE html>
 <?php
 	if (!ini_get('register_globals')) {
@@ -21,14 +17,14 @@ and open the template in the editor.
 	if(strlen($id)<1)
 		$id = "0";
 	if($id==0)	{
-		$t = "Добавление записи";
+		$t = "Р”РѕР±Р°РІР»РµРЅРёРµ Р·Р°РїРёСЃРё";
 		$frm_mode="insert";
-		$frm_btn="Добавить";
+		$frm_btn="Р”РѕР±Р°РІРёС‚СЊ";
 	}
 	else	{
-		$t = "Изменение записи";
+		$t = "РР·РјРµРЅРµРЅРёРµ Р·Р°РїРёСЃРё";
 		$frm_mode="update";
-		$frm_btn="Изменить";
+		$frm_btn="РР·РјРµРЅРёС‚СЊ";
 	}
 	print_head("$t");
 ?>
@@ -76,48 +72,48 @@ function doCancel(s1)
 	// user
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"user_id",$uid);
-	print "<TD WIDTH=\"30%\" class=\"hidden\">Пользователь:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_user\">\n";
+	print "<TD WIDTH=\"30%\" class=\"hidden\">РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_user\">\n";
 	$sql = "select user_id, user_name from m_users where close_date is null";
 	f_set_sel_options2($conn, $sql, $s, $s, 2);
 	print "</select></TD></TR>\n";
 	// name
 	print "<TR class=\"hidden\">\n";
-	$s = f_get_col($row,"loan_name","Кредит!");
-	print "<TD WIDTH=\"30%\" class=\"hidden\">Наименование:</TD><TD class=\"hidden\"><input name=\"l_name\" type=\"text\" value=\"$s\" autofocus></TD>\n";
+	$s = f_get_col($row,"loan_name","РљСЂРµРґРёС‚!");
+	print "<TD WIDTH=\"30%\" class=\"hidden\">РќР°РёРјРµРЅРѕРІР°РЅРёРµ:</TD><TD class=\"hidden\"><input name=\"l_name\" type=\"text\" value=\"$s\" autofocus></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"loan_rate",5);
-	print "<TD WIDTH=\"30%\" class=\"hidden\">Процентная ставка:</TD><TD class=\"hidden\"><input name=\"l_rate\" type=\"text\" value=\"$s\"></TD>\n";
+	print "<TD WIDTH=\"30%\" class=\"hidden\">РџСЂРѕС†РµРЅС‚РЅР°СЏ СЃС‚Р°РІРєР°:</TD><TD class=\"hidden\"><input name=\"l_rate\" type=\"text\" value=\"$s\"></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"currency_id",2);
-	print "<TD class=\"hidden\">Валюта:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_curr\">\n";
+	print "<TD class=\"hidden\">Р’Р°Р»СЋС‚Р°:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_curr\">\n";
 	$sql = "SELECT currency_id, concat(currency_name,' (',currency_abbr,')') as c_name FROM m_currency WHERE close_date is null";
 	f_set_sel_options2($conn, $sql, $s, 2, 2);
 	print "</select></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"loan_sum","0");
-	print "<TD class=\"hidden\">Сумма:</TD><TD class=\"hidden\"><input name=\"l_sum\" type=\"text\" value=\"$s\"></TD>\n";
+	print "<TD class=\"hidden\">РЎСѓРјРјР°:</TD><TD class=\"hidden\"><input name=\"l_sum\" type=\"text\" value=\"$s\"></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"start_date",date("Y-m-d H:i:s"));
-	print "<TD class=\"hidden\">Кредит взят:</TD><TD class=\"hidden\"><input name=\"l_bdate\" type=\"text\" value=\"$s\"></TD>\n";
+	print "<TD class=\"hidden\">РљСЂРµРґРёС‚ РІР·СЏС‚:</TD><TD class=\"hidden\"><input name=\"l_bdate\" type=\"text\" value=\"$s\"></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"end_date",date("Y-m-d H:i:s"));
-	print "<TD class=\"hidden\">Кредит надо вернуть до:</TD><TD class=\"hidden\"><input name=\"l_edate\" type=\"text\" value=\"$s\"></TD>\n";
+	print "<TD class=\"hidden\">РљСЂРµРґРёС‚ РЅР°РґРѕ РІРµСЂРЅСѓС‚СЊ РґРѕ:</TD><TD class=\"hidden\"><input name=\"l_edate\" type=\"text\" value=\"$s\"></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"place_id","1");
-	print "<TD class=\"hidden\">Место выдачи:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_place\">\n";
+	print "<TD class=\"hidden\">РњРµСЃС‚Рѕ РІС‹РґР°С‡Рё:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_place\">\n";
 	$sql = "SELECT place_id, place_name FROM m_places WHERE close_date is null";
 	f_set_sel_options2($conn, $sql, $s, 1, 2);
 	print "</select></TD>\n";
 	print "</TR>\n";
 	print "<TR class=\"hidden\">\n";
 	$s = f_get_col($row,"budget_id","1");
-	print "<TD class=\"hidden\">Бюджет:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_budget\">\n";
+	print "<TD class=\"hidden\">Р‘СЋРґР¶РµС‚:</TD><TD class=\"hidden\"><select size=\"1\" name=\"l_budget\">\n";
 	$sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
 	f_set_sel_options2($conn, $sql, $s, 1, 2);
 	print "</select></TD>\n";
@@ -132,15 +128,15 @@ function doCancel(s1)
         else {
             $s1 = date("Y-m-d H:i:s");
         }
-        print "onchange=\"rchange()\">Кредит возвращён:</TD><TD class=\"hidden\"><input name=\"l_2date\" type=\"text\" value=\"$s1\"";
+        print "onchange=\"rchange()\">РљСЂРµРґРёС‚ РІРѕР·РІСЂР°С‰С‘РЅ:</TD><TD class=\"hidden\"><input name=\"l_2date\" type=\"text\" value=\"$s1\"";
         if(strlen($s)<1)
             print " disabled ";
         print "></TD>\n</TR>\n";
 
 	print "</TABLE>\n";
 	print "<input type=\"submit\" value=\"$frm_btn\">\n";
-	print "<input type=\"submit\" value=\"Отмена\" onclick=\"doCancel('refresh')\">\n";
-	print "<input type=\"reset\" value=\"Сброс\">\n";
+	print "<input type=\"submit\" value=\"РћС‚РјРµРЅР°\" onclick=\"doCancel('refresh')\">\n";
+	print "<input type=\"reset\" value=\"РЎР±СЂРѕСЃ\">\n";
         ?>
     </form>
     </body>
