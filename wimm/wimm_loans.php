@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <?php
-include ("fun_dbms.php");
+    include_once ("fun_web.php");
+    $uid = page_pre();
+    if($uid===FALSE)
+        die();
+    include_once 'fun_dbms.php';
+    $inc = get_include_path();
+    set_include_path($inc . ";trunk\\wimm\\cls\\table");
+    include_once 'table.php';
+    $p_title = "Кредиты";
+    print_head($p_title);
+    $conn = f_get_connection();
 function print_buttons($conn, $bd="",$ed="", $bg="-1")
 {	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
 	if(strlen($bd)>0)	{
 		print "\t<TR class=\"hidden\">\n";
-		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Дата начала периода:<input name=\"BDATE\" type=\"text\" value=\"$bd\"></TD>\n";
-		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Дата окончания периода:<input name=\"EDATE\" type=\"text\" value=\"$ed\"></TD>\n";
+		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Дата начала периода:<input name=\"BDATE\" type=\"date\" value=\"$bd\"></TD>\n";
+		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Дата окончания периода:<input name=\"EDATE\" type=\"date\" value=\"$ed\"></TD>\n";
 		print "\t\t<TD class=\"hidden\" COLSPAN=\"2\">Бюджет:<select size=\"1\" name=\"f_budget\">\n";
 		$sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
 		f_set_sel_options2($conn, $sql, $bg, 1, 2);
@@ -14,101 +24,153 @@ function print_buttons($conn, $bd="",$ed="", $bg="-1")
 		print "\t</TR>\n";
 	}
 	print "\t<TR class=\"hidden\">\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"submit\" value=\"Обновить\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Добавить\" onclick=\"doEdit('add')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Изменить\" onclick=\"doEdit('edit')\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Удалить\" onclick=\"doEdit('del')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input name='btn_refresh' type=\"submit\" value=\"Обновить\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Добавить\" onclick=\"$('#dialog_box').show();$('#DEL_BTN').hide();$('#HIDDEN_ID').val('');$('.form_field').val('');$('#FRM_MODE').val('insert');document.getElementById('l_user').focus();\"></TD>\n";
 	print "\t\t<TD class=\"hidden\"><input type=\"reset\" value=\"Снять выделение\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Выход\" onclick=\"doEdit('exit')\"></TD>\n";
+	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Выход\" onclick=\"send_submit('exit')\"></TD>\n";
 	print "\t</TR>\n";
 	print "</TABLE>\n";
 }
-	include("fun_web.php");
-	$uid = page_pre();
-        if($uid===FALSE)
-            die();
-	print_head("Кредиты");
 ?>
-<script language="JavaScript" type="text/JavaScript">
-function doSel(s1, s2, s3)
-{
-	sid=loans.HIDDEN_ID.value;
-	coll = loans.elements;
-	for(i=0; i<coll.length; i++)             {
-		v = coll.item(i);
-		s_1 = v.name.substr(0,2);
-		s_2 = v.id;
-		if(s_1=="ID")	{
-			if(s_2==sid)	{
-				v.checked=false;
-				break;
-			}
-		}
-	}
-	loans.HIDDEN_ID.value=s1;
-	loans.p_name.value=s2;
-	loans.p_descr.value=s3;
-}
-
-function doEdit(s1)
-{
-	if(s1=="add")	{
-		loans.FRM_MODE.value="insert";
-                loans.action="wimm_loan_edit.php";
-		loans.HIDDEN_ID.value="0";
-		loans.submit();
-	}
-	else if(s1=="edit")	{
-                loans.action="wimm_loan_edit.php";
-		coll = loans.elements;
-		for(i=0; i<coll.length; i++)             {
-			v = coll.item(i);
-			s_1 = v.name.substr(0,2);
-			s2 = v.id;
-			if(s_1=="ID")	{
-				if(v.checked)	{
-					loans.HIDDEN_ID.value=s2;
-					loans.FRM_MODE.value="update";
-					break;
-				}
-			}
-		}
-		if(loans.FRM_MODE.value=="update")
-			loans.submit();
-		else
-			alert("Запись для редактирования не выбрана");
-	}	else if(s1=="del")	{
-		coll = loans.elements;
-		for(i=0; i<coll.length; i++)             {
-			v = coll.item(i);
-			s_1 = v.name.substr(0,2);
-			s2 = v.id;
-			if(s_1=="ID")	{
-				if(v.checked)	{
-					loans.HIDDEN_ID.value=s2;
-					loans.FRM_MODE.value="delete";
-					break;
-				}
-			}
-		}
-		if(loans.FRM_MODE.value=="delete")
-			loans.submit();
-		else
-			alert("Запись для удаления не выбрана");
-	}	else if(s1=="exit")	{
-		loans.FRM_MODE.value="return";
-		loans.action="index.php";
-		loans.submit();
-	}
-}
-</script>
-    <body>
+    <body onload="onLoad();">
+        <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
+        <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
+        <script language="JavaScript" type="text/JavaScript">
+            function onLoad()
+            {
+                ac_init("ac", ".txt");
+                $(".row_sel").click(function(e)
+                {
+                    $('.dlg_box').show();
+                    $('#DEL_BTN').show();
+                    $('#FRM_MODE').val('update');
+                    table_row_selected("#"+e.currentTarget.id, "#edit_form");
+                    $("#HIDDEN_ID").val(e.currentTarget.id);
+                    document.getElementById('curr_name').focus();
+                });
+            }
+            function send_submit(frm_mode)
+            {
+                if(frm_mode!=null && frm_mode.length>0)
+                {
+                    $('#FRM_MODE').val(frm_mode);
+                }
+                var s1 = $('#FRM_MODE').val();
+                var s2 = true;
+                var my_form;
+                switch(s1)
+                {
+                    case 'exit':
+                        my_form = document.getElementById('edit_form');
+                        if(my_form!=null)
+                            my_form.action='index.php';
+                        $('#FRM_MODE').val('return');
+                        //my_form.submit();
+                        break;
+                    case 'del':
+                        if($( ".row_sel:checked" ).length<1)
+                        {
+                            alert('Строка для удаления не выбрана');
+                            s2 = false;
+                        }
+                        break;
+                    case 'edit':
+                    case 'add':
+                        if($("#curr_name").val().length<1)
+                        {
+                            alert('Надо заполнить Наименование');
+                            $("#curr_name").select();
+                            s2 = false;
+                        }
+                        break;
+                }
+                console.log("mode="+$('#FRM_MODE').val());
+                if(s2)
+                    $('#edit_form').submit();
+            }
+        </script>
+        <form id="edit_form" name="curr_rates" method="post">
+            <div scroll_height="100" for="" selected_ac_item="" class="ac_list" id="ac"></div>
+            <div id="dialog_box" class="dlg_box ui-widget-content" style="width:525px;display:none;" onshow='document.getElementById("curr_name").focus();'>
+                <div class="dlg_box_cap">Редактирование кредита</div>
+                <div class="dlg_box_text">
+                    <div class="dialog_row">
+                        <label class="dialog_lbl" for="l_user">Кто взял:</label>
+                        <select size="1" name="l_user" id="l_user" class="dialog_ctl form_field">
+                            <?php
+                            $sql = "select user_id, user_name from m_users where close_date is null";
+                            f_set_sel_options2($conn, $sql, -1, -1, 6);
+                            ?>
+                        </select>
+                    </div>
+                    <div class="dialog_row">
+                        <label class="dialog_lbl" for="l_name">Наименование:</label>
+                        <input type="text" name="l_name" id="l_name" class="dialog_ctl form_field" 
+                               bind_row_type="label" bind_row_id="LNAME_" value="">
+                    </div>
+                    <div class="dialog_row">
+                        <label class="dialog_lbl" for="l_rate">Ставка, %:</label>
+                        <input type="number" name="l_rate" id="l_rate" class="dialog_ctl form_field" value="">
+                    </div>
+                    <div class="dialog_row">
+                        <label class="dialog_lbl" for="curr_to_name">Валюта:</label>
+                        <input type="hidden" name="l_curr" id="l_curr" value=""
+                               bind_row_type="title" bind_row_id="TNAME_">
+                        <input type="text" class="dialog_ctl form_field txt" id="curr_to_name" 
+                               bind_row_type="label" bind_row_id="TNAME_" value=""
+                               autocomplete="off" bound_id="l_curr" ac_src="/wimm2/ac_ref.php"
+                               ac_params="type=t_curr;filter=">
+                    </div>
+                    <div class="dialog_row">
+                        <label class="dialog_lbl" for="l_sum">Сумма:</label>
+                        <input type="number" name="l_sum" id="l_sum" class="dialog_ctl form_field" value="">
+                    </div>
+                    <div class="dialog_row">
+                        <label class="dialog_lbl" for="l_bdate">Взят:</label>
+                        <input type="date" name="l_bdate" id="l_bdate" class="dialog_ctl form_field" value="">
+                    </div>
+                    <div class="dialog_row">
+                        <label class="dialog_lbl" for="l_edate">Вернуть до:</label>
+                        <input type="date" name="l_edate" id="l_edate" class="dialog_ctl form_field" value="">
+                    </div>
+                    <div class="dialog_row">
+                        <label class="dialog_lbl" for="place_name">Кто выдал:</label>
+                        <input type="hidden" name="l_place" id="l_place" value=""
+                               bind_row_type="title" bind_row_id="TNAME_">
+                        <input type="text" class="dialog_ctl form_field txt" id="place_name" 
+                               bind_row_type="label" bind_row_id="TNAME_" value=""
+                               autocomplete="off" bound_id="l_place" ac_src="/wimm2/ac_ref.php"
+                               ac_params="type=t_place;filter=">
+                    </div>
+                    <div class="dialog_row">
+                        <label class="dialog_lbl" for="t_budget_txt">Бюджет:</label>
+                        <input type="hidden" name="l_budget" id="t_budget" value="">
+                        <input type="text" class="dialog_ctl txt" value=""
+                               autocomplete="off" bound_id="l_budget" ac_src="/wimm2/ac_ref.php" 
+                               ac_params="type=t_budget;filter=" id="t_budget_txt">
+                    </div>
+                    <div class="dialog_row">
+                        <input type="checkbox" id="returned">
+                        <label style="width:100px;" for="returned">Возвращён:</label>
+                        <input type="date" name="l_2date" id="l_2date" class="dialog_ctl form_field" value="">
+                    </div>
+                </div>
+                <div class="dlg_box_btns">
+                    <input id="OK_BTN" class="DLG_BTN" type="submit" value="Сохранить">
+                    <input id="DEL_BTN" type="button" value="Удалить" onclick="send_submit('delete');">
+                    <input type="button" value="Отмена" onclick="$('#dialog_box').hide();">
+                </div>
+            </div>
         <?php
-        $sql = '';
         // put your code here
-        $fm = getRequestParam("FRM_MODE","refresh");
-        print "<input type=hidden name=form_mode_from value=\"$fm\">\n";
-        $conn = f_get_connection();
+        $fm = "refresh";
+        if(getRequestParam("btn_refresh",FALSE)===FALSE)
+        {
+            $fm = getRequestParam("FRM_MODE","refresh");
+        }
+        $hfmt = "<input id=\"%s\" name=\"%s\" type=\"hidden\" value=\"%s\">" . PHP_EOL;
+        printf($hfmt, "FRM_MODE", "FRM_MODE", "refresh");
+        printf($hfmt, "HIDDEN_ID", "HIDDEN_ID", "0");
         if($conn)	{
             if(strcmp($fm,"insert")==0)	{
 		$sql = "INSERT INTO m_loans (place_id, loan_name, start_date, end_date, loan_rate, loan_type, " .
@@ -186,47 +248,46 @@ function doEdit(s1)
 		$s = getRequestParam("HIDDEN_ID",0);
 		$sql = "delete from m_loans where loan_id=$s";                
             }
-        }    
-	$cd = getdate();
-	$m = $cd['mon'];
-	$y = $cd['year'];
-	if(strlen($m)<2)
-		$m = "0" . $m;
-	$bd = update_param("BDATE", "BEG_DATE", "$y-$m-01");
-	if($m==12)	{
-		$m = "01";
-		$y ++;
-	}
-	else	{
-		$m ++;
-	}
-	if(strlen($m)<2)
-		$m = "0" . $m;
-	$ed = update_param("EDATE", "END_DATE", "$y-$m-01");
-	print_body_title("Кредиты, активные с $bd по $ed");
-	print "<form name=\"loans\" action=\"wimm_loans.php\" method=\"post\">\n";
-	if(strlen($sql)>0)	{
-		print "	<input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-		$conn->query(formatSQL($conn, $sql));
-		$conn->commit();
-	}
-	print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
-	print "<input name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
-	print "<input name=\"UID\" type=\"hidden\" value=\"$uid\">\n";
+            printf($hfmt, "SQL", "SQL", $sql);
+            if(strlen($sql)>0)	{
+                $conn->query(formatSQL($conn, $sql));
+                //$conn->commit();
+            }
+        }
+        $dtm = new DateTime();
+        $ldfmt = 'Y-m-01';//str_replace('d','01',getSessionParam('locale_date_format', 'd.m.Y'));
+	$bd = update_param("BDATE", "BEG_DATE", $dtm->format($ldfmt));
+        $dtm->add(new DateInterval('P1M'));
+	$ed = update_param("EDATE", "END_DATE", $dtm->format($ldfmt));
+        $dtm = DateTime::createFromFormat('Y-m-d', $bd);
+        $ldfmt = getSessionParam('locale_date_format', 'd.m.Y');
+        $dtm2 = DateTime::createFromFormat('Y-m-d', $ed);
+	print_body_title('Кредиты, активные с ' . $dtm->format($ldfmt) . ' по ' . $dtm2->format($ldfmt));
 	$bg = getRequestParam("f_budget","-1");
 	print_buttons($conn, $bd,$ed,$bg);
- 	print "<TABLE WIDTH=\"100%\" BORDER=\"1\">\n";
-	print "<TR>\n";
-	print "<TH WIDTH=\"5%\">&nbsp</TH>\n";
-	print "<TH WIDTH=\"20%\">Наименование</TH>\n";
-	print "<TH WIDTH=\"10%\">Сумма</TH>\n";
-	print "<TH WIDTH=\"15%\">Взят</TH>\n";
-	print "<TH WIDTH=\"15%\">Срок до</TH>\n";
-	print "<TH WIDTH=\"15%\">Кто</TH>\n";
-	print "<TH WIDTH=\"20%\">Где</TH>\n";
-	print "</TR>\n";
-        $sql = "select loan_id, loan_name, loan_sum, start_date, end_date, user_name, ".
-                "place_name, ml.currency_id t_cid, mcu.currency_sign, mb.currency_id as bc_id " .
+        $tb = new table();
+        $tb->setValue(tbase::$PN_CLASS, "visual");
+        $tb->setIndent(3);
+        $tb->addColumn(new tcol("Наименование"), TRUE);
+        $tb->addColumn(new tcol("Сумма"), TRUE);
+        $tb->addColumn(new tcol("Взят"), TRUE);
+        $tb->addColumn(new tcol("Срок до"), TRUE);
+        $tb->addColumn(new tcol("Кто"), TRUE);
+        $tb->addColumn(new tcol("Где"), TRUE);
+        $tb->body->setValue(tbody::$PN_ROW_CLASS, "expenses");
+        $fmt_str = "<input name='ROW_ID' ID='=loan_id' type='radio' value='=loan_id' class='row_sel'>" .
+                "<LABEL id='LNAME_=loan_name' FOR='=loan_id'>=loan_name</LABEL>".
+                '<input type="hidden" id="CURR_=loan_id" title="=t_cid" value="=currency_name">'.
+                '<input type="hidden" id="BUDG_=loan_id" title="=bc_id" value="=budget_name">';
+        $tb->addColumn(new tcol($fmt_str), FALSE);
+        $tb->addColumn(new tcol("<LABEL id=\"FRATE_=loan_id\" FOR=\"=loan_id\" TITLE=\"=loan_rate\">=loan_sum</LABEL>"), FALSE);
+        $tb->addColumn(new tcol("<LABEL id=\"CBDATE_=loan_id\" FOR=\"=loan_id\">=start_date</LABEL>"), FALSE);
+        $tb->addColumn(new tcol("<LABEL id=\"CEDATE_=loan_id\" FOR=\"=loan_id\">=end_date</LABEL>"), FALSE);
+        $tb->addColumn(new tcol("<LABEL id=\"USR_=loan_id\" FOR=\"=loan_id\" TITLE=\"=user_id\">=user_name</LABEL>"), FALSE);
+        $tb->addColumn(new tcol("<LABEL id=\"PLACE_=loan_id\" FOR=\"=loan_id\" TITLE=\"=place_id\">=place_name</LABEL>"), FALSE);
+        $sql = "select loan_id, loan_name, loan_sum, loan_rate, start_date, end_date, user_name, ml.user_id, ".
+                "place_name, ml.currency_id t_cid, mcu.currency_sign, mcu.currency_name, ".
+                "mb.budget_name, mb.currency_id as bc_id, ml.place_id " .
                 "from m_loans ml, m_users mu, m_places mp, m_currency mcu, m_budget mb ".
                 "where ml.user_id=mu.user_id and ml.place_id=mp.place_id and ".
                 "ml.currency_id=mcu.currency_id and ml.budget_id=mb.budget_id and ".
@@ -234,65 +295,29 @@ function doEdit(s1)
 	if($bg>0)	{
 		$sql .= " and ml.budget_id=$bg ";
 	}
+        $sql .= " and (start_date between '$bd' and '$ed' or end_date between '$bd' and '$ed') ";
 	$sql .= " order by end_date";
-        print "	<input name=\"SQL2\" type=\"hidden\" value=\"$sql\">\n";
+        printf($hfmt, "SQL2", "SQL2", $sql);
+        echo $tb->htmlOpen();
 	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
-	$c_class = "dark";
 	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
 		while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
-                    print "<TR class=\"$c_class\">\n";
-			if(strcmp($c_class,"dark")==0)	{
-				$c_class = "white";
-			}
-			else	{
-				$c_class = "dark";
-			}
-			$s = $row['loan_id'];
-			print "<TD><input name=\"ID$s\" ID=\"$s\"type=\"radio\" value=\"$s\"></TD>\n";			$t = $row['t_type_name'];
-			$s = $row['loan_name'];
-			print "<TD>$s</TD>\n";
-
-                        $cid = $row['t_cid'];
-                        $bid = $row['bc_id'];
-                        if($cid!=$bid) {
-                            $cs = $row['currency_sign'];
-                            $s = f_get_exchange_rate($row['t_cid'],$row['start_date'],$row['loan_sum'] );
-                        }
-                        else    {
-                            $cs = "";
-                            $s = $row['loan_sum'];
-                        }
-                        
-                        $sd += $s;
-                        $t = number_format($s,2,","," ");
-			print "<TD>$t</TD>\n";
-			$t = $row['start_date'];
-			$s = f_get_disp_date($t);
-			print "<TD TITLE=\"$t\">$s</TD>\n";
-			$t = $row['end_date'];
-			$s = f_get_disp_date($t);
-			print "<TD TITLE=\"$t\">$s</TD>\n";
-			$s = $row['user_name'];
-			print "<TD>$s</TD>\n";
-			$s = $row['place_name'];
-			$t = $row['place_descr'];
-			print "<TD TITLE=\"$t\">$s</TD>\n";
-			print "</TR>\n";
+                    echo $tb->htmlRow($row);
 		}	
         }
 	else	{
             $message  = f_get_error_text($conn, "Invalid query: ");
             print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
 	}
-	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\" ALIGN=\"RIGHT\">";
+	print "<TR class=\"white_bold\"><TD COLSPAN=\"3\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\" ALIGN=\"RIGHT\">";
 	$t = number_format($sd,2,","," ");
-	print "Итого, набрали кредитов на:</TD><TD COLSPAN=\"5\">&nbsp;$t</TD></TR>\n";
+	print "Итого, набрали кредитов на:</TD><TD COLSPAN=\"3\">&nbsp;$t</TD></TR>\n";
 	$t = number_format($sm,2,","," ");
-	print "</TABLE>\n";
+        echo $tb->htmlClose();
 	print_buttons($conn);
-	print "</form>\n";
        ?>
+        </form>
     </body>
 </html>
