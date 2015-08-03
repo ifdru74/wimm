@@ -67,6 +67,7 @@
     </script>
     <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
     <form id="edit_form" name="places" action="wimm_budgets.php" method="post">
+        <div scroll_height="100" for="" selected_ac_item="" class="ac_list" id="ac"></div>
         <div class="dlg_box ui-widget-content" id="dialog_box" style="width:600px;display:none;">
             <DIV class="dlg_box_cap" id="dlg_box_cap">Изменение записи</DIV>
             <DIV class="dlg_box_text" id="dlg_box_text" >
@@ -79,6 +80,16 @@
                     <label class="dialog_lbl" for="b_descr">Описание:</label>
                     <input class="dialog_ctl form_field" name="b_descr" id="b_descr" type="text" 
                            bind_row_type="title" bind_row_id="BNAME_" value="">
+                </div>
+                <div class="dialog_row">
+                    <label class="dialog_lbl" for="b_descr">Валюта:</label>
+                    <input type="hidden" name="b_curr_id" id="b_curr_id" 
+                           class="form_field" value=""
+                           bind_row_type="value" bind_row_id="T_CURR_">
+                    <input type="text" class="dialog_ctl form_field txt" value=""
+                           autocomplete="off" bound_id="b_curr_id" ac_src="/wimm2/ac_ref.php" 
+                           ac_params="type=t_curr;filter=" id="t_curr_txt"
+                           bind_row_type="title" bind_row_id="T_CURR_">
                 </div>
             </div>
             <DIV class="dlg_box_btns" id="dlg_box_btns">
@@ -119,12 +130,14 @@ if($conn)	{
             $sql .= "$uid)";
         } else if(strcmp($fm,"update")==0)	{
             $sql = "UPDATE m_budget SET ";
-            $s = getRequestParam("b_name","Бюджет?");
+            $s = value4db(getRequestParam("b_name","Бюджет?"));
             $sql .= "budget_name='$s',";
-            $s = getRequestParam("b_descr",1);
-            $sql .= "budget_descr='$s' ";
+            $s = value4db(getRequestParam("b_descr",1));
+            $sql .= "budget_descr='$s', ";
+            $s = str_replace("aci_", "", value4db(getRequestParam("b_curr_id",1)));
+            $sql .= "currency_id=$s ";
             $sql .= "where budget_id=";
-            $s = getRequestParam("HIDDEN_ID",0);
+            $s = value4db(getRequestParam("HIDDEN_ID",0));
             $sql .= $s;
 	}
 	else if(strcmp($fm,"delete")==0)	{
@@ -155,9 +168,14 @@ if($conn)	{
         $tb->addColumn(new tcol($fmt_str), FALSE);
         $tb->addColumn(new tcol("<LABEL TITLE=\"=open_date\" id=\"ODATE_=budget_id\" FOR=\"=budget_id\">=fopen_date</LABEL>"), FALSE);
         $tb->addColumn(new tcol("<LABEL TITLE=\"=close_date\" id=\"CDATE_=budget_id\" FOR=\"=budget_id\">=fclose_date</LABEL>"), FALSE);
-        $tb->addColumn(new tcol("<LABEL TITLE=\"=user_id\" id=\"USER_=budget_id\" FOR=\"=budget_id\">=user_name</LABEL>"), FALSE);
+        $tb->addColumn(new tcol("<LABEL TITLE=\"=user_id\" id=\"USER_=budget_id\" FOR=\"=budget_id\">=user_name</LABEL>" .
+                "<input type=\"hidden\" id=\"T_CURR_=budget_id\" title=\"=currency_name\" value=\"=currency_id\">"), FALSE);
         
-	$sql = "select budget_id, budget_name, budget_descr, tp.open_date, tp.close_date, user_name, tp.user_id from m_budget tp, m_users tu where tp.user_id=tu.user_id and tp.close_date is null order by budget_name";
+	$sql = "select budget_id, budget_name, budget_descr, tp.open_date, " .
+                " tp.close_date, user_name, tp.user_id, tp.currency_id, mcu.currency_name " .
+                " from m_budget tp, m_users tu, m_currency mcu " .
+                " where tp.user_id=tu.user_id and tp.close_date is null ".
+                " and tp.currency_id=mcu.currency_id order by budget_name";
 	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
