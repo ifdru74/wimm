@@ -180,13 +180,25 @@ function formatSQL($conn, $sql) {
     switch($conn->getAttribute(PDO::ATTR_DRIVER_NAME))
     {
         case "sqlite":
-            return str_replace("#PASSWORD#","", str_replace("#NOW#", "datetime()", $sql));
+            return str_replace("#PASSWORD#","", 
+                    str_replace("#NOW#", "datetime()", 
+                        str_replace("#TODATE#", 'julianday', 
+                            str_replace("#ISO_DATETIME#", '',
+                                str_replace("#ISO_DATE#", '',$sql)))));
             break;
         case "mysql":
-            return str_replace("#PASSWORD#","PASSWORD", str_replace("#NOW#", "NOW()", $sql));
+            return str_replace("#PASSWORD#","PASSWORD", 
+                    str_replace("#NOW#", "NOW()", 
+                        str_replace("#TODATE#", '',
+                            str_replace("#ISO_DATETIME#", '',
+                                str_replace("#ISO_DATE#", '',$sql)))));
             break;
         case "oracle":
-            return str_replace("#PASSWORD#","", str_replace("#NOW#", "SYSDATE", $sql));
+            return str_replace("#PASSWORD#","", 
+                    str_replace("#NOW#", "SYSDATE", 
+                        str_replace("#TODATE#", 'TO_DATE',
+                            str_replace("#ISO_DATETIME#", ",'YYYY-MM-DD HH24:MI:SS'",
+                                    str_replace("#ISO_DATE#", ",'YYYY-MM-DD'", $sql)))));
             break;
     }
     return $sql;
