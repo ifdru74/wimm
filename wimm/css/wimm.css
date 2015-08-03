@@ -296,7 +296,7 @@ DIV.dlg_box
 {
     left: 50%;
     margin-left: -500px;
-    position: absolute;
+    position: fixed;
     width: 400px;
     top: 50%;
     margin-top: -50px;
@@ -338,6 +338,28 @@ input.DLG_BTN
 {
     width: 75px;
 }
+/*
+label.tl_plus
+{
+    background-image: url('../picts/plus.gif');
+    background-position-x: left;
+    padding-left: 16px;
+    background-repeat: no-repeat;
+}
+*/
+label.tl_minus
+{
+    background-image: url('../picts/minus.gif');
+    background-position-x: left;
+    padding-left: 16px;
+    background-repeat: no-repeat;
+}
+
+label.tl_plus
+{
+    padding-left: 16px;
+}
+
 div.input_caption
 {
     width: 30%;
@@ -348,29 +370,29 @@ div.input_caption
     text-align: right;
 }
 
-    .dialog_row
-    {
-        margin: 0px auto; 
-        width: 500px; 
-        height: 30px;
-    }
+.dialog_row
+{
+    margin: 0px auto; 
+    width: 500px; 
+    height: 30px;
+}
 
-    .dialog_lbl
-    {
-        float:left;
-        width:100px;
-    }
+.dialog_lbl
+{
+    float:left;
+    width:100px;
+}
 
-    .dialog_ctl
-    {
-        float:right; 
-        width:380px;
-    }
+.dialog_ctl
+{
+    float:right; 
+    width:380px;
+}
 
-    .dialog_btn
-    {
-        width:100px;
-    }    
+.dialog_btn
+{
+    width:100px;
+}    
 
 @media only screen 
     and (min-device-width : 320px) 
