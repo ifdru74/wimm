@@ -10,13 +10,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+    $a_ret = array();
     session_start();
     init_superglobals();
-    $user = getSessionParam("UID","");
-    $a_ret = array();
+    $user = getSessionParam("UID",FALSE);
     $fm = getRequestParam("FRM_MODE","refresh");
     $a_ret['request'] = $fm;
-    if(strlen($user)<=0)    {
+    if($user===FALSE)    {
         //die("{id:-1,err:'empty user'}");
         $a_ret['err'] = 'empty user';
         die(json_encode($a_ret));
@@ -56,7 +56,7 @@
 		$s = getRequestParam("t_budget",0);
 		$sql .= "$s)";
                 $xxx = $sql;
-                $conn->exec($sql);
+                $conn->exec(formatSQL($conn, $sql));
                 $a_ret['id'] = $conn->lastInsertId;
                 $x = $conn->errorInfo();
                 $a_ret['err'] = $x[2];
@@ -90,7 +90,7 @@
 		$s = getRequestParam("HIDDEN_ID",0);
 		$sql .= $tid;
                 //$xxx = $sql;
-                $conn->exec($sql);
+                $conn->exec(formatSQL($conn, $sql));
                 $a_ret['id'] = $tid;
                 $x = $conn->errorInfo();
                 $a_ret['err'] = $x[2];
@@ -98,7 +98,7 @@
             case "delete":
                 $sql = "delete from m_transactions where transaction_id=$tid";
                 $xxx = $sql;
-                $conn->exec($sql);
+                $conn->exec(formatSQL($conn, $sql));
                 $a_ret['id'] = $tid;
                 $x = $conn->errorInfo();
                 $a_ret['err'] = $x[2];
@@ -109,7 +109,7 @@
                     "user_id, open_date, close_date, place_id, budget_id ".
                     "transaction_date, from m_transactions where transaction_id=$tid";
                 $xxx = $sql;
-                $result = $conn->query($sql);
+                $result = $conn->query(formatSQL($conn, $sql));
                 if($result) {
                     $line = $result->fetch(PDO::FETCH_ASSOC);
                     if ($line)  {

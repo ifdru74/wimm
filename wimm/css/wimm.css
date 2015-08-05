@@ -338,7 +338,7 @@ input.DLG_BTN
 {
     width: 75px;
 }
-/*
+
 label.tl_plus
 {
     background-image: url('../picts/plus.gif');
@@ -346,7 +346,7 @@ label.tl_plus
     padding-left: 16px;
     background-repeat: no-repeat;
 }
-*/
+
 label.tl_minus
 {
     background-image: url('../picts/minus.gif');
@@ -355,7 +355,7 @@ label.tl_minus
     background-repeat: no-repeat;
 }
 
-label.tl_plus
+label.tl_none
 {
     padding-left: 16px;
 }

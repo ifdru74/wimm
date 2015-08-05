@@ -28,7 +28,10 @@ var a_fields = [
  */
 function format_date(sDate)
 {
-    var sRet = sDate;
+    var sRet;
+    var d = new Date();
+    d.parse(sDate);
+    sRet = d.toISOString()
     if(sDate!==undefined && sDate!==null && sDate.length>18)    {
         // 2014-06-01 08:05:50 -> 01/06 08:05:50
         sRet = sDate.substring(8, 2) + "/" + sDate.substring(5, 2) + " " +
@@ -110,7 +113,7 @@ function onTxComplete(jqXHR, textStatus )
     $("#dialog_box").hide();
 }
 
-function tx_submit()
+function tx_submit(submitURL)
 {
     var i;
     var f,v;
@@ -163,7 +166,7 @@ function tx_submit()
     console_debug_log("query!");
     jqxr = $.ajax({
         type: "POST",
-        url: "/wimm/wimm_edit2.php",
+        url: submitURL,
         data: reqStr,
         complete: onTxComplete
     });
@@ -172,93 +175,6 @@ function tx_submit()
 //    else
 //        console_debug_log("empty response!");
     console_debug_log("end query!");
-}
-
-function sel_row(row_id)
-{
-    var focus2item = '#t_user';
-    var objDiv = document.getElementById("dialog_box");
-    objDiv.style.top = (f_get_scroll_y()+200).toString()+"px";
-    //var x = (window.innerWidth||document.body.clientWidth);
-    var x = (f_get_scroll_x()-600)/2+500;
-    if(x<0)
-        x = 500;
-    objDiv.style.left = x.toString()+"px";
-    //objDiv.style.display="inline";
-    $("#dialog_box").show();
-    var s1;
-    var i;
-    if(row_id===null || row_id===undefined || row_id.length<1) {
-        $("#FRM_MODE").val("insert");
-        $("#HIDDEN_ID").val(0);
-        $("#ADD_BTN").show();
-        $("#OK_BTN").hide();
-        $("#DEL_BTN").hide();
-        $("#dlg_box_cap").text("Добавление записи");
-        s1 = "";
-        for(i=0; i<a_fields.length; i++)    {
-            if(a_fields[i].id.indexOf("t_user")==0)
-                focus2item = '#t_name';
-            else
-                $("#" + a_fields[i].id).val($("#" + a_fields[i].id + "_a").val());
-        }
-    }
-    else    {
-        $("#FRM_MODE").val("update");
-        $("#HIDDEN_ID").val(row_id);
-        $("#ADD_BTN").hide();
-        $("#OK_BTN").show();
-        $("#DEL_BTN").show();
-        $("#dlg_box_cap").text("Изменение записи");
-        s1 = "";
-        for(i=0; i<a_fields.length; i++)    {
-            s1 = "";
-            if(a_fields[i].tbl_type.indexOf("v")==0)
-                s1 = $(a_fields[i].in_tbl + row_id).val();
-            if(a_fields[i].tbl_type.indexOf("t")==0)    {
-                if(a_fields[i].id.indexOf('t_sum')==0)  {
-                    var s2 = $(a_fields[i].in_tbl + row_id).text();
-                    s1 = s2.replace(" ","");
-                }
-                else
-                    s1 = $(a_fields[i].in_tbl + row_id).text();
-            }
-            if(a_fields[i].tbl_type.indexOf("i")==0)
-                s1 = $(a_fields[i].in_tbl + row_id).attr("title");
-            console_debug_log(a_fields[i].in_tbl + row_id + "(" + a_fields[i].tbl_type + ")=" + s1);
-            if(s1!==null && s1!==undefined && s1.length>0)
-                $("#"+a_fields[i].id).val(s1);
-        }
-    }
-    $(focus2item).select();
-    $(focus2item).focus();
-
-}
-
-function del_click()
-{
-    var i;
-    var f,v;
-    var inv_idx = -1;
-    var msg = "";
-    var reqStr = "time=" + Date.now() + "&FRM_MODE=delete&HIDDEN_ID=" + $("#HIDDEN_ID").val();
-    $("#FRM_MODE").val("delete");
-    jqxr = $.ajax({
-        type: "POST",
-        url: "/wimm/wimm_edit2.php",
-        data: reqStr,
-        complete: onTxComplete
-    });
-}
-
-function onLoad()
-{
-    $('#dialog_box').draggable();
-    $('#OK_BTN').draggable();
-    $("body").keydown(function(e) {
-        onPageKey(e.keyCode);
-    });
-    setHandlers(".dtp");
 }
 
 function onPageKey(key)
