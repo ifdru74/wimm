@@ -51,6 +51,9 @@ function translateKeyCode(keyCode)
     var nRet = 0;
     switch(keyCode)
     {
+        case 9: // tab
+            nRet = 5;
+            break;
         case 13: // enter
 //                case 10: // enter
             nRet = 4;
@@ -189,7 +192,7 @@ function selectAcItem(boxID, itemID, itemText)
             var idTargetID = document.getElementById(textTargetID).getAttribute("bound_id");
             document.getElementById(textTargetID).value = (itemText);
             if(idTargetID!=null && idTargetID.length>0)
-                document.getElementById(idTargetID).value = (itemID);
+                $('#'+idTargetID).val(itemID);
         }
         hideAcBox(boxID);
     }
@@ -279,13 +282,17 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     });
     var s1;
     var nMax;
+    var n;
     s1 = $("#" + boxID).attr("scroll_height");
     if(s1!=null && s1.length>0)
         nMax = Number(s1);
     else
         nMax = 50;
     s1 = $("#" + boxID).css( "height" );
-    var n = Number(s1.replace("px",""));
+    if (s1!=null && s1!=undefined)
+        n = Number(s1.replace("px",""));
+    else
+        n = 100500;
     if(n>nMax)
     {
         $("#" + boxID).css( "height", nMax.toString() + "px" );
@@ -345,6 +352,9 @@ function queryAcItems(boxID, itemID)
             pv = "";
         }
     }
+    var d = new Date();
+    query_str += param_sep;
+    query_str += "d=" + d.toString();
     console.log('params parsed: ' + query_str);
     console.log('query to: ' + query_src);
     // got query string - send request
@@ -421,10 +431,13 @@ function textFieldKeyUp(event)
 {
     var nCode = translateKeyCode(event.which);
     console.log('entering textFieldKeyUp(' + nCode.toString() + ')');
-    if(nCode==-4)
+    if(nCode==-4 || nCode==5)
     {
 //        console.log('<Esc>');
         hideAcBox(ac_box);
+    }
+    if(nCode==-4)
+    {
         event.preventDefault();
     }
 //    else if(nCode==4)
@@ -480,5 +493,9 @@ function ac_init(boxID, ac_box_sel)
             event.preventDefault();
             return false;
         }
+    });
+    $(ac_txt).blur(function(event)
+    {
+        hideAcBox(ac_box);
     });
 }
