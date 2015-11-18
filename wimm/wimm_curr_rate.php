@@ -11,17 +11,18 @@
     print_head($p_title);
 function print_buttons($bd="")
 {
-	print "<TABLE WIDTH=\"100%\" class=\"hidden\">\n";
-	print "\t<TR class=\"hidden\">\n";
-	print "\t\t<TD class=\"hidden\"><input name='btn_refresh' type=\"submit\" value=\"Обновить\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Добавить\" onclick=\"$('#dialog_box').show();$('#DEL_BTN').hide();$('#HIDDEN_ID').val('');$('.form_field').val('');$('#FRM_MODE').val('insert');document.getElementById('curr_name').focus();\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"reset\" value=\"Снять выделение\"></TD>\n";
-	print "\t\t<TD class=\"hidden\"><input type=\"button\" value=\"Выход\" onclick=\"send_submit('exit')\"></TD>\n";
-	print "\t</TR>\n";
-	print "</TABLE>\n";
+	print "<DIV>\n";
+	print "\t<DIV class=\"dialog_row\">\n";
+	print "\t\t<input name='btn_refresh' type=\"submit\" value=\"Обновить\">\n";
+	print "\t\t<input type=\"button\" value=\"Добавить\" onclick=\"$('#dialog_box').show();$('#DEL_BTN').hide();$('#HIDDEN_ID').val('');$('.form_field').val('');$('#FRM_MODE').val('insert');document.getElementById('curr_from_name').focus();\">\n";
+	print "\t\t<input type=\"reset\" value=\"Снять выделение\">\n";
+	print "\t\t<input type=\"button\" value=\"Выход\" onclick=\"send_submit('exit')\">\n";
+	print "\t</DIV>\n";
+	print "</DIV>\n";
 }
 ?>
     <body onload="onLoad();">
+        <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
         <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
         <script language="JavaScript" type="text/JavaScript">
             function onLoad()
@@ -35,7 +36,7 @@ function print_buttons($bd="")
                     $('#FRM_MODE').val('update');
                     table_row_selected("#"+e.currentTarget.id, "#edit_form");
                     $("#HIDDEN_ID").val(e.currentTarget.id);
-                    document.getElementById('curr_name').focus();
+                    document.getElementById('curr_from_name').focus();
                 });
             }
             function send_submit(frm_mode)
@@ -65,10 +66,10 @@ function print_buttons($bd="")
                         break;
                     case 'edit':
                     case 'add':
-                        if($("#curr_name").val().length<1)
+                        if($("#curr_from_name").val().length<1)
                         {
                             alert('Надо заполнить Наименование');
-                            $("#curr_name").select();
+                            $("#curr_from_name").select();
                             s2 = false;
                         }
                         break;
@@ -81,42 +82,42 @@ function print_buttons($bd="")
         </script>
         <form id="edit_form" name="curr_rates" method="post">
             <div scroll_height="100" for="" selected_ac_item="" class="ac_list" id="ac"></div>
-            <div id="dialog_box" class="dlg_box" style="width:525px;display:none;" onshow='document.getElementById("curr_name").focus();'>
+            <div id="dialog_box" class="dlg_box" style="width:525px;display:none;" onshow='document.getElementById("curr_from_name").focus();'>
                 <div class="dlg_box_cap">Редактирование курса обмена</div>
                 <div class="dlg_box_text">
                     <div class="dialog_row" style="height: 50px; display: block">
                         <fieldset>
                             <legend>Меняем:</legend>
-                            <input type="number" class="form_field" name="from_rate" id="from_rate" 
-                                   bind_row_type="label" bind_row_id="FRATE_" value="">
+                            <input type="text" class="form_field" name="from_rate" id="from_rate" 
+                                   bind_row_type="label" bind_row_id="FRATE_" value="" title="Количество дензнаков">
                             <input type="hidden" name="tf_curr" id="tf_curr" value=""
-                                   bind_row_type="title" bind_row_id="FNAME_">
+                                   bind_row_type="title" bind_row_id="FNAME_" class="form_field txt">
                             <input type="text" class="form_field txt" name="curr_from_name" id="curr_from_name" 
                                    bind_row_type="label" bind_row_id="FNAME_" value="" size="45"
                                    autocomplete="off" bound_id="tf_curr" ac_src="/wimm2/ac_ref.php"
-                                   ac_params="type=t_curr;filter=">
+                                   ac_params="type=t_curr;filter=" title="Наименование валюты">
                         </fieldset>
                     </div>
                     <div class="dialog_row" style="height: 50px;display: block">
                         <fieldset>
                             <legend>На:</legend>
-                            <input type="number" class="form_field" name="to_rate" id="to_rate" 
-                                   bind_row_type="label" bind_row_id="TRATE_" value="">
+                            <input type="text" class="form_field" name="to_rate" id="to_rate" 
+                                   bind_row_type="label" bind_row_id="TRATE_" value="" title="Количество дензнаков">
                             <input type="hidden" name="tt_curr" id="tt_curr" value=""
-                                   bind_row_type="title" bind_row_id="TNAME_">
+                                   bind_row_type="title" bind_row_id="TNAME_" class="form_field txt">
                             <input type="text" class="form_field txt" name="curr_to_name" id="curr_to_name" 
                                    bind_row_type="label" bind_row_id="TNAME_" value="" size="45"
                                    autocomplete="off" bound_id="tt_curr" ac_src="/wimm2/ac_ref.php"
-                                   ac_params="type=t_curr;filter=">
+                                   ac_params="type=t_curr;filter=" title="Наименование валюты">
                         </fieldset>
                     </div>
                     <div class="dialog_row" style="height: 50px;display: block">
                         <fieldset>
                             <legend>Действует:</legend>
-                            <label for="curr_name">С:</label>
+                            <label for="dt_open">С:</label>
                             <input type="datetime" class="form_field" name="dt_open" id="dt_open" 
                                    bind_row_type="title" bind_row_id="ODATE_" value="">
-                            <label for="curr_name">По:</label>
+                            <label for="dt_close">По:</label>
                             <input type="datetime" class="form_field" name="dt_close" id="dt_close" 
                                    bind_row_type="title" bind_row_id="CDATE_" value="">
                         </fieldset>
@@ -157,28 +158,28 @@ function print_buttons($bd="")
             }
             $sql = "";
             $def_date = "#NOW#";
+            $curr_from = str_replace("aci_","", value4db(getRequestParam("tf_curr",0)));
+            $rate_from = str_replace(",", ".", value4db(getRequestParam("from_rate",0)));
+            $curr_to = str_replace("aci_","", value4db(getRequestParam("tt_curr",0)));
+            $rate_to = str_replace(",", ".", value4db(getRequestParam("to_rate",0)));
             switch ($fm)
             {
                 case "insert":
                     $sql = "insert into m_currency_rate(currency_from, exchange_rate_from, currency_to, exchange_rate_to, open_date, close_date, user_id) values(";
-                    $sql .= (str_replace("aci_","", value4db(getRequestParam("tf_curr",0))) . ", ");
-                    $sql .= (value4db(getRequestParam("from_rate",0)) . ", ");
-                    $sql .= (str_replace("aci_","", value4db(getRequestParam("tt_curr",0))) . ", ");
-                    $sql .= (value4db(getRequestParam("to_rate",0)) . ", ");
+                    $sql .= ($curr_from . ", ");
+                    $sql .= ($rate_from . ", ");
+                    $sql .= ($rate_to . ", ");
+                    $sql .= ($rate_to . ", ");
                     $sql .= (getDateFormValue("dt_open",$def_date) . ", ");
                     $sql .= (getDateFormValue("dt_close",$def_date) . ", ");
                     $sql .= " $uid)";
                     break;
                 case "update":
                     $sql = "UPDATE m_currency_rate SET ";
-                    $s = str_replace("aci_","", value4db(getRequestParam("tf_curr",0)));
-                    $sql .= "currency_from=$s, ";
-                    $s = value4db(getRequestParam("from_rate",0));
-                    $sql .= "exchange_rate_from=$s, ";
-                    $s = str_replace("aci_","", value4db(getRequestParam("tt_curr",0)));
-                    $sql .= "currency_to=$s, ";
-                    $s = value4db(getRequestParam("to_rate",0));
-                    $sql .= "exchange_rate_to=$s, ";
+                    $sql .= "currency_from=$curr_from, ";
+                    $sql .= "exchange_rate_from=$rate_from, ";
+                    $sql .= "currency_to=$curr_to, ";
+                    $sql .= "exchange_rate_to=$rate_to, ";
                     $s = getDateFormValue("dt_open",$def_date);
                     $sql .= "open_date=$s, ";
                     $s = getDateFormValue("dt_close",$def_date);
@@ -194,6 +195,8 @@ function print_buttons($bd="")
             }
             print_body_title($p_title);
             $hfmt = "<input id=\"%s\" name=\"%s\" type=\"hidden\" value=\"%s\">" . PHP_EOL;
+            printf($hfmt, "p_rate_from", "p_rate_from", $rate_from);
+            printf($hfmt, "p_rate_to", "p_rate_to", $rate_to);
             printf($hfmt, "SQL", "SQL", $sql);
             if(strlen($sql)>0)	{
                 $conn->query(formatSQL($conn, $sql));
