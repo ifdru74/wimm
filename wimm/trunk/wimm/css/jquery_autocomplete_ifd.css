@@ -19,7 +19,6 @@ div.ac_list {
     position: absolute; 
     display: none;
     width: 150px; 
-    //background-color: blueviolet; 
     height: 100px;
     background-color: white;
     border-left: 1px gray solid;
