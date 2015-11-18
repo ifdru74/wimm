@@ -9,7 +9,7 @@
 function f_get_connection()
 {
 //    $dsn = 'mysql:dbname=wimm;host=localhost';
-    $dsn = 'sqlite:C:\\Projects\\wimm\\wimm\\sqlite\\wimm.sqlite';
+    $dsn = 'sqlite:D:\\Projects\\wimm\\wimm\\sqlite\\wimm.sqlite';
     $user = '';//wimm';
     $password = '';//'wimm1';
     try {
