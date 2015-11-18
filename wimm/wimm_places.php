@@ -122,7 +122,7 @@ if($conn)	{
 	print_body_title($p_title);
 ?>
         <form id='edit_form' name="places" action="wimm_places.php" method="post">
-            <div id="dialog_box" class="dlg_box ui-widget-content" style="width:500px;display:none;" >
+            <div id="dialog_box" class="dlg_box ui-widget-content" style="width:550px;display:none;" >
                 <div class="dlg_box_cap" id="dlg_box_cap">Изменить</div>
                 <div class="dlg_box_text" id="dlg_box_text">
                     <div class="dialog_row">
