@@ -256,8 +256,10 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_date">Дата:</label>
-                            <input class="dtp dialog_ctl form_field" id="t_date" name="t_date" 
-                                   type="text" value="" bind_row_type="title" bind_row_id="T_DATE_">
+                            <input class="dtp dialog_ctl form_field" id="t_date" 
+                                   name="t_date" type="text" value="" bind_row_type="title" 
+                                   pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1]) ([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$" 
+                                   bind_row_id="T_DATE_">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_place">Место:</label>
