@@ -29,13 +29,20 @@ var a_fields = [
 function format_date(sDate)
 {
     var sRet;
-    var d = new Date();
-    d.parse(sDate);
-    sRet = d.toISOString()
-    if(sDate!==undefined && sDate!==null && sDate.length>18)    {
+    try
+    {
+        var d = new Date();
+        d.parse(sDate);
+        sRet = d.toISOString()
+    }
+    catch(e)
+    {
+        sRet = sDate.trim();
+    }
+    if(sRet!==undefined && sRet!==null && sRet.length>18)    {
         // 2014-06-01 08:05:50 -> 01/06 08:05:50
-        sRet = sDate.substring(8, 2) + "/" + sDate.substring(5, 2) + " " +
-                sDate.substring(11, 8);
+        sRet = sRet.substr(8, 2) + "/" + sRet.substr(5, 2) + " " +
+                sRet.substr(11, 8);
     }
     return sRet;
 }
@@ -78,31 +85,79 @@ function onTxComplete(jqXHR, textStatus )
                 console_debug_log("error="+i.err);
                 v = $("#FRM_MODE").val();
                 console_debug_log("mode="+v);
-                if(v.indexOf("delete")==0)  {
-                    $("#TR_"+row_id).remove();
+                if(v.indexOf("delete")==0)
+                {
+                    $("#"+row_id).parent().parent().remove();
                 }
                 else {
-                    for(i=0; i<a_fields.length; i++)    {
-                        v = $("#"+a_fields[i].id).val();
-                        if(a_fields[i].tbl_type.indexOf("v"))
-                            $(a_fields[i].in_tbl + row_id).val(v);
-                        if(a_fields[i].tbl_type.indexOf("t"))   {
-                            if(a_fields[i].id.indexOf('t_date')==0)
-                                $(a_fields[i].in_tbl + row_id).text(format_date(v));
-                            else
-                                $(a_fields[i].in_tbl + row_id).text(v);
+                    var form_fields = $('#expenses').find(".form_field");
+                    for(i=0; i<form_fields.length; i++)
+                    {
+                        var bt = form_fields[i].getAttribute("bind_row_type");
+                        var bi = "#" + form_fields[i].getAttribute("bind_row_id") + row_id;
+                        var v = form_fields[i].value;
+                        if(v.substr(0,4)=='aci_')
+                        {
+                            v = v.substr(4);
                         }
-                        if(a_fields[i].tbl_type.indexOf("i"))
-                            $(a_fields[i].in_tbl + row_id).attr("title",v);
-                        if(a_fields[i].tbl_type.indexOf("x"))   {
-                            var t = $("#"+a_fields[i].id).text();
-                            $(a_fields[i].l_tbl + row_id).text(t);
+                        if(form_fields[i].id.indexOf('t_date')==0)
+                        {
+                            $(bi).attr('title', v);
+                            $(bi).text(format_date(v));
+                        }
+                        else
+                        {
+                            switch(bt)
+                            {
+                            case 'value':
+                                $(bi).val(v);
+                                break;
+                            case 'label':
+                                $(bi).text(v);
+                                break;
+                            case 'title':
+                                $(bi).attr('title', v);
+                                break;
+                            }
                         }
                     }
+//                    for(i=0; i<a_fields.length; i++)    {
+//                        v = $("#"+a_fields[i].id).val();
+//                        if(a_fields[i].tbl_type.indexOf("v"))
+//                            $(a_fields[i].in_tbl + row_id).val(v);
+//                        if(a_fields[i].tbl_type.indexOf("t"))   {
+//                            if(a_fields[i].id.indexOf('t_date')==0)
+//                                $(a_fields[i].in_tbl + row_id).text(format_date(v));
+//                            else
+//                                $(a_fields[i].in_tbl + row_id).text(v);
+//                        }
+//                        if(a_fields[i].tbl_type.indexOf("i"))
+//                            $(a_fields[i].in_tbl + row_id).attr("title",v);
+//                        if(a_fields[i].tbl_type.indexOf("x"))   {
+//                            var t = $("#"+a_fields[i].id).text();
+//                            $(a_fields[i].l_tbl + row_id).text(t);
+//                        }
+//                    }
                 }
             }
             else
                 alert("Пустой ответ!");
+        }
+        else
+        {
+            console_debug_log("new row.");
+            console_debug_log('response=' + jqXHR.responseText);
+            v = $("#FRM_MODE").val();
+            console_debug_log("mode="+v);
+            if(v.indexOf("insert")==0)
+            {
+                if(jqXHR.responseText!==null && jqXHR.responseText!==undefined && 
+                        jqXHR.responseText.length>0)  {
+                    i = JSON.parse(jqXHR.responseText);
+                    console_debug_log("id="+i.id);
+                    console_debug_log("error="+i.err);
+                }                
+            }
         }
     }
     else {
@@ -120,47 +175,38 @@ function tx_submit(submitURL)
     var inv_idx = -1;
     var msg = "";
     var currentdate = new Date(); 
-    var reqStr = "time=" + Date.now() + "&FRM_MODE=update&HIDDEN_ID=" + $("#HIDDEN_ID").val();
-    for(i=0; i<a_fields.length; i++)    {
-        f = $("#" + a_fields[i].id);
-        v = f.val();
-        if(v!==null&&v!==undefined) {
-            if(v.length>a_fields[i].len)    {
-                if(a_fields[i].type.indexOf("n")==0)    {
-                    try {
-                        var nn = new Number(v);
-                        if(nn<=a_fields[i].val)   {
-                            inv_idx = i;
-                            msg = "Недопустимое значение <=" + a_fields[i].val.toString();
-                        }
-                        else {
-                            reqStr += ("&" + a_fields[i].id + "=" + encodeURIComponent(v));
-                        }
-
-                    } catch (e) {
-                        inv_idx = i;
-                        msg = e.toString();
-                    }
+    v = $("#FRM_MODE").val();
+    if(v=='insert')
+    {
+        $('#expenses').submit();
+        return;
+    }
+    var reqStr = "time=" + Date.now() + "&FRM_MODE=" + v + 
+            "&HIDDEN_ID=" + $("#HIDDEN_ID").val();
+    var fields = $('#expenses').find('.sendable');
+    if(fields!=null && fields!=undefined)
+    {
+        for(i=0; i<fields.length; i++)
+        {
+            try {
+                f = fields[i].getAttribute("id");;
+                v = fields[i].value;
+                if(v.substr(0,4)=='aci_')
+                {
+                    v = v.substr(4);
                 }
-                else {
-                    reqStr += ("&" + a_fields[i].id + "=" + encodeURIComponent(v));
-                }
-            }
-            else    {
+                reqStr += ("&" + f.toString() + "=" + encodeURIComponent(v));
+            } catch (e) {
                 inv_idx = i;
-                msg = "Слишком короткое значение"
+                msg = e.toString();
             }
-        }
-        else    {
-            inv_idx = i;
-            msg = "Значение не установлено"
         }
     }
     console_debug_log("request:"+reqStr);
     if(inv_idx>=0&&inv_idx<a_fields.length)  {
         if(msg.length>0)
             alert(msg);
-        $("#" + a_fields[i].id).select();
+        console_debug_log("error at:"+inv_idx.toString());
         return;
     }
     console_debug_log("query!");
@@ -218,10 +264,17 @@ function setInputSelection(el, nStart, nEnd) {
     var start = 0, end = 0, normalizedValue, range,
         textInputRange, len, endRange;
 
-    if (typeof el.selectionStart === "number" && typeof el.selectionEnd === "number") {
-        el.selectionStart = nStart;
-        el.selectionEnd = nEnd;
-    } 
+    try
+    {
+        if (typeof el.selectionStart === "number" && typeof el.selectionEnd === "number") {
+            el.selectionStart = nStart;
+            el.selectionEnd = nEnd;
+        } 
+    }
+    catch(e)
+    {
+        console_debug_log("set date & time selection: " + e.toString());
+    }
 }
 
 /**
@@ -233,14 +286,22 @@ function getInputSelection(el) {
     var start = 0, end = 0, normalizedValue, range,
         textInputRange, len, endRange;
 
-    if (typeof el.selectionStart === "number" && typeof el.selectionEnd === "number") {
-        start = el.selectionStart;
-        end = el.selectionEnd;
+    try
+    {
+        if (typeof el.selectionStart === "number" && typeof el.selectionEnd === "number") {
+            start = el.selectionStart;
+            end = el.selectionEnd;
+        }
+        return {
+            start: start,
+            end: end
+        };
     }
-    return {
-        start: start,
-        end: end
-    };
+    catch(e)
+    {
+        console_debug_log("get date & time selection: " + e.toString());
+    }
+    return null;
 }
 
 /**
@@ -301,107 +362,110 @@ function setHandlers(jqSelector)
     {
         var pos, len, val, i;
         var caret = getInputSelection(e.currentTarget);
-        var month;
-        val = $(this).val();
-        len = val.length;
-        pos = caret.start;
-        month = new Number(val.substring(aParts[1][0],aParts[1][0]+aParts[1][1])).valueOf();
-        switch(e.keyCode)
+        if(caret!=null)
         {
-            case 17:
-                bCtrlHit = false;
-                break;
-            case 37://left
-                if(bCtrlHit)    {
-                    if(pos>=len)
-                        break;
-                    for(i=0; i<aParts.length; i++)
-                    {
-                        if(aParts[i][0]>=pos)    {
-                            if(i<1)
+            var month;
+            val = $(this).val();
+            len = val.length;
+            pos = caret.start;
+            month = new Number(val.substring(aParts[1][0],aParts[1][0]+aParts[1][1])).valueOf();
+            switch(e.keyCode)
+            {
+                case 17:
+                    bCtrlHit = false;
+                    break;
+                case 37://left
+                    if(bCtrlHit)    {
+                        if(pos>=len)
+                            break;
+                        for(i=0; i<aParts.length; i++)
+                        {
+                            if(aParts[i][0]>=pos)    {
+                                if(i<1)
+                                    break;
+                                setInputSelection(e.currentTarget, aParts[i-1][0], 
+                                    aParts[i-1][0] + aParts[i-1][1]);
                                 break;
-                            setInputSelection(e.currentTarget, aParts[i-1][0], 
-                                aParts[i-1][0] + aParts[i-1][1]);
-                            break;
-                        }
-                    }
-                }
-                break;
-            case 39://right
-                if(bCtrlHit)    {
-                    if(pos<=0)
-                        break;
-                    for(i=0; i<aParts.length; i++)
-                    {
-                        if(aParts[i][0]>=pos)    {
-//                                        if(i<1)
-//                                            break;
-                            setInputSelection(e.currentTarget, aParts[i][0], 
-                                aParts[i][0] + aParts[i][1]);
-                            break;
-                        }
-                    }
-                }
-                break;
-            case 38://up
-                if(!bCtrlHit)    {
-                    for(i=0; i<aParts.length; i++)
-                    {
-                        if(aParts[i][0]>=pos)    {
-                            var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
-                            n1 ++;
-                            if(aParts[i][2]>=0)  {
-                                var nLim;
-                                if(i===2)
-                                    nLim = aDays[month];
-                                else
-                                    nLim = aParts[i][2];
-                                if(n1>nLim)
-                                    n1 = aParts[i][3];
                             }
-                            $(this).val(val.substring(0,aParts[i][0]) +
-                                    formatNumber(n1.toString(),aParts[i][1],"0")+
-                                    val.substring(aParts[i][0]+aParts[i][1]));
-                            setInputSelection(e.currentTarget, aParts[i][0], 
-                                aParts[i][0] + aParts[i][1]);
-                            e.preventDefault();
-                            break;
                         }
                     }
-                }
-                break;
-            case 40://down
-                if(!bCtrlHit)    {
-                    for(i=0; i<aParts.length; i++)
-                    {
-                        if(aParts[i][0]>=pos)    {
-                            var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
-                            n1 --;
-                            if(aParts[i][3]>=0)  {
-                                if(n1<aParts[i][3]) {
+                    break;
+                case 39://right
+                    if(bCtrlHit)    {
+                        if(pos<=0)
+                            break;
+                        for(i=0; i<aParts.length; i++)
+                        {
+                            if(aParts[i][0]>=pos)    {
+    //                                        if(i<1)
+    //                                            break;
+                                setInputSelection(e.currentTarget, aParts[i][0], 
+                                    aParts[i][0] + aParts[i][1]);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case 38://up
+                    if(!bCtrlHit)    {
+                        for(i=0; i<aParts.length; i++)
+                        {
+                            if(aParts[i][0]>=pos)    {
+                                var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
+                                n1 ++;
+                                if(aParts[i][2]>=0)  {
                                     var nLim;
                                     if(i===2)
                                         nLim = aDays[month];
                                     else
                                         nLim = aParts[i][2];
-                                    if(nLim>0)
-                                        n1 = nLim;
-                                    else
+                                    if(n1>nLim)
                                         n1 = aParts[i][3];
                                 }
+                                $(this).val(val.substring(0,aParts[i][0]) +
+                                        formatNumber(n1.toString(),aParts[i][1],"0")+
+                                        val.substring(aParts[i][0]+aParts[i][1]));
+                                setInputSelection(e.currentTarget, aParts[i][0], 
+                                    aParts[i][0] + aParts[i][1]);
+                                e.preventDefault();
+                                break;
                             }
-                            $(this).val(val.substring(0,aParts[i][0]) +
-                                    formatNumber(n1.toString(),aParts[i][1],"0")+
-                                    val.substring(aParts[i][0]+aParts[i][1]));
-                            setInputSelection(e.currentTarget, aParts[i][0], 
-                                aParts[i][0] + aParts[i][1]);
-                            e.preventDefault();
-                            break;
                         }
                     }
-                }
-                break;
+                    break;
+                case 40://down
+                    if(!bCtrlHit)    {
+                        for(i=0; i<aParts.length; i++)
+                        {
+                            if(aParts[i][0]>=pos)    {
+                                var n1 = val.substring(aParts[i][0], aParts[i][0] + aParts[i][1]).valueOf();
+                                n1 --;
+                                if(aParts[i][3]>=0)  {
+                                    if(n1<aParts[i][3]) {
+                                        var nLim;
+                                        if(i===2)
+                                            nLim = aDays[month];
+                                        else
+                                            nLim = aParts[i][2];
+                                        if(nLim>0)
+                                            n1 = nLim;
+                                        else
+                                            n1 = aParts[i][3];
+                                    }
+                                }
+                                $(this).val(val.substring(0,aParts[i][0]) +
+                                        formatNumber(n1.toString(),aParts[i][1],"0")+
+                                        val.substring(aParts[i][0]+aParts[i][1]));
+                                setInputSelection(e.currentTarget, aParts[i][0], 
+                                    aParts[i][0] + aParts[i][1]);
+                                e.preventDefault();
+                                break;
+                            }
+                        }
+                    }
+                    break;
+            }
+            //e.preventDefault();
         }
-        //e.preventDefault();
     });
 }

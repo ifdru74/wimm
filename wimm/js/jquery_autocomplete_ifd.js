@@ -135,16 +135,19 @@ function changeSelection(boxID, how)
         }
         if(titem.length<1)
         {
-            if(i<0)
+            if(items!=null && items!=undefined && items.length>0)
             {
-                i = 0;
+                if(i<0)
+                {
+                    i = 0;
+                }
+                else
+                {
+                    if(i>items.length)
+                        i = items.length - 1;
+                }
+                titem = items[i].id;
             }
-            else
-            {
-                if(i>items.length)
-                    i = items.length - 1;
-            }
-            titem = items[i].id;
         }
         if(titem.length>0)
         {
@@ -192,7 +195,13 @@ function selectAcItem(boxID, itemID, itemText)
             var idTargetID = document.getElementById(textTargetID).getAttribute("bound_id");
             document.getElementById(textTargetID).value = (itemText);
             if(idTargetID!=null && idTargetID.length>0)
+            {
+                if(itemID.substr(0,4)=='aci_')
+                {
+                    itemID = itemID.substr(4);
+                }                
                 $('#'+idTargetID).val(itemID);
+            }
         }
         hideAcBox(boxID);
     }
