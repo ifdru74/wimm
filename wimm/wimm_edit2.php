@@ -57,7 +57,7 @@
 		$sql .= "$s)";
                 $xxx = $sql;
                 $conn->exec(formatSQL($conn, $sql));
-                $a_ret['id'] = $conn->lastInsertId;
+                $a_ret['id'] = $conn->lastInsertId();
                 $x = $conn->errorInfo();
                 $a_ret['err'] = $x[2];
                 break;
