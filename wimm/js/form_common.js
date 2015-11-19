@@ -216,6 +216,7 @@ function delete_table_row()
     var id=$("#e_row_id").val();
     $("#row_"+id).parent().parent().remove();
 }
+
 function table_row_selected(sel_id, form_id)
 {
     var db_id = $(sel_id).val();
@@ -241,4 +242,117 @@ function table_row_selected(sel_id, form_id)
             break;
         }
     }
+}
+
+/**
+ * validated field value against regexp pattern
+ * @param {String} field_id
+ * @returns {String|Boolean} field_id or false if field value was validated successfully
+ */
+function re_pattern_validate_field(field_id)
+{
+    var ret_id=false;
+    var element = document.getElementById(field_id);
+    if(element!=null && element!=undefined)
+    {
+        var patt = element.pattern;//getAttribute("pattern");
+        if(patt!=null && patt!=undefined)
+        {
+            var val = element.value;
+            if(val!=null && val!=undefined && val.length>0)
+            {
+                var re = RegExp(patt);
+                if(re.test(val))
+                {
+                    // match!
+                    ret_id = true;
+                }
+                else
+                {
+                    console_debug_log("pattern '"+patt + "' don't match '"+val+"'");
+                }
+            }
+            else
+            {
+                console_debug_log("bad value:"+field_id);
+            }
+        }
+        else
+        {
+            console_debug_log("bad pattern: '"+patt+"'");
+            var val = element.value;
+            if(val!=null && val!=undefined && val.length>0)
+            {
+                ret_id = true;
+            }
+            else
+            {
+                console_debug_log("empty value:"+field_id);
+            }
+        }
+        if(ret_id)
+        {
+            ret_id = false;
+        }
+        else
+        {
+            ret_id = element.getAttribute("focus_on");
+            if(ret_id==null || ret_id==undefined)
+            {
+                ret_id = field_id;
+            }
+            else
+            {
+                if(ret_id.length<1 || ret_id.trim().length<1)
+                {
+                    ret_id = field_id;
+                }
+            }
+        }
+    }
+    else
+    {
+        console_debug_log("bad element:"+field_id);
+        ret_id = field_id;
+    }
+    return ret_id;
+}
+
+function fancy_form_validate(form_id)
+{
+    var v_ret = true;
+    var fields = $('#'+form_id).find(".valid");
+    if(fields!=null && fields!=undefined)
+    {
+        var i;
+        for(i=0; i<fields.length; i++)
+        {
+            var field_id = fields[i].getAttribute("id");
+            if(field_id!=null && field_id!=undefined)
+            {
+                var ff_id = re_pattern_validate_field(field_id);
+                if(ff_id!=null && ff_id!=undefined)
+                {
+                    if(ff_id)
+                    {
+                        // focus on field
+                        console_debug_log("select:"+ff_id);
+                        $('#'+ff_id).select();
+                        console_debug_log("focus:"+ff_id);
+                        $('#'+ff_id).focus();
+//                        var elem = document.getElementById(ff_id);
+//                        //alert('Что-то не так');
+//                        if(elem!=null && elem!=undefined)
+//                        {
+//                            elem.selected = true;
+//                            elem.focus();
+//                        }
+                        v_ret = false;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return v_ret;
 }
