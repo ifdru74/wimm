@@ -51,8 +51,10 @@
             $(".row_sel").click(function(e)
             {
                 $('.dlg_box').show();
+                $('#dlg_box_cap').text('Изменение записи');
                 table_row_selected("#"+e.currentTarget.id, "#expenses");
                 $('#HIDDEN_ID').val(e.currentTarget.id);
+                $('#FRM_MODE').val('update');
             });
         }
         function doCancel2()
@@ -66,7 +68,7 @@
             if(s1!=null && s1.length>0)
             {
                 $('#FRM_MODE').val('delete');
-                $('#expenses').submit();
+                tx_submit('/wimm2/wimm_edit2.php');
             }
             else
             {
@@ -76,6 +78,7 @@
         function add_click2()
         {
             $('#dialog_box').show();
+            $('#dlg_box_cap').text('Добавление записи');
             $('#DEL_BTN').hide();
             $('#HIDDEN_ID').val('');
             $('.form_field').val('');
@@ -93,9 +96,9 @@ function print_buttons($conn, $bd="",$ed="", $bg="-1")
 ?>
         <div style="display: block; width: 100%;">
             <label for="BDATE">Дата начала периода:</label>
-            <input class="dtp" id="BDATE" name="BDATE" type="date" value="<?php echo $bd;?>">
+            <input class="dtp" id="BDATE" name="BDATE" type="date" value="<?php echo $bd;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
             <label for="EDATE">Дата окончания периода:</label>
-            <input class="dtp" id="EDATE" name="EDATE" type="date" value="<?php echo $ed;?>">
+            <input class="dtp" id="EDATE" name="EDATE" type="date" value="<?php echo $ed;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
             <label for="f_budget">Бюджет:</label>
             <select size="1" id="f_budget" name="f_budget" onchange="$('#FRM_MODE').val('refresh'); $('#expenses').submit();">
 <?php
@@ -122,16 +125,24 @@ if($conn)	{
         {
             $fm = getRequestParam("FRM_MODE","refresh");
         }
+        $div_fmt = '<div id="show_%s" style="display:none;">%s</div>' . PHP_EOL;
 	$sql_dml = "";
         $dup_id = false;
         $t_name = value4db(urldecode(getRequestParam("t_name","Покупка!")));
+        printf($div_fmt, "t_name", $t_name);
         $t_type = str_replace("aci_", "", getRequestParam("t_type",1));
+        printf($div_fmt, "t_type", $t_type);
         $t_curr = str_replace("aci_", "", getRequestParam("t_curr",2));
+        printf($div_fmt, "t_curr", $t_curr);
         $td = getRequestParam("t_date",date("Y-m-d H:i:s"));//2014-09-01 20:30:57
+        printf($div_fmt, "t_date", $td);
         $td1 = substr($td, 0, 16);
         $t_user = str_replace("aci_", "", getRequestParam("t_user",1));
+        printf($div_fmt, "t_user", $t_user);
         $t_place = str_replace("aci_", "", getRequestParam("t_place",0));
+        printf($div_fmt, "t_place", $t_place);
         $t_budget = str_replace("aci_", "", getRequestParam("t_budget",0));
+        printf($div_fmt, "t_budget", $t_budget);
         switch($fm)
         {
             case "insert":
@@ -193,6 +204,7 @@ if($conn)	{
                 }
                 break;
 	}
+        printf($div_fmt, "sql_dml", $sql_dml);
         $dtm = new DateTime();
         $ldfmt = 'Y-m-01';//str_replace('d','01',getSessionParam('locale_date_format', 'd.m.Y'));
 	$bd = update_param("BDATE", "BEG_DATE", $dtm->format($ldfmt));
@@ -218,8 +230,8 @@ if($conn)	{
                 <DIV class="dlg_box_text" id="dlg_box_text" >
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_user">Пользователь:</label>
-                            <select class="dialog_ctl form_field" size="1" id="t_user" name="t_user"
-                                    bind_row_type="value" bind_row_id="T_USR_">
+                            <select class="dialog_ctl form_field valid sendable" size="1" id="t_user" name="t_user"
+                                    bind_row_type="value" bind_row_id="T_USR_" pattern="^[1-9][0-9]*$">
 <?php
 	$sql = "select user_id, user_name from m_users where close_date is null";
 	f_set_sel_options2($conn, formatSQL($conn, $sql), $uid, $uid, 2);
@@ -228,13 +240,15 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_name">Наименование:</label>
-                            <input class="dialog_ctl form_field" name="t_name" id="t_name" 
-                                   type="text" bind_row_type="label" bind_row_id="TNAME_" value="">
+                            <input class="dialog_ctl form_field valid sendable" name="t_name" id="t_name" 
+                                   type="text" bind_row_type="label" bind_row_id="TNAME_" 
+                                   pattern="^(?!\s*$).+" value="">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_type">Тип:</label>
-                            <input class="form_field" type="hidden" name="t_type" id="t_type" 
-                                   bind_row_type="value" bind_row_id="T_TYPE_" value="">
+                            <input class="form_field valid sendable" type="hidden" name="t_type" id="t_type" 
+                                   bind_row_type="value" bind_row_id="T_TYPE_" value=""
+                                   pattern="^[1-9][0-9]*$" focus_on="t_type_txt">
                             <input type="text" name="t_type_name" class="dialog_ctl form_field txt" value=""
                                    autocomplete="off" bound_id="t_type" ac_src="/wimm2/ac_ref.php" 
                                    ac_params="type=t_type;filter=" id="t_type_txt" scroll_height="10"
@@ -242,8 +256,9 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_curr">Валюта:</label>
-                            <input type="hidden" name="t_curr" id="t_curr" class="form_field" value=""
-                                   bind_row_type="value" bind_row_id="T_CURR_">
+                            <input type="hidden" name="t_curr" id="t_curr" class="form_field valid sendable" value=""
+                                   bind_row_type="value" bind_row_id="T_CURR_"
+                                   pattern="^[1-9][0-9]*$" focus_on="t_curr_txt">
                             <input type="text" class="dialog_ctl form_field txt" value=""
                                    autocomplete="off" bound_id="t_curr" ac_src="/wimm2/ac_ref.php" 
                                    ac_params="type=t_curr;filter=" id="t_curr_txt"
@@ -251,20 +266,22 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_sum">Сумма:</label>
-                            <input class="dialog_ctl form_field" id="t_sum" name="t_sum" 
-                                   type="text" value="" bind_row_type="title" bind_row_id="T_SUMM_">
+                            <input class="dialog_ctl form_field valid sendable" id="t_sum" name="t_sum" 
+                                   type="text" value="" bind_row_type="title" bind_row_id="T_SUMM_"
+                                   pattern="^[1-9][0-9]*[.,]?[0-9]?[0-9]?$">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_date">Дата:</label>
-                            <input class="dtp dialog_ctl form_field" id="t_date" 
+                            <input class="dtp dialog_ctl form_field valid sendable" id="t_date" 
                                    name="t_date" type="text" value="" bind_row_type="title" 
                                    pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1]) ([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$" 
                                    bind_row_id="T_DATE_">
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_place">Место:</label>
-                            <input type="hidden" name="t_place" id="t_place" class="form_field" value=""
-                                   bind_row_type="value" bind_row_id="T_PLACE_">
+                            <input type="hidden" name="t_place" id="t_place" class="form_field valid sendable" value=""
+                                   bind_row_type="value" bind_row_id="T_PLACE_"
+                                   pattern="^[1-9][0-9]*$" focus_on="t_place_txt">
                             <input type="text" class="dialog_ctl form_field txt" value=""
                                    autocomplete="off" bound_id="t_place" ac_src="/wimm2/ac_ref.php" 
                                    ac_params="type=t_place;filter=" id="t_place_txt"
@@ -272,8 +289,9 @@ if($conn)	{
                         </div>
                         <div class="dialog_row">
                             <label class="dialog_lbl" for="t_budget">Бюджет:</label>
-                            <input type="hidden" name="t_budget" id="t_budget" class="form_field" value=""
-                                   bind_row_type="value" bind_row_id="T_BUDG_">
+                            <input type="hidden" name="t_budget" id="t_budget" class="form_field valid sendable" value=""
+                                   bind_row_type="value" bind_row_id="T_BUDG_"
+                                   pattern="^[1-9][0-9]*$" focus_on="t_budget_txt">
                             <input type="text" class="dialog_ctl form_field txt" value=""
                                    autocomplete="off" bound_id="t_budget" ac_src="/wimm2/ac_ref.php" 
                                    ac_params="type=t_budget;filter=" id="t_budget_txt"
@@ -281,8 +299,8 @@ if($conn)	{
                         </div>
                 </DIV>
                 <DIV class="dlg_box_btns" id="dlg_box_btns">
-                    <input id="OK_BTN" type="button" value="Сохранить" onclick="tx_submit('/wimm2/wimm_edit2.php');">
-                    <input id="DEL_BTN" type="button" value="Удалить" onclick="del_click2()">
+                    <input id="OK_BTN" type="button" value="Сохранить" onclick="if(fancy_form_validate('expenses')) tx_submit('/wimm2/wimm_edit2.php');">
+                    <input id="DEL_BTN" type="button" value="Удалить" onclick="del_click2();">
                     <input type="button" value="Отмена" onclick="doCancel2();">
                 </DIV>
             </DIV>
@@ -322,7 +340,7 @@ if($conn)	{
                         "<input type=\"hidden\" id=\"T_USR_=transaction_id\" value=\"=user_id\">"), FALSE);
         $tb->addColumn(new tcol("<label id=\"TP_NAME_=transaction_id\" TITLE=\"=place_descr\" FOR=\"=transaction_id\">=place_name</label>".
                         "<input type=\"hidden\" id=\"T_PLACE_=transaction_id\" value=\"=place_id\">".
-                        "<input type=\"hidden\" id=\"T_BUDG_=transaction_id\" value=\"budget_id\" title=\"=budget_name\">"), FALSE);
+                        "<input type=\"hidden\" id=\"T_BUDG_=transaction_id\" value=\"=budget_id\" title=\"=budget_name\">"), FALSE);
 ?>
             <input type="hidden" id="bg" value="<?php echo $bg;?>">
 <?php
@@ -330,7 +348,7 @@ if($conn)	{
 	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
         $a_vg = false;
 	$sql = "select transaction_id, t_type_name, transaction_name, transaction_sum, type_sign, transaction_date, user_name, place_name, " .
-                " place_descr, t.currency_id t_cid, mcu.currency_name, mcu.currency_sign, mb.currency_id as bc_id, " .
+                " place_descr, t.currency_id t_cid, mcu.currency_name || ' (' || mcu.currency_abbr || ')' as currency_name, mcu.currency_sign, mb.currency_id as bc_id, " .
                 " t.place_id, t.budget_id, t.user_id, t.t_type_id, mb.budget_name " .
                 " from m_transactions t, m_transaction_types tt, m_users tu, m_places tp, m_currency mcu, m_budget mb " .
                 " where t.t_type_id=tt.t_type_id and t.user_id=tu.user_id and t.place_id=tp.place_id and t.currency_id=mcu.currency_id and " .
