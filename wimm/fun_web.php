@@ -103,33 +103,70 @@ function print_head($title)
     echo $sOut;
 }
 
-function print_body_title($title)
+function print_body_title($title='')
 {
-    $sOut = "<TABLE WIDTH=\"100%\" class=\"hidden\">" . PHP_EOL;
-    $sOut .= "\t<TR class=\"hidden\">" . PHP_EOL;
-    $sOut .= "\t\t<TD class=\"hidden\" width=\"75%\"><H2>$title</H2></TD>" . PHP_EOL;
+    $sOut = '';
     if(strcmp(basename($_SERVER['PHP_SELF']),"wimm_auth.php")!=0)	{
         $uname=getSessionParam("UNAME","?");
-        $sOut .= "<TD class=\"hidden\" width=\"25%\" VALIGN=\"TOP\" ALIGN=\"RIGHT\">";
-        $sOut .= "<FONT SIZE=\"-2\">Действующий пользователь:$uname</FONT>";
-        $sOut .= "<IMG id=\"show_bar_i\" TITLE=\"Показать панель навигации\" SRC=\"picts/drop_down.gif\" onclick=\"showNavBar('nav_bar_d','show_bar_i')\"></TD>" . PHP_EOL;
     }
-    $sOut .= "\t</TR>" . PHP_EOL;
-    $sOut .= "</TABLE>" . PHP_EOL;
-    $sOut .= "<DIV id=\"nav_bar_d\" style=\"display:none\">" . PHP_EOL;
-    $sOut .= "<TABLE WIDTH=\"100%\" class=\"hidden\"><TR class=\"hidden\">" . PHP_EOL;
-    $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_places.php\" TITLE=\"Места надо знать!\">Места</A></TD>";
-    $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_budgets.php\" TITLE=\"Бюджеты!\">Бюджеты</A></TD>";
-    $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_report.php\" TITLE=\"Отчёт!\">Отчёт</A></TD>";
-    $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_ttypes.php\" TITLE=\"Типы транзакций!\">Типы затрат</A></TD>";
-    $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_currency.php\" TITLE=\"Валюты!\">Валюты</A></TD>";
-    $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_curr_rate.php\" TITLE=\"Курсы валют!\">Обменник</A></TD>";
-    $sOut .= "<TD class=\"hidden\"><A HREF=\"tree.php\" TITLE=\"Дерево типов!\">Дерево типов</A></TD>";
-    $sOut .= "<TD class=\"hidden\"><A HREF=\"wimm_loans.php\" TITLE=\"Кредиты, набранные по жадности!\">Кредиты</A></TD>";
-    $sOut .= "\t</TR>" . PHP_EOL;
-    $sOut .= "</TABLE>" . PHP_EOL;
-    $sOut .= "</DIV>" . PHP_EOL;
-    echo $sOut;
+?>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#nav_bar_d">
+                    <span class="glyphicon glyphicon-menu-hamburger"></span>
+                </button>
+                <a class='navbar-brand' href='wimm_user.php'><?php echo $uname;?></a>
+            </div>
+            <div class="collapse navbar-collapse" id="nav_bar_d">
+                <ul class="nav navbar-nav">
+<?php
+    $indent = "                        ";
+    $sOut = "";
+    $a_nav_links = array(
+        'index.php'=>array('Расходы',"Куда пропали мои деньги?"),
+        'wimm_places.php'=>array('Места',"Места надо знать!"),
+        'wimm_budgets.php'=>array('Бюджеты',"Бюджеты!"),
+        'wimm_report.php'=>array('Отчёт',"Отчёт!"),
+        'wimm_ttypes.php'=>array('Типы затрат',"Типы транзакций!"),
+        'wimm_currency.php'=>array('Валюты',"Валюты!"),
+        'wimm_curr_rate.php'=>array('Обменник',"Курсы валют!"),
+//       'tree.php'=>array('Дерево типов',"Дерево типов!"),
+        'wimm_loans.php'=>array('Кредиты' ,"Кредиты, набранные по жадности!")
+        );
+        foreach ($a_nav_links as $nkey => $nvalue) {
+            if(strpos($_SERVER["SCRIPT_FILENAME"], $nkey)!==FALSE)
+            {
+                $link_class = 'class="active"';
+                $link_href="#";
+                $sOut .= sprintf('<li class="active"><a title="%s">%s</a></li>',$nvalue[1], $nvalue[0]);
+            }
+            else
+            {
+                $sOut .= sprintf('<li><a href="%s" title="%s">%s</a></li>', $nkey, $nvalue[1], $nvalue[0]);
+            }
+        }
+        echo $sOut . PHP_EOL;
+?>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <form action="wimm_exit.php" method="post">
+                            <input type="hidden" name="FRM_MODE" value="exit">
+                            <button type="submit" class="btn btn-toolbar" title="Завершить работу">
+                                <span class="glyphicon glyphicon-log-out"></span> Выход
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+<?php
+    if(strlen($title)>0)
+    {
+        echo "	<H2>$title</H2>" . PHP_EOL;
+    }
 }
 
 function print_title($title)
@@ -241,4 +278,63 @@ function getUsedLocale()
         return $default;    
     }
     return $ret;
+}
+
+/**
+ * creates table buttons
+ * @param string $add_btn_js - javascript for addd button
+ */
+function print_buttons($add_btn_js)
+{
+?>
+        <div class="form-group">
+            <button type="submit" class="btn btn-default" name="btn_refresh">
+                <span class="glyphicon glyphicon-refresh"></span> Обновить
+            </button>
+<?php
+    if($add_btn_js!==FALSE)
+    {
+?>
+            <button type="button" class="btn" onclick="<?php echo $add_btn_js;?>"
+                    data-toggle="modal" data-target="#dialog_box">
+                <span class="glyphicon glyphicon-plus"></span> Добавить
+            </button>
+            <button type="reset" class="btn">
+                <span class="glyphicon glyphicon-unchecked"></span> Снять выделение
+            </button>
+        </div>
+<?php
+    }
+}
+
+/**
+ * creates table filter
+ * @param PDO $conn  - current connection
+ * @param string $bd - period begin date
+ * @param string $ed - period end date
+ * @param string $bg - selected budget
+ */
+function print_filter($conn, $bd="",$ed="", $bg="-1")
+{
+?>
+    <div style="display: block; width: 100%;">
+<?php
+    if(strlen($bd)>0)	{
+?>
+        <div  class="form-group form-inline">
+            <label for="BDATE">Дата начала периода:</label>
+            <input class="dtp form-control" id="BDATE" name="BDATE" type="date" value="<?php echo $bd;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
+            <label for="EDATE">Дата окончания периода:</label>
+            <input class="dtp form-control" id="EDATE" name="EDATE" type="date" value="<?php echo $ed;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
+            <label for="f_budget">Бюджет:</label>
+            <select size="1" id="f_budget" name="f_budget" onchange="$('#FRM_MODE').val('refresh'); $('#expenses').submit();" class="form-control">
+<?php
+            $sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
+            f_set_sel_options2($conn, $sql, $bg, $bg, 2);
+?>
+            </select>
+        </div>
+    </div>
+<?php
+    }
 }

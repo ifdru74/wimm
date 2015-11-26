@@ -165,7 +165,8 @@ function onTxComplete(jqXHR, textStatus )
     }
 
     jqxr = null;
-    $("#dialog_box").hide();
+    //$("#dialog_box").hide();
+    $("#dialog_box").modal('hide');
 }
 
 function tx_submit(submitURL)
@@ -229,18 +230,15 @@ function onPageKey(key)
     {
         case 27:
             if($('#dialog_box:visible').length > 0) {
-                doCancel();
+                doCancel2();
+                $("#dialog_box").modal('hide');
             }
             break;
         case 10:
             if($('#dialog_box:visible').length > 0) {
-                if($('#OK_BTN:visible').length > 0) {
-                    tx_submit();
-                }
-                else    {
-                    if($('#ADD_BTN:visible').length > 0) {
-                        $('#expenses').submit();
-                    }
+                if(fancy_form_validate('expenses')) 
+                {
+                    tx_submit('/wimm2/wimm_edit2.php');
                 }
             }
             break;

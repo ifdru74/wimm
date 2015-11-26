@@ -49,10 +49,38 @@
 	}
 	else
             $cnt = strlen($user_name) . " - " .$user_name;        
-	print_head("Авторизация");
-	if($uid!=0)	{
+	$page_title = "Авторизация";
 ?>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="STYLESHEET" href="css/wimm.css" type="text/css"/>
+        <link rel="STYLESHEET" href="css/bootstrap.css" type="text/css"/>
+        <link rel="STYLESHEET" href="css/jquery_autocomplete_ifd.css" type="text/css"/>
+        <link rel="SHORTCUT ICON" href="picts/favicon.ico">
+        <title><?php echo $page_title;?></title>
+<?php    
+    if(isMSIE())   {
+?>        
+        <script language="JavaScript" type="text/JavaScript" src="js/jquery-1.11.1.js"></script>
+        <script language="JavaScript" type="text/JavaScript" src="js/json2.js"></script>
+<?php    
+    }
+    else {
+?>        
+        <script language="JavaScript" type="text/JavaScript" src="js/jquery-2.1.1.js"></script>
+<?php    
+    }
+?>        
+        <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
+        <script language="JavaScript" type="text/JavaScript"></script>
+    </head>
     <BODY onload="bodyOnLoad();">
+<?php    
+	if($uid!=0)
+        {
+?>
         <script language="JavaScript" type="text/JavaScript">
             function bodyOnLoad()
             {
@@ -66,11 +94,11 @@
             <input type="submit" value="Вход">
         </form>
 <?php
+            print_title($page_title);
 	}
 	else	{
 		session_destroy();
 ?>
-    <BODY onload="bodyOnLoad();">
         <script language="JavaScript" type="text/JavaScript">
             function bodyOnLoad()
             {
@@ -80,28 +108,35 @@
 <?php
 		print_title("Авторизация");
 ?>
-    <form name="auth" action="wimm_auth.php" method="post">
+    <form name="auth" action="wimm_auth.php" method="post" >
         <input type="hidden" id="dtst" name="dtst" value="">
-        <DIV style="margin: 0px auto;">
+        <DIV style="max-width: 600px; min-width: 300px; margin: 0px auto;">
 <?php
 		if(strcmp($cnt,"1")!=0)	{
                     print "<TR class=\"hidden\"><TD COLSPAN=\"2\" class=\"hidden\">";
                     if($cnt!=0)
+                    {
                         showError("Неверное имя пользователя или пароль ($cnt)");
+                    }
                     print "</TD></TR>\n";
                 }
 ?>
-            <DIV style="height: 30px; width:300px;margin: 0px auto;">
+            <DIV class="form-group">
                 <label for="UNAME">Имя пользователя:</LABEL>
-                <input style="float: right;" id="UNAME" name="UNAME" type="text" value="<?php echo $user_name;?>" autofocus="on">
+                <input id="UNAME" name="UNAME" type="text" 
+                       class="form-control" value="<?php echo $user_name;?>" 
+                       autofocus="on">
             </div>
-            <DIV style="height: 30px; width:300px;margin: 0px auto;">
+            <DIV class="form-group">
                 <label for="UPASS">Пароль:</LABEL>
-                <input style="float: right;" id="UPASS" name="UPASS" type="password" value="">
+                <input id="UPASS" name="UPASS" type="password" 
+                       class="form-control" value="">
             </DIV>
-            <DIV style="height: 30px; width:300px;margin: 0px auto;">
-                <input style="width:100px;float: left;" type="submit" value="Вход">
-                <input style="width:100px;float: right;" type="reset" value="Очистить">
+            <DIV class="form-group">
+                <button type="submit" class="btn btn-default">
+                    <span class="glyphicon glyphicon-log-in"></span> Вход
+                </button>
+                <input type="reset" class="btn" value="Очистить">
             </DIV>
         </div>
     </form>
