@@ -25,7 +25,7 @@ div.ac_list {
     border-top: 1px gray solid;
     border-right: 1px darkgray solid;
     border-bottom: 1px darkgray solid;
-    z-index: 4;
+    z-index: 2147483647;
 }
 div.ac_disp_item  {
     background-image: url("../picts/minus2.gif");
