@@ -24,6 +24,12 @@ FORM
     font-family: Tahoma;
     background-color: transparent;
 }
+
+TABLE.visual2
+{
+    width: 100%;    
+}
+
 TABLE.visual
 {
     border-collapse: collapse;
@@ -33,7 +39,7 @@ TABLE.visual
     border-bottom: black thin solid;
     width: 100%;
 }
-TABLE.hidden
+TABLE.hidden_wimm
 {
     border-collapse: collapse;
     border-right: none;
@@ -63,7 +69,7 @@ TR
     border-left: black thin solid;
     border-bottom: black thin solid;
 }
-TR.hidden
+TR.hidden_wimm
 {
     border-collapse: collapse;
     border-right: none;
@@ -235,7 +241,7 @@ TD.plan
     border-bottom: black thin solid;
     text-decoration: none;
 }
-TD.hidden
+TD.hidden_wimm
 {
     font-size: 10pt;
     color: black;
@@ -339,7 +345,7 @@ input.DLG_BTN
     width: 75px;
 }
 
-label.tl_plus
+.tl_plus
 {
     background-image: url('../picts/plus.gif');
     background-position-x: left;
@@ -347,7 +353,7 @@ label.tl_plus
     background-repeat: no-repeat;
 }
 
-label.tl_minus
+.tl_minus
 {
     background-image: url('../picts/minus.gif');
     background-position-x: left;
@@ -355,7 +361,7 @@ label.tl_minus
     background-repeat: no-repeat;
 }
 
-label.tl_none
+.tl_none
 {
     padding-left: 16px;
 }
@@ -422,4 +428,13 @@ div.input_caption
         font-size: x-large;
         margin-left: 10px;
     }
+}
+.glyphicon-none:before {
+    content: "\2122";
+    color: transparent !important;
+}
+
+label.td {
+  font-weight: normal;
+  margin-left: 5px;
 }
