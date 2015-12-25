@@ -167,6 +167,7 @@ if($conn)	{
 <?php
                     
                 }
+                break;
             case 'delete':
                 $s = value4db(getRequestParam("HIDDEN_ID",0));
                 $sql_dml = "delete from m_transactions where transaction_id=$s";
@@ -383,6 +384,8 @@ if($conn)	{
                         $pn = "";
                 }
                 $row['disp_date'] = f_get_disp_date($row['transaction_date']);
+                for($x=0; $x<50; $x ++)
+                    print "<TR><TD COLSPAN=\"6\"></TD></TR>\n";
                 echo $tb->htmlRow($row);
             }	
         }

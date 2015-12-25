@@ -122,6 +122,37 @@ FOREIGN KEY(place_id) references m_places (place_id),
 FOREIGN KEY(budget_id) references m_budget (budget_id),
 FOREIGN KEY(user_id) references m_users (user_id));
 
+create table if not exists m_goods (
+good_id 		INTEGER PRIMARY KEY,
+good_barcode	TEXT,
+good_name		TEXT NOT NULL,
+item_count		INTEGER NOT NULL,
+net_weight		REAL NOT NULL,
+open_date 		TEXT,
+close_date 		TEXT,
+user_id  		INTEGER NOT NULL,
+good_type_id 	INTEGER NOT NULL,
+FOREIGN KEY(good_type_id) references m_transaction_types (t_type_id),
+FOREIGN KEY(user_id) references m_users (user_id));
+
+create table if not exists m_transaction_goods (
+good_id 		INTEGER NOT NULL,
+good_idx		INTEGER NOT NULL,
+transaction_id	INTEGER NOT NULL,
+store_barcode	TEXT,
+currency_id		INTEGER NOT NULL,
+transaction_sum REAL NOT NULL,
+purchased_count	INTEGER NOT NULL,
+purchased_weight REAL,
+open_date 		TEXT,
+close_date 		TEXT,
+user_id  		INTEGER NOT NULL,
+PRIMARY KEY(good_id, good_idx, transaction_id),
+FOREIGN KEY(good_id) references m_goods (good_id),
+FOREIGN KEY(transaction_id) references m_transactions (transaction_id),
+FOREIGN KEY(currency_id) references m_currency (currency_id),
+FOREIGN KEY(user_id) references m_users (user_id));
+
 select transaction_id, t_type_name, transaction_name, transaction_sum, Type_sign, transaction_date, user_name, place_name,  
                  place_descr, t.currency_id t_cid, mcu.currency_sign, mb.currency_id as bc_id  
                  from m_transactions t, m_transaction_types tt, m_users tu, m_places tp, m_currency mcu, m_budget mb  

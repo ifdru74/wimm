@@ -129,6 +129,7 @@ function print_body_title($title='')
         'wimm_budgets.php'=>array('Бюджеты',"Бюджеты!"),
         'wimm_report.php'=>array('Отчёт',"Отчёт!"),
         'wimm_ttypes.php'=>array('Типы затрат',"Типы транзакций!"),
+        'wimm_goods.php'=>array('Товары',"Что продают в магазинах!"),
         'wimm_currency.php'=>array('Валюты',"Валюты!"),
         'wimm_curr_rate.php'=>array('Обменник',"Курсы валют!"),
 //       'tree.php'=>array('Дерево типов',"Дерево типов!"),
@@ -153,7 +154,7 @@ function print_body_title($title='')
                     <li>
                         <form action="wimm_exit.php" method="post">
                             <input type="hidden" name="FRM_MODE" value="exit">
-                            <button type="submit" class="btn btn-toolbar" title="Завершить работу">
+                            <button type="submit" class="btn navbar-btn" title="Завершить работу">
                                 <span class="glyphicon glyphicon-log-out"></span> Выход
                             </button>
                         </form>
@@ -287,24 +288,26 @@ function getUsedLocale()
 function print_buttons($add_btn_js)
 {
 ?>
-        <div class="form-group">
-            <button type="submit" class="btn btn-default" name="btn_refresh">
+        <div class="btn_cont form-group">
+            <button type="submit" class="btn btn-default quick_acc" name="btn_refresh" formnovalidate title="Обновить">
                 <span class="glyphicon glyphicon-refresh"></span> Обновить
-            </button>
+            </button><br>
 <?php
     if($add_btn_js!==FALSE)
     {
 ?>
-            <button type="button" class="btn" onclick="<?php echo $add_btn_js;?>"
-                    data-toggle="modal" data-target="#dialog_box">
+            <button type="button" class="btn quick_acc" onclick="<?php echo $add_btn_js;?>"
+                    data-toggle="modal" data-target="#dialog_box" title="Добавить">
                 <span class="glyphicon glyphicon-plus"></span> Добавить
-            </button>
-            <button type="reset" class="btn">
+            </button><br>
+            <button type="reset" class="btn quick_acc" title="Снять выделение">
                 <span class="glyphicon glyphicon-unchecked"></span> Снять выделение
-            </button>
-        </div>
+            </button><br>
 <?php
     }
+?>
+        </div>
+<?php
 }
 
 /**
@@ -321,7 +324,7 @@ function print_filter($conn, $bd="",$ed="", $bg="-1")
 <?php
     if(strlen($bd)>0)	{
 ?>
-        <div  class="form-group form-inline">
+        <div  class="form-group form-inline filt_cont">
             <label for="BDATE">Дата начала периода:</label>
             <input class="dtp form-control" id="BDATE" name="BDATE" type="date" value="<?php echo $bd;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
             <label for="EDATE">Дата окончания периода:</label>

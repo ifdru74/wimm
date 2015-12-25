@@ -13,7 +13,7 @@ BODY
     letter-spacing: normal;
     background-color: transparent;
 }
-FORM
+FORM.wimm
 {
     border-right: thin;
     border-top: thin;
@@ -437,4 +437,48 @@ div.input_caption
 label.td {
   font-weight: normal;
   margin-left: 5px;
+}
+
+div.btn_cont
+{
+    border: 1px solid #1b6d85;
+    position: absolute; 
+    top:150px;
+    width: 200px;
+    left: -190px;
+    padding: 5px;
+    height: 40px;
+}
+
+div.btn_cont:hover
+{
+    left: 0px;
+    background-color: window;
+    height: 150px;
+    z-index: 2147483647;
+}
+
+button.quick_acc
+{
+    vertical-align: baseline;
+    margin: 5px auto;
+}
+
+div.filt_cont
+{
+    border: 1px solid #1b6d85;
+    position: absolute; 
+    top:100px;
+    width: 200px;
+    left: -190px;
+    padding: 5px;
+    height: 40px;
+}
+
+div.filt_cont:hover
+{
+    left: 0px;
+    background-color: window;
+    height: 200px;
+    z-index: 2147483647;
 }

@@ -417,14 +417,20 @@ function displayAcBox(boxID, itemID)
             (!($(boxSel).is(":visible")) || // box not visible
             $(boxSel).attr("for")!=itemID)) // box not under item
     {
-        var p = $(itemSel).offset();
+        var p;
+        if($(itemSel).hasClass( "form-control" ))
+            p = $(itemSel).position();
+        else
+            p = $(itemSel).offset();
+        console.log('item:'+ itemID + ', top:' + p.top.toString() + ', left:' + p.left.toString())
         var s1 = $(itemSel).css( "height" );
         var n1 = 0;
         n1 = Number(s1.replace("px",""));
         n1 += n1;
         n1 += Number(p.top);
         p.top =  n1 ;
-        //$("#ac").offset({ top: p.top, left: p.left});
+        $("#ac").offset({ top: p.top, left: p.left});
+        console.log('box:'+ boxID + ', top:' + p.top.toString() + ', left:' + p.left.toString())
         $(boxSel).css("top", p.top);
         $(boxSel).css("left", p.left);
         s1 = $(itemSel).css( "width" );
