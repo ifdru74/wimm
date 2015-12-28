@@ -4,8 +4,6 @@
     if($uid===FALSE)
         die();
     include_once 'fun_dbms.php';
-    $inc = get_include_path();
-    set_include_path($inc . ";trunk\\wimm\\cls\\table");
     include_once 'table.php';
     $p_title = "Редактор мест, где тратятся деньги";
     //print_head($p_title);
@@ -120,35 +118,21 @@ if($conn)	{
         {
             $fm = getRequestParam("FRM_MODE","refresh");
         }
-	$sql = "";
-	if(strcmp($fm,"insert")==0)	{
-		$sql = "INSERT INTO m_places (place_name, open_date, place_descr, inn, user_id) VALUES(";
-		$s = (value4db(getRequestParam("p_name",'Место?')));
-		$sql .= "'$s',";
-		$td = date("Y-m-d H:i:s");
-		$sql .= "'$td',";
-		$s = (value4db(getRequestParam("p_descr",'Описание?')));
-		$sql .= "'$s',";
-		$s = (value4db(getRequestParam("p_inn",'0?')));
-		$sql .= "'$s',";
-		$sql .= "$uid)";
-	}	else if(strcmp($fm,"update")==0)	{
-		$sql = "UPDATE m_places SET ";
-		$s = (value4db(getRequestParam("p_inn",'0?')));
-		$sql .= "inn='$s',";
-		$s = (value4db(getRequestParam("p_name",'Место?')));
-		$sql .= "place_name='$s',";
-		$s = (value4db(getRequestParam("p_descr",'Описание?')));
-		$sql .= "place_descr='$s' ";
-		$sql .= "where place_id=";
-		$s = getRequestParam("HIDDEN_ID",0);
-		$sql .= $s;
-	}
-	else if(strcmp($fm,"delete")==0)	{
-		$s = getRequestParam("HIDDEN_ID",0);
-		//$sql = "delete from m_places where place_id=$s";
-                $sql = "update m_places set close_date=#NOW# where place_id=$s";
-	}
+        include_once 'wimm_dml.php';
+        $a_dml = places_dml($conn, $fm);
+        foreach ($a_dml as $kdml => $vdml) {
+            switch($kdml)
+            {
+                case 'dup_id':
+?>
+    <div>Дублирование записи <?php echo $vdml;?></div>
+<?php            
+                    break;
+                case 'sql':
+                    print "	<input ID=\"SQL\" type=\"hidden\" value=\"$vdml\">\n";
+                    break;
+            }
+        }
 ?>
         <form id='edit_form' name="places" action="wimm_places.php" method="post">
             <div id="dialog_box" class="ui-widget-content modal fade" role="dialog">
@@ -192,10 +176,6 @@ if($conn)	{
             <input type="hidden" name="HIDDEN_ID" id='HIDDEN_ID' value="0">
             <input type="hidden" name="UID" id='UID' value="<?php echo $uid; ?>">
 <?php
-	if(strlen($sql)>0)	{
-            print "            <input name=\"SQL\" type=\"hidden\" value=\"$sql\">\n";
-            $conn->query(formatSQL($conn, $sql));
-	}
 	print_buttons("onAdd();");
         $tb = new table();
         $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
@@ -214,7 +194,10 @@ if($conn)	{
         $tb->addColumn(new tcol("<label class='td' id=\"ODATE_=place_id\" FOR=\"=place_id\" title=\"open_date\">=fopen_date</label>"), FALSE);
         $tb->addColumn(new tcol("<label class='td' id=\"CDATE_=place_id\" FOR=\"=place_id\" title=\"close_date\">=fclose_date</label>"), FALSE);
         $tb->addColumn(new tcol("<label class='td' id=\"USR_=place_id\" FOR=\"=place_id\" title=\"user_id\">=user_name</label>"), FALSE);
-	$sql = "select place_id, place_name, tp.open_date, tp.close_date, place_descr, tp.user_id, user_name, inn from m_places tp, m_users tu where tp.user_id=tu.user_id order by place_name";
+	$sql = "select place_id, place_name, tp.open_date, tp.close_date, "
+                . "place_descr, tp.user_id, user_name, inn "
+                . "from m_places tp, m_users tu where tp.user_id=tu.user_id and "
+                . "tp.close_date is null order by place_name";
 	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
@@ -230,11 +213,24 @@ if($conn)	{
             }
         }
 	else	{
-		$message  = f_get_error_text($conn, "Invalid query: ");
-		print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
-	}	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество мест</TD><TD COLSPAN=\"3\">$sm</TD></TR>\n";
+            $message  = f_get_error_text($conn, "Invalid query: ");
+            echo $tb->htmlError($message);
+	}
+        print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество мест</TD><TD COLSPAN=\"3\">$sm</TD></TR>\n";
+        if(key_exists('retcode', $a_dml) && $a_dml['retcode']<0)
+        {
+            foreach ($a_dml as $kdml => $vdml) {
+                switch($kdml)
+                {
+                    case 'retcode':
+                    case 'error':
+                    case 'dbg_out':
+                        echo $tb->htmlError("<div>$vdml</div>" . PHP_EOL);
+                        break;
+                }
+            }
+        }
 	echo $tb->htmlClose();
-	print_buttons("onAdd();");
 }
 
 ?>

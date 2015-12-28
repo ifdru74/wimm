@@ -193,11 +193,6 @@ function update_param($rname, $sname, $defval='')
     return $ed;
 }
 
-function text4sql($txt)
-{
-    return str_replace(str_replace(str_replace(str_replace(str_replace($txt,"--","&mdash;")),'/*',''),'*/',''),"'","\'");
-}
-
 /**
  * converts superglobals
  */
@@ -213,6 +208,11 @@ function init_superglobals()
            extract($superglobal, EXTR_SKIP);
        }
     }
+    set_include_path( get_include_path() . PATH_SEPARATOR . 
+            "trunk" . DIRECTORY_SEPARATOR .
+            "wimm" . DIRECTORY_SEPARATOR .
+            "cls" . DIRECTORY_SEPARATOR .
+            "table");    
 }
 
 function isMSIE()

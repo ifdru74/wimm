@@ -211,7 +211,7 @@
                     $sql = "insert into m_currency_rate(currency_from, exchange_rate_from, currency_to, exchange_rate_to, open_date, close_date, user_id) values(";
                     $sql .= ($curr_from . ", ");
                     $sql .= ($rate_from . ", ");
-                    $sql .= ($rate_to . ", ");
+                    $sql .= ($curr_to . ", ");
                     $sql .= ($rate_to . ", ");
                     $sql .= (getDateFormValue("dt_open",$def_date) . ", ");
                     $sql .= (getDateFormValue("dt_close",$def_date) . ", ");

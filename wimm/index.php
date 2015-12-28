@@ -4,8 +4,6 @@
     if($uid===FALSE)
         die();
     include_once 'fun_dbms.php';
-    $inc = get_include_path();
-    set_include_path($inc . ";trunk\\wimm\\cls\\table");
     include_once 'table.php';
     /**
      * @var $conn PDO 
@@ -108,91 +106,24 @@ if($conn)	{
         {
             $fm = getRequestParam("FRM_MODE","refresh");
         }
-        $div_fmt = '<div id="show_%s" style="display:none;">%s</div>' . PHP_EOL;
-	$sql_dml = "";
-        $dup_id = false;
-        $t_name = value4db(urldecode(getRequestParam("t_name","Покупка!")));
-        printf($div_fmt, "t_name", $t_name);
-        $t_type = str_replace("aci_", "", getRequestParam("t_type",1));
-        printf($div_fmt, "t_type", $t_type);
-        $t_curr = str_replace("aci_", "", getRequestParam("t_curr",2));
-        printf($div_fmt, "t_curr", $t_curr);
-        $td = getRequestParam("t_date",date("Y-m-d H:i:s"));//2014-09-01 20:30:57
-        printf($div_fmt, "t_date", $td);
-        $td1 = substr($td, 0, 16);
-        $t_user = str_replace("aci_", "", getRequestParam("t_user",1));
-        printf($div_fmt, "t_user", $t_user);
-        $t_place = str_replace("aci_", "", getRequestParam("t_place",0));
-        printf($div_fmt, "t_place", $t_place);
-        $t_budget = str_replace("aci_", "", getRequestParam("t_budget",0));
-        printf($div_fmt, "t_budget", $t_budget);
-        switch($fm)
-        {
-            case "insert":
-		$s2 = getRequestParam("t_sum",0);
-		if(strpos($s2,",")===false)	{
-                    $t_sum = $s2;
-		}
-		else	{
-                    $t_sum = str_replace(",",".",$s2);
-		}
-                $sql_pd = "SELECT transaction_id FROM m_transactions ".
-                        "where t_type_id=$t_type and currency_id=$t_curr ".
-                        "and transaction_sum=$t_sum ".
-                        "and substr(transaction_date,1,16)='$td1';";
-                $res_pd = $conn->query($sql_pd);
-                if($res_pd) {
-                    $row_pd = $res_pd->fetch(PDO::FETCH_ASSOC);
-                    if($row_pd) {
-                        $dup_id = $row_pd['transaction_id'];
-                    }
-                }
-                if($dup_id===false) {
-                    $sql_dml = "INSERT INTO m_transactions (transaction_name, ".
-                            "t_type_id, currency_id, transaction_sum, transaction_date, ".
-                            "user_id, open_date, place_id, budget_id) VALUES(";
-                    $sql_dml .= "'$t_name',";
-                    $sql_dml .= "$t_type,";
-                    $sql_dml .= "$t_curr,";
-                    $sql_dml .= "$t_sum,";
-                    $sql_dml .= "'$td',";
-                    $sql_dml .= "$t_user,";
-                    $sql_dml .= "'$td',";
-                    $sql_dml .= "$t_place,";
-                    $sql_dml .= "$t_budget)";
-                }
-                else {
+        include_once 'wimm_dml.php';
+        $a_dml = transaction_dml($conn, $fm);
+        foreach ($a_dml as $kdml => $vdml) {
+            switch($kdml)
+            {
+                case 'dup_id':
 ?>
-    <div>Дублирование записи <?php echo $dup_id;?></div>
-<?php
-                    
-                }
-                break;
-            case 'delete':
-                $s = value4db(getRequestParam("HIDDEN_ID",0));
-                $sql_dml = "delete from m_transactions where transaction_id=$s";
-                break;
-            case 'update':
-                $s = value4db(getRequestParam("HIDDEN_ID",0));
-                if(strlen($s)>0 && $s>0)
-                {
-                    $sql_dml = 'update m_transactions set ';
-                    $sql_dml .= " transaction_name='" . $t_name . "', ";
-                    $sql_dml .= " t_type_id=$t_type, ";
-                    $sql_dml .= " currency_id=$t_curr, ";
-                    $sql_dml .= " transaction_sum=$t_sum, ";
-                    $sql_dml .= " user_id=$t_user, ";
-                    $sql_dml .= " place_id=$t_place, ";
-                    $sql_dml .= " budget_id=$t_budget ";
-                    $sql_dml .= " where transaction_id=$s";
-                }
-                break;
-	}
-        printf($div_fmt, "sql_dml", $sql_dml);
-	if(strlen($sql_dml)>0)	{
-		print "	<input ID=\"SQL\" type=\"hidden\" value=\"$sql_dml\">\n";
-		$conn->exec(formatSQL($conn, $sql_dml));
-	}
+    <div>Дублирование записи <?php echo $vdml;?></div>
+<?php            
+                    break;
+                case 'dup_id':
+                    echo $vdml;
+                    break;
+                case 'sql':
+                    print "	<input ID=\"SQL\" type=\"hidden\" value=\"$vdml\">\n";
+                    break;
+            }
+        }
         $s = "";
 ?>
 	<form id="expenses" name="expenses" method="post" accept-charset="utf-8">
@@ -282,6 +213,11 @@ if($conn)	{
                                     onclick="if(fancy_form_validate('expenses')) tx_submit('/wimm2/wimm_edit2.php');">
                                 <span class="glyphicon glyphicon-save"></span> Сохранить
                             </button>
+                            <button class="btn" type="button"
+                                    onclick="submit_myform('expenses','wimm_edit3.php','refresh');"
+                                    data-dismiss="modal">
+                                <span class="glyphicon glyphicon-edit"></span> Подробнее...
+                            </button>
                             <button class="btn" id="DEL_BTN" type="button"
                                     onclick="del_click2();">
                                 <span class="glyphicon glyphicon-remove"></span> Удалить
@@ -350,23 +286,27 @@ if($conn)	{
 		$sql .= " and t.budget_id=$bg ";
 	}
 	$sql .= "order by transaction_date";
-        $res = $conn->query(formatSQL($conn, $sql));
+        $fsql = formatSQL($conn, $sql);
+        $res = $conn->query($fsql);
 	//$res = mysql_query($sql,$conn);
 	$sm = 0;
 	$sd = 0;
 	$plus_pict = "picts/plus.gif";
 	$minus_pict = "picts/minus.gif";
 	$locale_info = localeconv();
-	if($res)	{		//print "<TR><TD COLSPAN=\"6\">Запрос пошёл</TD></TR>\n";
+	if($res)	{
             while ($row =  $res->fetch(PDO::FETCH_ASSOC)) {
                 $cid = $row['t_cid'];
                 $bid = $row['bc_id'];
+                $ns = $row['transaction_sum'];
                 if($cid!=$bid) {
-                    $row['sum_txt'] = $row['currency_sign'] . number_format(
-                            f_get_exchange_rate($conn, $row['t_cid'],$row['transaction_date'],$row['transaction_sum'] ),2,","," ");
+//                    $row['sum_txt'] = number_format(
+//                            f_get_exchange_rate($conn, $row['t_cid'],$row['transaction_date'],$row['transaction_sum'] ),2,","," ");
+                    $row['sum_txt'] = $row['currency_sign'] . number_format($ns, 2, ",", " ");
+                    $row['transaction_sum'] = f_get_exchange_rate($conn, $row['t_cid'],$row['transaction_date'], $ns );
                 }
                 else    {
-                    $row['sum_txt'] = number_format($row['transaction_sum'],2,","," ");
+                    $row['sum_txt'] = number_format($ns, 2, ",", " ");
                 }
                 $ts = $row['type_sign'];
                 if($ts>0)	{
@@ -384,14 +324,12 @@ if($conn)	{
                         $pn = "";
                 }
                 $row['disp_date'] = f_get_disp_date($row['transaction_date']);
-                for($x=0; $x<50; $x ++)
-                    print "<TR><TD COLSPAN=\"6\"></TD></TR>\n";
                 echo $tb->htmlRow($row);
             }	
         }
 	else	{
             $message  = f_get_error_text($conn, "Invalid query: ");
-            print "<TR><TD COLSPAN=\"6\">$message - $sql</TD></TR>\n";
+            print $tb->htmlError("$message - $sql");
 	}
 	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\" ALIGN=\"RIGHT\">";
 	$t = number_format($sd,2,","," ");
@@ -444,7 +382,7 @@ if($conn)	{
         }
 }
 
-        echo "<input type='hidden' id='main_sql' value=\"" . formatSQL($conn, $sql) . "\">\n";
+        echo "<input type='hidden' id='main_sql' value=\"$fsql\">\n";
 ?>
         </form>
         </div>
