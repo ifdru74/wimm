@@ -61,4 +61,13 @@ class tbody extends thead {
                 self::$HSE_TAG . PHP_EOL;
         return $sOut;
     }
+    
+    /**
+     * returns table body column count
+     * @return integer
+     */
+    public function getColCount()
+    {
+        return count($this->columns);
+    }
 }

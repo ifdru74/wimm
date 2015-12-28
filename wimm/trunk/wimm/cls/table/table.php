@@ -68,4 +68,14 @@ class table extends tbase {
             return $this->body->addColumn($col);
         }
     }
+    /**
+     * create error string
+     * @param string $error_str
+     * @return string
+     */
+    public function htmlError($error_str)
+    {
+        $cnt = $this->body->getColCount();
+        return "<TR><TD COLSPAN=\"$cnt\">$error_str</TD></TR>" . PHP_EOL;
+    }
 }
