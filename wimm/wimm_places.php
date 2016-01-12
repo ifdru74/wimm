@@ -6,7 +6,6 @@
     include_once 'fun_dbms.php';
     include_once 'table.php';
     $p_title = "Редактор мест, где тратятся деньги";
-    //print_head($p_title);
 ?>
 <html>
     <head>
@@ -113,26 +112,6 @@
 print_body_title($p_title);
 $conn = f_get_connection();
 if($conn)	{
-    $fm = "refresh";
-        if(getRequestParam("btn_refresh",FALSE)===FALSE)
-        {
-            $fm = getRequestParam("FRM_MODE","refresh");
-        }
-        include_once 'wimm_dml.php';
-        $a_dml = places_dml($conn, $fm);
-        foreach ($a_dml as $kdml => $vdml) {
-            switch($kdml)
-            {
-                case 'dup_id':
-?>
-    <div>Дублирование записи <?php echo $vdml;?></div>
-<?php            
-                    break;
-                case 'sql':
-                    print "	<input ID=\"SQL\" type=\"hidden\" value=\"$vdml\">\n";
-                    break;
-            }
-        }
 ?>
         <form id='edit_form' name="places" action="wimm_places.php" method="post">
             <div id="dialog_box" class="ui-widget-content modal fade" role="dialog">
@@ -177,6 +156,20 @@ if($conn)	{
             <input type="hidden" name="UID" id='UID' value="<?php echo $uid; ?>">
 <?php
 	print_buttons("onAdd();");
+    $fm = "refresh";
+        if(getRequestParam("btn_refresh",FALSE)===FALSE)
+        {
+            $fm = getRequestParam("FRM_MODE","refresh");
+        }
+        if(strcmp($fm,'refresh')!=0)
+        {
+            include_once 'wimm_dml.php';
+            $a_dml = places_dml($conn, $fm);
+            embed_diag_out($a_dml);
+        }
+        else {
+            $a_dml = array();
+        }
         $tb = new table();
         $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
         $tb->setIndent(3);
@@ -187,7 +180,7 @@ if($conn)	{
         $tb->addColumn(new tcol("Кто автор"), TRUE);
         $tb->body->setValue(tbody::$PN_ROW_CLASS, "table-hover");
         // column 1
-        $fmt_str = "<input name='ROW_ID' ID='=place_id' type='radio' value='=place_id' class='row_sel'>" .
+        $fmt_str = "<input name='ROW_ID' ID='=place_id' type='radio' value='=place_id' class='row_sel' =checked>" .
                 "<label class='td' TITLE='=place_descr' id='PNAME_=place_id' FOR='=place_id'>=place_name</label>";
         $tb->addColumn(new tcol($fmt_str), FALSE);
         $tb->addColumn(new tcol("<label class='td' id=\"INN_=place_id\" FOR=\"=place_id\">=inn</label>"), FALSE);
@@ -206,6 +199,13 @@ if($conn)	{
         {
             while ($row = $res->fetch(PDO::FETCH_ASSOC)) 
             {
+                if(key_exists('dup_id', $a_dml))
+                {
+                    if(strcmp($row['place_id'],$a_dml['dup_id'])==0 )
+                    {
+                        $row['checked']='checked';
+                    }
+                }
                 $row['fopen_date'] = f_get_disp_date($row['open_date']);
                 $row['fclose_date'] = f_get_disp_date($row['close_date']);
                 echo $tb->htmlRow($row);

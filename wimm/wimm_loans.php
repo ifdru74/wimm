@@ -5,8 +5,6 @@
     if($uid===FALSE)
         die();
     include_once 'fun_dbms.php';
-    $inc = get_include_path();
-    set_include_path($inc . ";trunk\\wimm\\cls\\table");
     include_once 'table.php';
     $conn = f_get_connection();
     $dtm = new DateTime();
@@ -229,89 +227,95 @@
         $hfmt = "<input id=\"%s\" name=\"%s\" type=\"hidden\" value=\"%s\">" . PHP_EOL;
         printf($hfmt, "FRM_MODE", "FRM_MODE", "refresh");
         printf($hfmt, "HIDDEN_ID", "HIDDEN_ID", "0");
-        if($conn)	{
-            if(strcmp($fm,"insert")==0)	{
-		$sql = "INSERT INTO m_loans (place_id, loan_name, start_date, end_date, loan_rate, loan_type, " .
-                        "close_date, user_id, currency_id, budget_id, loan_sum) VALUES(";
-		$s = getRequestParam("l_place",1);
-		$sql .= "$s,";
-		$s = getRequestParam("l_name","Кредит!");
-		$sql .= "'$s',";
-		$td = getRequestParam("l_bdate",date("Y-m-d H:i:s"));
-		$sql .= "'$td',";
-		$td = getRequestParam("l_edate","");
-                if(strlen($td)>0)
-                    $sql .= "'$td',";
-                else
-                    $sql .= "NULL,";
-		$s = getRequestParam("l_rate",5);
-		$sql .= "$s,";
-		$s = getRequestParam("l_type",1);
-		$sql .= "$s,";
-		$td = getRequestParam("l_cdate","");
-                if(strlen($td)>0)
-                    $sql .= "'$td',";
-                else
-                    $sql .= "NULL,";
-		$s = getRequestParam("l_user",1);
-		$sql .= "$s,";
-		$s = getRequestParam("l_curr",2);
-		$sql .= "$s,";
-		$s = getRequestParam("l_budget",1);
-		$sql .= "$s,";
-		$s = getRequestParam("l_sum",0);
-		$sql .= "$s";
-                $sql .= ")";
-            }	else if(strcmp($fm,"update")==0)	{//!!!!!!!!!!!!!!!!!!
-                $sql = "update m_loans set ";
-                $s = getRequestParam("l_place",-1);
-                if($s!=-1)
-                    $sql .= "place_id=$s, ";
-		$s = getRequestParam("l_name","");
-                if(strlen($s)>0)
-                    $sql .= "loan_name='$s', ";
-		$td = getRequestParam("l_bdate",date("Y-m-d H:i:s"));
-		$sql .= "start_date='$td'";
-		$td = getRequestParam("l_edate","");
-                if(strlen($td)>0)
-                    $sql .= ", end_date='$td'";
-                else
-                    $sql .= ", end_date=NULL";
-		$s = getRequestParam("l_rate",-1);
-                if($s!=-1)
-                    $sql .= ", loan_rate=$s ";
-		$s = getRequestParam("l_type",-1);
-                if($s!=-1)
-                    $sql .= ", loan_type=$s ";
-		$td = getRequestParam("l_cdate","");
-                if(strlen($td)>0)
-                    $sql .= ", close_date='$td'";
-                else
-                    $sql .= ", close_date=NULL";
-		$s = getRequestParam("l_user",-1);
-                if($s!=-1)
-                    $sql .= ", user_id=$s ";
-		$s = getRequestParam("l_curr",-1);
-                if($s!=-1)
-                    $sql .= ", currency_id=$s ";
-		$s = getRequestParam("l_budget",-1);
-                if($s!=-1)
-                    $sql .= ", budget_id=$s ";
-		$s = getRequestParam("l_sum",-1);
-                if($s!=-1)
-                    $sql .= ", loan_sum=$s ";
-                $s = getRequestParam("HIDDEN_ID",0);
-		$sql .= "where loan_id=$s";
-            }   else if(strcmp($fm,"delete")==0)	{
-		$s = getRequestParam("HIDDEN_ID",0);
-		$sql = "delete from m_loans where loan_id=$s";                
-            }
-            printf($hfmt, "SQL", "SQL", $sql);
-            if(strlen($sql)>0)	{
-                $conn->query(formatSQL($conn, $sql));
-                //$conn->commit();
-            }
+        include_once 'wimm_dml.php';
+        if(strcmp($fm, 'refresh')!=0)
+        {
+            $a_ret = loan_dml($conn, $fm);
+            embed_diag_out($a_ret);
         }
+//        if($conn)	{
+//            if(strcmp($fm,"insert")==0)	{
+//		$sql = "INSERT INTO m_loans (place_id, loan_name, start_date, end_date, loan_rate, loan_type, " .
+//                        "close_date, user_id, currency_id, budget_id, loan_sum) VALUES(";
+//		$s = getRequestParam("l_place",1);
+//		$sql .= "$s,";
+//		$s = getRequestParam("l_name","Кредит!");
+//		$sql .= "'$s',";
+//		$td = getRequestParam("l_bdate",date("Y-m-d H:i:s"));
+//		$sql .= "'$td',";
+//		$td = getRequestParam("l_edate","");
+//                if(strlen($td)>0)
+//                    $sql .= "'$td',";
+//                else
+//                    $sql .= "NULL,";
+//		$s = getRequestParam("l_rate",5);
+//		$sql .= "$s,";
+//		$s = getRequestParam("l_type",1);
+//		$sql .= "$s,";
+//		$td = getRequestParam("l_cdate","");
+//                if(strlen($td)>0)
+//                    $sql .= "'$td',";
+//                else
+//                    $sql .= "NULL,";
+//		$s = getRequestParam("l_user",1);
+//		$sql .= "$s,";
+//		$s = getRequestParam("l_curr",2);
+//		$sql .= "$s,";
+//		$s = getRequestParam("l_budget",1);
+//		$sql .= "$s,";
+//		$s = getRequestParam("l_sum",0);
+//		$sql .= "$s";
+//                $sql .= ")";
+//            }	else if(strcmp($fm,"update")==0)	{//!!!!!!!!!!!!!!!!!!
+//                $sql = "update m_loans set ";
+//                $s = getRequestParam("l_place",-1);
+//                if($s!=-1)
+//                    $sql .= "place_id=$s, ";
+//		$s = getRequestParam("l_name","");
+//                if(strlen($s)>0)
+//                    $sql .= "loan_name='$s', ";
+//		$td = getRequestParam("l_bdate",date("Y-m-d H:i:s"));
+//		$sql .= "start_date='$td'";
+//		$td = getRequestParam("l_edate","");
+//                if(strlen($td)>0)
+//                    $sql .= ", end_date='$td'";
+//                else
+//                    $sql .= ", end_date=NULL";
+//		$s = getRequestParam("l_rate",-1);
+//                if($s!=-1)
+//                    $sql .= ", loan_rate=$s ";
+//		$s = getRequestParam("l_type",-1);
+//                if($s!=-1)
+//                    $sql .= ", loan_type=$s ";
+//		$td = getRequestParam("l_cdate","");
+//                if(strlen($td)>0)
+//                    $sql .= ", close_date='$td'";
+//                else
+//                    $sql .= ", close_date=NULL";
+//		$s = getRequestParam("l_user",-1);
+//                if($s!=-1)
+//                    $sql .= ", user_id=$s ";
+//		$s = getRequestParam("l_curr",-1);
+//                if($s!=-1)
+//                    $sql .= ", currency_id=$s ";
+//		$s = getRequestParam("l_budget",-1);
+//                if($s!=-1)
+//                    $sql .= ", budget_id=$s ";
+//		$s = getRequestParam("l_sum",-1);
+//                if($s!=-1)
+//                    $sql .= ", loan_sum=$s ";
+//                $s = getRequestParam("HIDDEN_ID",0);
+//		$sql .= "where loan_id=$s";
+//            }   else if(strcmp($fm,"delete")==0)	{
+//		$s = getRequestParam("HIDDEN_ID",0);
+//		$sql = "delete from m_loans where loan_id=$s";                
+//            }
+//            printf($hfmt, "SQL", "SQL", $sql);
+//            if(strlen($sql)>0)	{
+//                $conn->query(formatSQL($conn, $sql));
+//                //$conn->commit();
+//            }
+//        }
 	$bg = getRequestParam("f_budget","-1");
 	print_filter($conn, $bd, $ed, $bg);
         print_buttons("onAdd();");

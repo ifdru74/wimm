@@ -259,7 +259,7 @@ function re_pattern_validate_field(field_id)
         if(patt!=null && patt!=undefined)
         {
             var val = element.value;
-            if(val!=null && val!=undefined && val.length>0)
+            if(val!=null && val!=undefined)
             {
                 var re = RegExp(patt);
                 if(re.test(val))

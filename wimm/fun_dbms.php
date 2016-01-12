@@ -230,3 +230,31 @@ function f_get_single_value($conn, $sql, $def_val)
     }
     return $ret;
 }
+
+/**
+ * execute query with supposed scalar result
+ * @param PDO    $conn     - connection
+ * @param string $sql      - parametrized statement
+ * @param array  $a_params - statement parameters
+ * @param mixed  $def_val  - default value
+ */
+function f_get_single_value_parm($conn, $sql, $a_params, $def_val)
+{
+    $ret = $def_val;
+    if(strlen($sql)>0)  {
+        /**
+         * @var $res PDO::query
+         */
+        try {
+            $stmt = $conn->prepare(formatSQL($conn, $sql));
+            $stmt->execute($a_params);
+            $row = $stmt->fetch(PDO::FETCH_NUM);
+            if(is_array($row) && count($row)>0)
+            {
+                $ret = $row[0];
+            }
+        } catch (PDOException $ex) {
+        }
+    }
+    return $ret;
+}

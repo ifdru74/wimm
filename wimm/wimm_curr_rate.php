@@ -4,8 +4,6 @@
     if($uid===FALSE)
         die();
     include_once 'fun_dbms.php';
-    $inc = get_include_path();
-    set_include_path($inc . ";trunk\\wimm\\cls\\table");
     include_once 'table.php';
     $p_title = "Обменный курс";
     print_head($p_title);
@@ -170,25 +168,6 @@
             </div>
         <?php
         /**
-         * formats datetime field value
-         * @param string $field_name
-         * @param string $def_date
-         * @return string formatted datetime value
-         */
-        function getDateFormValue($field_name, $def_date)
-        {
-            $dtf = value4db(getRequestParam($field_name,FALSE));
-            if(!$dtf)
-            {
-                $dtf = $def_date;
-            }
-            else
-            {
-                $dtf = "'" . $dtf . "'";
-            }
-            return $dtf;
-        }
-        /**
          * print table buttons before table
          * @param string $bd
          */
@@ -199,51 +178,14 @@
             {
                 $fm = getRequestParam("FRM_MODE","refresh");
             }
-            $sql = "";
-            $def_date = "#NOW#";
-            $curr_from = str_replace("aci_","", value4db(getRequestParam("tf_curr",0)));
-            $rate_from = str_replace(",", ".", value4db(getRequestParam("from_rate",0)));
-            $curr_to = str_replace("aci_","", value4db(getRequestParam("tt_curr",0)));
-            $rate_to = str_replace(",", ".", value4db(getRequestParam("to_rate",0)));
-            switch ($fm)
+            include_once 'wimm_dml.php';
+            if(strcmp($fm,"refresh")!=0)
             {
-                case "insert":
-                    $sql = "insert into m_currency_rate(currency_from, exchange_rate_from, currency_to, exchange_rate_to, open_date, close_date, user_id) values(";
-                    $sql .= ($curr_from . ", ");
-                    $sql .= ($rate_from . ", ");
-                    $sql .= ($curr_to . ", ");
-                    $sql .= ($rate_to . ", ");
-                    $sql .= (getDateFormValue("dt_open",$def_date) . ", ");
-                    $sql .= (getDateFormValue("dt_close",$def_date) . ", ");
-                    $sql .= " $uid)";
-                    break;
-                case "update":
-                    $sql = "UPDATE m_currency_rate SET ";
-                    $sql .= "currency_from=$curr_from, ";
-                    $sql .= "exchange_rate_from=$rate_from, ";
-                    $sql .= "currency_to=$curr_to, ";
-                    $sql .= "exchange_rate_to=$rate_to, ";
-                    $s = getDateFormValue("dt_open",$def_date);
-                    $sql .= "open_date=$s, ";
-                    $s = getDateFormValue("dt_close",$def_date);
-                    $sql .= "close_date=$s ";
-                    $sql .= "where currency_rate_id=";
-                    $s = value4db(getRequestParam("HIDDEN_ID",0));
-                    $sql .= $s;
-                    break;
-                case "delete":
-                    $s = value4db(getRequestParam("HIDDEN_ID",0));
-                    $sql = "delete from m_currency_rate where currency_rate_id=$s";
-                    break;
+                $a_ret = exchange_dml($conn, $fm);
             }
             $hfmt = "<input id=\"%s\" name=\"%s\" type=\"hidden\" value=\"%s\">" . PHP_EOL;
-            printf($hfmt, "p_rate_from", "p_rate_from", $rate_from);
-            printf($hfmt, "p_rate_to", "p_rate_to", $rate_to);
-            printf($hfmt, "SQL", "SQL", $sql);
-            if(strlen($sql)>0)	{
-                $conn->query(formatSQL($conn, $sql));
-                //$conn->commit();
-            }
+            if(isset($a_ret))
+                embed_diag_out($a_ret);
             printf($hfmt, "FRM_MODE", "FRM_MODE", "refresh");
             printf($hfmt, "HIDDEN_ID", "HIDDEN_ID", "0");
             print_buttons("onAdd();");

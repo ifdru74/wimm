@@ -168,8 +168,8 @@
                                        id="p_descr" value="">
                             </div>
                             <div class="form-group">
-                                <input type="radio" name="p_sign" id="p_s_m" value="-1"><img id="p_s_mi" src="picts/minus.gif">
-                                <input type="radio" name="p_sign" id="p_s_p" value="1" ><img id="p_s_pi" src="picts/plus.gif">
+                                <input type="radio" name="p_sign" id="p_s_m" value="-1"><label for="p_s_m"><img id="p_s_mi" src="picts/minus.gif">Расходы</label>
+                                <input type="radio" name="p_sign" id="p_s_p" value="1" ><label for="p_s_p"><img id="p_s_pi" src="picts/plus.gif">Доходы</label>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -191,41 +191,51 @@
                 </div>
             </div>
 <?php
-	$sql = "";
-        switch ($fm)    {
-        case "insert":
-		$sql = "INSERT INTO m_transaction_types (t_type_name, open_date, parent_type_id, type_sign, user_id) VALUES('";
-		$sql .= getRequestParam("p_name","Место?");
-		$sql .= "', #NOW#,";
-		$sql .= getRequestParam("p_descr",'NULL') . ",";
-                $sql .= getRequestParam("p_sign",0) . ",";
-		$sql .= "$uid)";
-                break;
-        case "update":
-		$sql = "UPDATE m_transaction_types SET ";
-		$s = getRequestParam("p_name","Место?");
-		$sql .= "t_type_name='$s' ";
-		$s = getRequestParam("p_descr","NULL");
-                if(strlen($s)>0)
-                    $sql .= ", parent_type_id=$s ";
-                $sql .= ", type_sign=" . getRequestParam("p_sign",0) . ' ';
-		$sql .= "where t_type_id=";
-		$s = getRequestParam("HIDDEN_ID",0);
-		$sql .= $s;
-                break;
-        case "delete":
-		$s = getRequestParam("HIDDEN_ID",0);
-		//$sql = "delete from m_transaction_types where t_type_id=$s";
-                $sql = "update m_transaction_types set close_date=#NOW# where t_type_id=$s";
-	}
-	if(strlen($sql)>0)	{
-            $sqlf = formatSQL($conn, $sql);
-            print "	<input name=\"SQL\" type=\"hidden\" value=\"$sqlf\">\n";
-            $conn->query($sqlf);
-	}
+//	$sql = "";
+//        switch ($fm)    {
+//        case "insert":
+//		$sql = "INSERT INTO m_transaction_types (t_type_name, open_date, parent_type_id, type_sign, user_id) VALUES('";
+//		$sql .= getRequestParam("p_name","Место?");
+//		$sql .= "', #NOW#,";
+//		$sql .= getRequestParam("p_descr",'NULL') . ",";
+//                $sql .= getRequestParam("p_sign",0) . ",";
+//		$sql .= "$uid)";
+//                break;
+//        case "update":
+//		$sql = "UPDATE m_transaction_types SET ";
+//		$s = getRequestParam("p_name","Место?");
+//		$sql .= "t_type_name='$s' ";
+//		$s = getRequestParam("p_descr","NULL");
+//                if(strlen($s)>0)
+//                    $sql .= ", parent_type_id=$s ";
+//                $sql .= ", type_sign=" . getRequestParam("p_sign",0) . ' ';
+//		$sql .= "where t_type_id=";
+//		$s = getRequestParam("HIDDEN_ID",0);
+//		$sql .= $s;
+//                break;
+//        case "delete":
+//		$s = getRequestParam("HIDDEN_ID",0);
+//		//$sql = "delete from m_transaction_types where t_type_id=$s";
+//                $sql = "update m_transaction_types set close_date=#NOW# where t_type_id=$s";
+//	}
+//	if(strlen($sql)>0)	{
+//            $sqlf = formatSQL($conn, $sql);
+//            print "	<input name=\"SQL\" type=\"hidden\" value=\"$sqlf\">\n";
+//            $conn->query($sqlf);
+//	}
+        $a_ret = array();
+        if(strcmp($fm,"refresh")!=0)
+        {
+            include_once 'wimm_dml.php';
+            $a_ret = ttypes_dml($conn, $fm);
+            embed_diag_out($a_ret);
+        }
+        if(key_exists('dup_id', $a_ret))
+        {
+            showError("Такой место ({$a_ret['dup_id']}) уже есть! Оно отмечено в таблице.");
+        }
 	print "<input id=\"FRM_MODE\" name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	print "<input id=\"HIDDEN_ID\" name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
-	print "<input id=\"UID\" name=\"UID\" type=\"hidden\" value=\"" . $uid ."\">\n";
 	print_buttons("doEdit('insert');");
 	print "<TABLE class=\"table table-bordered table-responsive table-striped visual2\">\n";
 	print "<thead><TR>\n";
@@ -252,9 +262,13 @@
                 $s = $row['t_type_id'];
                 $sn = $row['t_type_name'];
                 $sd = $row['parent_type_id'];
-                print "<TD><input name=\"rowid\" ID=\"$s\" type=\"radio\" value=\"$s\" class=\"row_sel\">";
+                print "<TD><input name=\"rowid\" ID=\"$s\" type=\"radio\" value=\"$s\" class=\"row_sel\"";
+                if(key_exists('dup_id', $a_ret) && strcmp($row['t_type_id'], $a_ret['dup_id'])==0)
+                {
+                    echo ' checked';
+                }
                 $s = $row['t_type_name'];
-                print "<label class='td' for='{$row['t_type_id']}' id=ln_{$row['t_type_id']}>$s</label></TD>\n";
+                print "><label class='td' for='{$row['t_type_id']}' id=ln_{$row['t_type_id']}>$s</label></TD>\n";
                 $s = $row['parent_type_id'];
                 $p = '';
                 if($s==$parent_id)

@@ -4,8 +4,6 @@
     if($uid===FALSE)
         die();
     include_once 'fun_dbms.php';
-    $inc = get_include_path();
-    set_include_path($inc . ";trunk\\wimm\\cls\\table");
     include_once 'table.php';
     $p_title = "Валюты, в которых тратятся деньги";
 ?>
@@ -151,42 +149,53 @@
             {
                 $fm = getRequestParam("FRM_MODE","refresh");
             }
-            $sql = "";
-            switch ($fm)
-            {
-                case "insert":
-                    $sql = "insert into m_currency(currency_name, currency_abbr, currency_sign, open_date, user_id) values(";
-                    $sql .= ("'" . value4db(getRequestParam("curr_name","Рубль?")) . "', ");
-                    $sql .= ("'" . value4db(getRequestParam("curr_abbr","?")) . "', ");
-                    $sql .= ("'" . value4db(getRequestParam("curr_sign","$")) . "', ");
-                    $sql .= "#NOW#, $uid)";
-                    break;
-                case "update":
-                    $sql = "UPDATE m_currency SET ";
-                    $s = value4db(getRequestParam("curr_name","Рубль?"));
-                    $sql .= "currency_name='$s', ";
-                    $s = value4db(getRequestParam("curr_abbr","?"));
-                    $sql .= "currency_abbr='$s', ";
-                    $s = value4db(getRequestParam("curr_sign","$"));
-                    $sql .= "currency_sign='$s' ";
-                    $sql .= "where currency_id=";
-                    $s = value4db(getRequestParam("HIDDEN_ID",0));
-                    $sql .= $s;
-                    break;
-                case "delete":
-                    $s = value4db(getRequestParam("HIDDEN_ID",0));
-                    $sql = "update m_currency set close_date=#NOW# where currency_id=$s";
-                    break;
-            }
+//            $sql = "";
+//            switch ($fm)
+//            {
+//                case "insert":
+//                    $sql = "insert into m_currency(currency_name, currency_abbr, currency_sign, open_date, user_id) values(";
+//                    $sql .= ("'" . value4db(getRequestParam("curr_name","Рубль?")) . "', ");
+//                    $sql .= ("'" . value4db(getRequestParam("curr_abbr","?")) . "', ");
+//                    $sql .= ("'" . value4db(getRequestParam("curr_sign","$")) . "', ");
+//                    $sql .= "#NOW#, $uid)";
+//                    break;
+//                case "update":
+//                    $sql = "UPDATE m_currency SET ";
+//                    $s = value4db(getRequestParam("curr_name","Рубль?"));
+//                    $sql .= "currency_name='$s', ";
+//                    $s = value4db(getRequestParam("curr_abbr","?"));
+//                    $sql .= "currency_abbr='$s', ";
+//                    $s = value4db(getRequestParam("curr_sign","$"));
+//                    $sql .= "currency_sign='$s' ";
+//                    $sql .= "where currency_id=";
+//                    $s = value4db(getRequestParam("HIDDEN_ID",0));
+//                    $sql .= $s;
+//                    break;
+//                case "delete":
+//                    $s = value4db(getRequestParam("HIDDEN_ID",0));
+//                    $sql = "update m_currency set close_date=#NOW# where currency_id=$s";
+//                    break;
+//            }
             $hfmt = "<input id=\"%s\" name=\"%s\" type=\"hidden\" value=\"%s\">" . PHP_EOL;
-            $sqlf = formatSQL($conn, $sql);
-            printf($hfmt, "SQL", "SQL", $sqlf);
-            if(strlen($sql)>0)	{
-                $conn->query($sqlf);
-                //$conn->commit();
+//            $sqlf = formatSQL($conn, $sql);
+//            printf($hfmt, "SQL", "SQL", $sqlf);
+//            if(strlen($sql)>0)	{
+//                $conn->query($sqlf);
+//                //$conn->commit();
+//            }
+            $a_ret = array();
+            include_once 'wimm_dml.php';
+            if(strcmp($fm,"refresh")!=0)
+            {
+                $a_ret = currency_dml($conn, $fm);
             }
             printf($hfmt, "FRM_MODE", "FRM_MODE", "refresh");
             printf($hfmt, "HIDDEN_ID", "HIDDEN_ID", "0");
+            embed_diag_out($a_ret);
+            if(key_exists('dup_id', $a_ret))
+            {
+                showError("Такая валюта ({$a_ret['dup_id']}) уже есть! Она отмечена в таблице.");
+            }
             print_buttons("onAdd();");
             $tb = new table();
             $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
@@ -197,7 +206,7 @@
             $tb->addColumn(new tcol("Дата закрытия"), TRUE);
             $tb->addColumn(new tcol("Кто автор"), TRUE);
             $tb->body->setValue(tbody::$PN_ROW_CLASS, "table-hover");
-            $fmt_str = "<input name='ROW_ID' ID='=currency_id' type='radio' value='=currency_id' class='row_sel'>" .
+            $fmt_str = "<input name='ROW_ID' ID='=currency_id' type='radio' value='=currency_id' class='row_sel' =checked>" .
                     "<LABEL class='td' TITLE='=currency_abbr' id='CNAME_=currency_id' FOR='=currency_id'>=currency_name</LABEL>";
             $tb->addColumn(new tcol($fmt_str), FALSE);
             $tb->addColumn(new tcol("<LABEL class='td' id=\"CSIGN_=currency_id\" FOR=\"=currency_id\">=currency_sign</LABEL>"), FALSE);
@@ -215,6 +224,10 @@
                 while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
                     $row['fopen_date'] = f_get_disp_date($row['open_date']);
                     $row['fclose_date'] = f_get_disp_date($row['close_date']);
+                    if(key_exists('dup_id', $a_ret) && strcmp($row['currency_id'],$a_ret['dup_id'])==0 )
+                    {
+                        $row['checked']='checked';
+                    }
                     echo $tb->htmlRow($row);
                     $sm ++;
                 }

@@ -6,7 +6,6 @@
     if($uid===FALSE)
         die();
     include_once 'fun_dbms.php';
-    $inc = get_include_path();
     /**
      * @var $conn PDO 
      */
@@ -19,42 +18,10 @@
     $sql_dml = "";
     $good_id = 0;
     $a_ret = array();
-    switch($fm)
+    include_once 'wimm_dml.php';
+    if(strcmp($fm,"refresh")!=0)
     {
-        case 'insert':
-            $sql_dml = "insert into m_goods (good_barcode, good_name, item_count, net_weight, user_id, good_type_id, open_date) values('" .
-            value4db(getRequestParam("g_barcode","")) . "','" .
-            value4db(getRequestParam("g_name","")) . "'," .
-            value4db(getRequestParam("g_count","")) . "," .
-            value4db(getRequestParam("g_weight",0)) . "," .
-            value4db(getRequestParam("g_user",1)) . "," .
-            value4db(getRequestParam("g_type",1)) . ", #NOW#)";
-            $good_id = $conn->lastInsertId();
-            break;
-        case 'update':
-            $good_id = value4db(getRequestParam("HIDDEN_ID",0));
-            $a_ret['id'] = $good_id;
-            $sql_dml = "update m_goods set " .
-            "good_barcode='" . value4db(getRequestParam("g_barcode","")) . "'," .
-            "good_name='" . value4db(getRequestParam("g_name","")) . "'," .
-            "item_count=" . value4db(getRequestParam("g_count","")) . "," .
-            "net_weight=" . value4db(getRequestParam("g_weight",0)) . "," .
-            "user_id=" . value4db(getRequestParam("g_user",1)) . "," .
-            "good_type_id=" . value4db(getRequestParam("g_type",1)) . 
-                    " where good_id=$good_id";
-            break;
-        case 'delete':
-            $good_id = value4db(getRequestParam("HIDDEN_ID",0));
-            $sql_dml = "update m_goods set close_date=#NOW# where good_id=$good_id";
-            $a_ret['id'] = $good_id;
-            break;
-    }
-    if(strlen($sql_dml)>0)	{
-        $conn->exec(formatSQL($conn, $sql_dml));
-        $a_ret['sql'] = formatSQL($conn, $sql_dml);
-    }
-    else {
-        $a_ret['error'] = 'empty SQL';
+        $a_ret = goods_dml($conn, $fm);
     }
     switch($fm)
     {
@@ -63,7 +30,6 @@
             die(json_encode($a_ret));
     }
     $page_title = "Справочник товаров";
-    set_include_path($inc . ";trunk\\wimm\\cls\\table");
     include_once 'table.php';
 ?>
 <!DOCTYPE html>
@@ -315,7 +281,7 @@
                                 <div class="form-group">
                                     <label for="t_name">Штрихкод:</label>
                                     <input class="form-control form_field valid sendable" name="g_barcode" id="g_barcode" 
-                                           type="text" bind_row_type="label" bind_row_id="G_CODE_" pattern="(^$\b[1-6][0-9]{8})" value="">
+                                           type="text" bind_row_type="label" bind_row_id="G_CODE_" pattern="(^$|\b[1-6][0-9]{8})" value="">
                                 </div>
                                 <div class="form-group">
                                     <label for="t_type">Тип:</label>
@@ -359,6 +325,12 @@
                     </div>
                 </DIV>
 <?php
+        embed_diag_out($a_ret);
+        if(key_exists('dup_id', $a_ret))
+        {
+            showError("Такой товар ({$a_ret['dup_id']}) уже есть! Он отмечен в таблице.");
+        }
+        
         print_buttons("add_click2();");
         $tb = new table();
         $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
@@ -374,7 +346,7 @@
         $tc = new tcol("Вес упаковки");
         $tb->addColumn($tc, TRUE);
         $tb->body->setValue(tbody::$PN_ROW_CLASS, "table-hover");
-        $fmt_str = "<input class='row_sel' name=\"ROW_ID\" ID=\"=good_id\" type=\"radio\" value=\"=good_id\">" .
+        $fmt_str = "<input class='row_sel' name=\"ROW_ID\" ID=\"=good_id\" type=\"radio\" value=\"=good_id\" =checked>" .
                 "<label class='td' id=\"G_NAME_=good_id\" FOR=\"=good_id\" title=\"=user_id\">=good_name</label>";
         $tb->addColumn(new tcol($fmt_str), FALSE);
         $tb->addColumn(new tcol('<label class="td" id="G_CODE_=good_id" for="=good_id">=good_barcode</span>'), FALSE);
@@ -391,6 +363,13 @@
         if($res)
         {
             while ($row =  $res->fetch(PDO::FETCH_ASSOC)) {
+                if(key_exists('dup_id', $a_ret))
+                {
+                    if(strcmp($row['good_id'],$a_ret['dup_id'])==0 )
+                    {
+                        $row['checked']='checked';
+                    }
+                }
                 echo $tb->htmlRow($row);
             }
         }

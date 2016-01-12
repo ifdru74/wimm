@@ -4,8 +4,6 @@
     if($uid===FALSE)
         die();
     include_once 'fun_dbms.php';
-    $inc = get_include_path();
-    set_include_path($inc . ";trunk\\wimm\\cls\\table");
     include_once 'table.php';
     $p_title = "Редактор бюджетов, в рамках которых тратятся деньги";
 ?>
@@ -158,42 +156,48 @@ if($conn)	{
         {
             $fm = getRequestParam("FRM_MODE","refresh");
         }
-	$sql = "";
-	if(strcmp($fm,"insert")==0)	{
-            $sql = "INSERT INTO m_budget (budget_name, open_date, budget_descr, user_id) VALUES(";
-            $s = getRequestParam("b_name","Бюджет?");
-            $sql .= "'$s',";
-            $td = date("Y-m-d H:i:s");
-            $sql .= "'$td',";
-            $s = getRequestParam("b_descr",1);
-            $sql .= "'$s',";
-            $sql .= "$uid)";
-        } else if(strcmp($fm,"update")==0)	{
-            $sql = "UPDATE m_budget SET ";
-            $s = value4db(getRequestParam("b_name","Бюджет?"));
-            $sql .= "budget_name='$s',";
-            $s = value4db(getRequestParam("b_descr",1));
-            $sql .= "budget_descr='$s', ";
-            $s = str_replace("aci_", "", value4db(getRequestParam("b_curr_id",1)));
-            $sql .= "currency_id=$s ";
-            $sql .= "where budget_id=";
-            $s = value4db(getRequestParam("HIDDEN_ID",0));
-            $sql .= $s;
-	}
-	else if(strcmp($fm,"delete")==0)	{
-            $s = getRequestParam("HIDDEN_ID",0);
-            //$sql = "delete from m_budget where budget_id=$s";
-            $sql = "update m_budget set close_date=#NOW# where budget_id=$s";
-	}
+//	$sql = "";
+//	if(strcmp($fm,"insert")==0)	{
+//            $sql = "INSERT INTO m_budget (budget_name, open_date, budget_descr, user_id) VALUES(";
+//            $s = getRequestParam("b_name","Бюджет?");
+//            $sql .= "'$s',";
+//            $td = date("Y-m-d H:i:s");
+//            $sql .= "'$td',";
+//            $s = getRequestParam("b_descr",1);
+//            $sql .= "'$s',";
+//            $sql .= "$uid)";
+//        } else if(strcmp($fm,"update")==0)	{
+//            $sql = "UPDATE m_budget SET ";
+//            $s = value4db(getRequestParam("b_name","Бюджет?"));
+//            $sql .= "budget_name='$s',";
+//            $s = value4db(getRequestParam("b_descr",1));
+//            $sql .= "budget_descr='$s', ";
+//            $s = str_replace("aci_", "", value4db(getRequestParam("b_curr_id",1)));
+//            $sql .= "currency_id=$s ";
+//            $sql .= "where budget_id=";
+//            $s = value4db(getRequestParam("HIDDEN_ID",0));
+//            $sql .= $s;
+//	}
+//	else if(strcmp($fm,"delete")==0)	{
+//            $s = getRequestParam("HIDDEN_ID",0);
+//            //$sql = "delete from m_budget where budget_id=$s";
+//            $sql = "update m_budget set close_date=#NOW# where budget_id=$s";
+//	}
         $hfmt = "<input id=\"%s\" name=\"%s\" type=\"hidden\" value=\"%s\">" . PHP_EOL;
-        printf($hfmt, "SQL", "SQL", $sql);
-	if(strlen($sql)>0)	{
-            $conn->query(formatSQL($conn, $sql));
-            //$conn->commit();
-	}
+        $a_ret = array();
+        if(strcmp($fm,'refresh')!=0)
+        {
+            include_once 'wimm_dml.php';
+            $a_ret = budget_dml($conn, $fm);
+            embed_diag_out($a_ret);
+        }
         printf($hfmt, "FRM_MODE", "FRM_MODE", "refresh");
         printf($hfmt, "HIDDEN_ID", "HIDDEN_ID", "0");
 	print_buttons("onAdd();");
+        if(key_exists('dup_id', $a_ret))
+        {
+            showError("Такой бюджет ({$a_ret['dup_id']}) уже есть! Он отмечен в таблице.");
+        }
         $tb = new table();
         $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
         $tb->setIndent(3);
@@ -202,7 +206,7 @@ if($conn)	{
         $tb->addColumn(new tcol("Дата закрытия"), TRUE);
         $tb->addColumn(new tcol("Кто автор"), TRUE);
         $tb->body->setValue(tbody::$PN_ROW_CLASS, "table-hover");
-        $fmt_str = "<input name='ROW_ID' ID='=budget_id' type='radio' value='=budget_id' class='row_sel'>" .
+        $fmt_str = "<input name='ROW_ID' ID='=budget_id' type='radio' value='=budget_id' class='row_sel' =checked>" .
                 "<LABEL class='td' TITLE='=budget_descr' id='BNAME_=budget_id' FOR='=budget_id'>=budget_name</LABEL>";
         $tb->addColumn(new tcol($fmt_str), FALSE);
         $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=open_date\" id=\"ODATE_=budget_id\" FOR=\"=budget_id\">=fopen_date</LABEL>"), FALSE);
@@ -223,6 +227,13 @@ if($conn)	{
         echo $tb->htmlOpen();
 	if($res)	{
             while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
+                if(key_exists('dup_id', $a_ret))
+                {
+                    if(strcmp($row['budget_id'],$a_ret['dup_id'])==0 )
+                    {
+                        $row['checked']='checked';
+                    }
+                }
                 $row['fopen_date'] = f_get_disp_date($row['open_date']);
                 $row['fclose_date'] = f_get_disp_date($row['close_date']);
                 echo $tb->htmlRow($row);
