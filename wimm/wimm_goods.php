@@ -77,6 +77,21 @@
                 }
                 function onLoad2()
                 {
+                    $(window).scroll(function(e) {
+                        var height = $(window).scrollTop();
+                        var h = $("#buttonz").offset();
+                        console.log("nav:" + h.top);
+                        if(height>50)
+                        {
+                            $(".btn_up").show();
+                            $("#buttonz").addClass("filt_fixed");
+                        }
+                        else
+                        {
+                            $(".btn_up").hide();
+                            $("#buttonz").removeClass("filt_fixed");
+                        }
+                    });
                     $('#dialog_box').draggable();
                     ac_init("ac", ".txt");
                     $(".row_sel").click(function(e)
@@ -324,6 +339,11 @@
                         </div>
                     </div>
                 </DIV>
+            <DIV id="buttonz">
+<?php
+	print_buttons("add_click2();");
+?>                
+            </DIV>
 <?php
         embed_diag_out($a_ret);
         if(key_exists('dup_id', $a_ret))
@@ -331,7 +351,7 @@
             showError("Такой товар ({$a_ret['dup_id']}) уже есть! Он отмечен в таблице.");
         }
         
-        print_buttons("add_click2();");
+//        print_buttons("add_click2();");
         $tb = new table();
         $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
         $tb->setIndent(3);

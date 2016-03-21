@@ -44,6 +44,21 @@
     <script language="JavaScript" type="text/JavaScript">
         function onLoad2()
         {
+            $(window).scroll(function(e) {
+                var height = $(window).scrollTop();
+                var h = $("#buttonz").offset();
+                console.log("nav:" + h.top);
+                if(height>50)
+                {
+                    $(".btn_up").show();
+                    $("#buttonz").addClass("filt_fixed");
+                }
+                else
+                {
+                    $(".btn_up").hide();
+                    $("#buttonz").removeClass("filt_fixed");
+                }
+            });
             $("body").keydown(function(e) {
                 onPageKey(e.keyCode);
             });
@@ -231,10 +246,14 @@ if($conn)	{
                     </div>
                 </div>
             </DIV>
+            <DIV id="buttonz">
 <?php
 	$bg = getRequestParam("f_budget","-1");
 	print_filter($conn, $bd, $ed, $bg);
         print_buttons("add_click2();");
+?>
+            </DIV>
+<?php
         $tb = new table();
         $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
         $tb->setIndent(3);
@@ -360,10 +379,10 @@ if($conn)	{
                 $c_class = "tl_none";//tl_none
             $t = number_format($sr*-1,2,","," ");
         }
-	print "<TR  class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Расходы - Доходы\" ALIGN=\"RIGHT\">";
-	print "Итого, разница:</TD><TD COLSPAN=\"4\"><LABEL class=\"$c_class\">$t</LABEL></TD></TR>" . PHP_EOL;
+        print "<TR  class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Расходы - Доходы\" ALIGN=\"RIGHT\">";
+        print "Итого, разница:</TD><TD COLSPAN=\"4\"><LABEL class=\"$c_class\">$t</LABEL></TD></TR>" . PHP_EOL;
 	echo $tb->htmlClose();
-	print_buttons("add_click2();");
+	//print_buttons("add_click2();");
         if($a_vg)   {
             $a_ctls = array('transaction_name'=>'t_name_a',
                 'transaction_sum'=>'t_sum_a',

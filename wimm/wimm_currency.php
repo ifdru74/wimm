@@ -40,6 +40,21 @@
         <script language="JavaScript" type="text/JavaScript">
             function onLoad()
             {
+                $(window).scroll(function(e) {
+                    var height = $(window).scrollTop();
+                    var h = $("#buttonz").offset();
+                    console.log("nav:" + h.top);
+                    if(height>50)
+                    {
+                        $(".btn_up").show();
+                        $("#buttonz").addClass("filt_fixed");
+                    }
+                    else
+                    {
+                        $(".btn_up").hide();
+                        $("#buttonz").removeClass("filt_fixed");
+                    }
+                });
                 $(".row_sel").click(function(e)
                 {
                     $('#dlg_box_cap').text('Редактировать');
@@ -140,6 +155,11 @@
                     </div>
                 </div>
             </div>
+            <DIV id="buttonz">
+<?php
+	print_buttons("onAdd();");
+?>                
+            </DIV>
             
         <?php
         $conn = f_get_connection();
@@ -196,7 +216,7 @@
             {
                 showError("Такая валюта ({$a_ret['dup_id']}) уже есть! Она отмечена в таблице.");
             }
-            print_buttons("onAdd();");
+//            print_buttons("onAdd();");
             $tb = new table();
             $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
             $tb->setIndent(3);
@@ -238,7 +258,7 @@
             }
             print "<TR class=\"white_bold\"><TD COLSPAN=\"3\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество валют</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
             echo $tb->htmlClose();
-            print_buttons("onAdd();");
+//            print_buttons("onAdd();");
         }
         // put your code here
         ?>

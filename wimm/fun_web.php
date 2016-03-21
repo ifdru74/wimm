@@ -288,10 +288,10 @@ function getUsedLocale()
 function print_buttons($add_btn_js)
 {
 ?>
-        <div class="btn_cont form-group">
+        <div class="form-group" xxx="btn_cont">
             <button type="submit" class="btn btn-default quick_acc" name="btn_refresh" formnovalidate title="Обновить">
                 <span class="glyphicon glyphicon-refresh"></span> Обновить
-            </button><br>
+            </button>
 <?php
     if($add_btn_js!==FALSE)
     {
@@ -299,10 +299,14 @@ function print_buttons($add_btn_js)
             <button type="button" class="btn quick_acc" onclick="<?php echo $add_btn_js;?>"
                     data-toggle="modal" data-target="#dialog_box" title="Добавить">
                 <span class="glyphicon glyphicon-plus"></span> Добавить
-            </button><br>
+            </button>
             <button type="reset" class="btn quick_acc" title="Снять выделение">
                 <span class="glyphicon glyphicon-unchecked"></span> Снять выделение
-            </button><br>
+            </button>
+            <button type="button" class="btn btn_up" onclick="window.scrollTo(0,0);" 
+                    title="В начало страницы" style="float: right; display: none">
+                <span class="glyphicon glyphicon-eject">Наверх</span>
+            </button>
 <?php
     }
 ?>
@@ -324,7 +328,7 @@ function print_filter($conn, $bd="",$ed="", $bg="-1")
 <?php
     if(strlen($bd)>0)	{
 ?>
-        <div  class="form-group form-inline filt_cont">
+        <div  class="form-group form-inline" xxx="filt_cont">
             <label for="BDATE">Дата начала периода:</label>
             <input class="dtp form-control" id="BDATE" name="BDATE" type="date" value="<?php echo $bd;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
             <label for="EDATE">Дата окончания периода:</label>

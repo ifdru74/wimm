@@ -482,3 +482,13 @@ div.filt_cont:hover
     height: 200px;
     z-index: 2147483647;
 }
+div.filt_fixed
+{
+    z-index: 2147483647;
+    top: 0px;
+    position: fixed;
+    border: 1px solid #1b6d85;
+    background-color: whitesmoke;
+    margin: 5px;
+    padding: 5px;
+}

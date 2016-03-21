@@ -38,6 +38,21 @@
         <script language="JavaScript" type="text/JavaScript">
             function onLoad()
             {
+                $(window).scroll(function(e) {
+                    var height = $(window).scrollTop();
+                    var h = $("#buttonz").offset();
+                    console.log("nav:" + h.top);
+                    if(height>50)
+                    {
+                        $(".btn_up").show();
+                        $("#buttonz").addClass("filt_fixed");
+                    }
+                    else
+                    {
+                        $(".btn_up").hide();
+                        $("#buttonz").removeClass("filt_fixed");
+                    }
+                });
                 ac_init("ac", ".txt");
                 $(".row_sel").click(function(e)
                 {
@@ -148,6 +163,11 @@
                 </div>
             </div>
         </div>
+            <DIV id="buttonz">
+<?php
+	print_buttons("onAdd();");
+?>                
+            </DIV>
 <?php
 $conn = f_get_connection();
 if($conn)	{
@@ -193,7 +213,7 @@ if($conn)	{
         }
         printf($hfmt, "FRM_MODE", "FRM_MODE", "refresh");
         printf($hfmt, "HIDDEN_ID", "HIDDEN_ID", "0");
-	print_buttons("onAdd();");
+//	print_buttons("onAdd();");
         if(key_exists('dup_id', $a_ret))
         {
             showError("Такой бюджет ({$a_ret['dup_id']}) уже есть! Он отмечен в таблице.");
@@ -246,7 +266,7 @@ if($conn)	{
 	}
         print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество мест</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
 	echo $tb->htmlClose();
-	print_buttons("onAdd();");
+//	print_buttons("onAdd();");
 }
 
 ?>

@@ -81,6 +81,21 @@
             }
             function onLoad()
             {
+                $(window).scroll(function(e) {
+                    var height = $(window).scrollTop();
+                    var h = $("#buttonz").offset();
+                    console.log("nav:" + h.top);
+                    if(height>50)
+                    {
+                        $(".btn_up").show();
+                        $("#buttonz").addClass("filt_fixed");
+                    }
+                    else
+                    {
+                        $(".btn_up").hide();
+                        $("#buttonz").removeClass("filt_fixed");
+                    }
+                });
                 $('#dialog_box').draggable();
                 ac_init("ac", ".txt");
                 $(".row_sel").click(function(e)
@@ -190,6 +205,11 @@
                     </div>
                 </div>
             </div>
+            <DIV id="buttonz">
+<?php
+	print_buttons("doEdit('insert');");
+?>                
+            </DIV>
 <?php
 //	$sql = "";
 //        switch ($fm)    {
@@ -236,7 +256,7 @@
         }
 	print "<input id=\"FRM_MODE\" name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
 	print "<input id=\"HIDDEN_ID\" name=\"HIDDEN_ID\" type=\"hidden\" value=\"0\">\n";
-	print_buttons("doEdit('insert');");
+//	print_buttons("doEdit('insert');");
 	print "<TABLE class=\"table table-bordered table-responsive table-striped visual2\">\n";
 	print "<thead><TR>\n";
 	print "<TH WIDTH=\"45%\">Наименование</TH>\n";
@@ -308,7 +328,6 @@
             print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
 	}
 	print "</tbody></TABLE>\n";
-	print_buttons("doEdit('insert');");
 ?>
         </form>
     </div>

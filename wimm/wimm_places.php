@@ -38,6 +38,21 @@
         <script language="JavaScript" type="text/JavaScript">
             function onLoad()
             {
+                $(window).scroll(function(e) {
+                    var height = $(window).scrollTop();
+                    var h = $("#buttonz").offset();
+                    console.log("nav:" + h.top);
+                    if(height>50)
+                    {
+                        $(".btn_up").show();
+                        $("#buttonz").addClass("filt_fixed");
+                    }
+                    else
+                    {
+                        $(".btn_up").hide();
+                        $("#buttonz").removeClass("filt_fixed");
+                    }
+                });
                 $('#dialog_box').draggable();
                 $(".row_sel").click(function(e)
                 {
@@ -154,9 +169,13 @@ if($conn)	{
             <input type="hidden" name="FRM_MODE" id='FRM_MODE' value="refresh">
             <input type="hidden" name="HIDDEN_ID" id='HIDDEN_ID' value="0">
             <input type="hidden" name="UID" id='UID' value="<?php echo $uid; ?>">
+            <DIV id="buttonz">
 <?php
 	print_buttons("onAdd();");
-    $fm = "refresh";
+?>                
+            </DIV>
+<?php
+	$fm = "refresh";
         if(getRequestParam("btn_refresh",FALSE)===FALSE)
         {
             $fm = getRequestParam("FRM_MODE","refresh");
