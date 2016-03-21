@@ -288,7 +288,7 @@ function getUsedLocale()
 function print_buttons($add_btn_js)
 {
 ?>
-        <div class="form-group" xxx="btn_cont">
+        <div class="form-group">
             <button type="submit" class="btn btn-default quick_acc" name="btn_refresh" formnovalidate title="Обновить">
                 <span class="glyphicon glyphicon-refresh"></span> Обновить
             </button>
