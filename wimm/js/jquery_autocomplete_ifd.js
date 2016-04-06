@@ -240,16 +240,19 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
                 if(arr[i].text.toString().indexOf(item_text)==0)
                     sel_item_id = arr[i].id;
             }
-            s1 = "<a href='#' id='aci_" + arr[i].id;
+            s1 = "<a href=\"javascript::selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+ arr[i].text + 
+                    "');\";' id='aci_" + arr[i].id;
             var jsc = " onclick=\"selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+
                     arr[i].text + "');\" ";
             if(arr[i].id.toString()==sel_item_id.toString())
             {
-                s1 += "' class='ac_link ac_bordered'" + jsc +">";
+                s1 += "' class='ac_link ac_bordered' " + jsc +
+                        "title='" + arr[i].text + "'>";
             }
             else
             {
-                s1 += "' class='ac_link'" + jsc +">";
+                s1 += "' class='ac_link'" + jsc +
+                        "title='" + arr[i].text + "'>";
             }
             s1 += (arr[i].text + "</a>");
             html += s1;
@@ -263,22 +266,28 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     }
     else
         $("#"+boxID).text("!");
-    $(".ac_link").click(function(e)
-    {
-        console.log('acLink click');
-        selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
-    });
-    $(".ac_link").keyup(function(e)
-    {
-        var nCode = translateKeyCode(e.which);
-        console.log('LINKKeyUp()');
-        if(nCode!=0)
-        {
-            changeSelection(boxID, nCode);
-        }
-        //keyUpAcItem(boxID, e.currentTarget.id);
-        console.log('acLink onKeyUp()');
-    });
+//    $(".ac_link").click(function(e)
+//    {
+//        console.log('acLink click');
+//        selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
+//    });
+//    $(".ac_link").on("click", function(e)
+//    {
+//        console.log('acLink click');
+//        selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
+//    });
+//    //$(".ac_link").keyup(function(e)
+//    $(".ac_link").on("keyup", function(e)
+//    {
+//        var nCode = translateKeyCode(e.which);
+//        console.log('LINKKeyUp()');
+//        if(nCode!=0)
+//        {
+//            changeSelection(boxID, nCode);
+//        }
+//        //keyUpAcItem(boxID, e.currentTarget.id);
+//        console.log('acLink onKeyUp()');
+//    });
     $("#"+boxID).keyup(function(e)
     {
         var nCode = translateKeyCode(e.which);
