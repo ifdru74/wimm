@@ -121,11 +121,11 @@
 ?>        
     <form id="edit_form" name="places" action="wimm_budgets.php" method="post">
         <div class="ui-widget-content modal fade" id="dialog_box" role="dialog">
-        <div scroll_height="100" for="" selected_ac_item="" class="ac_list" id="ac"></div>
             <div class="modal-dialog">
                 <div class="modal-content">
                     <DIV class="modal-header" id="dlg_box_cap">Изменение записи</DIV>
                     <DIV class="modal-body" id="dlg_box_text" >
+                        <div scroll_height="100" for="" selected_ac_item="" class="ac_list" id="ac"></div>
                         <div class="form-group">
                             <label for="b_name">Наименование:</label>
                             <input class="form-control form_field" name="b_name" id="b_name" type="text" 
@@ -137,14 +137,24 @@
                                    bind_row_type="title" bind_row_id="BNAME_" value="">
                         </div>
                         <div class="form-group">
-                            <label for="b_descr">Валюта:</label>
+                            <label for="t_curr_txt">Валюта:</label>
                             <input type="hidden" name="b_curr_id" id="b_curr_id" 
                                    class="form_field" value=""
-                                   bind_row_type="value" bind_row_id="T_CURR_">
+                                   bind_row_type="title" bind_row_id="T_CURR_">
                             <input type="text" class="form-control form_field txt" value=""
                                    autocomplete="off" bound_id="b_curr_id" ac_src="/wimm2/ac_ref.php" 
                                    ac_params="type=t_curr;filter=" id="t_curr_txt"
-                                   bind_row_type="title" bind_row_id="T_CURR_">
+                                   bind_row_type="label" bind_row_id="T_CURR_">
+                        </div>
+                        <div class="form-group">
+                            <label for="b_parent">Родитель:</label>
+                            <input type="hidden" name="b_parent_id" id="b_parent_id" 
+                                   class="form_field" value=""
+                                   bind_row_type="title" bind_row_id="T_PARENT_">
+                            <input type="text" class="form-control form_field txt" value=""
+                                   autocomplete="off" bound_id="b_parent_id" ac_src="/wimm2/ac_ref.php" 
+                                   ac_params="type=t_budget;filter=" id="b_parent"
+                                   bind_row_type="label" bind_row_id="T_PARENT_">
                         </div>
                     </div>
                     <DIV class="modal-footer" id="dlg_box_btns">
@@ -176,33 +186,6 @@ if($conn)	{
         {
             $fm = getRequestParam("FRM_MODE","refresh");
         }
-//	$sql = "";
-//	if(strcmp($fm,"insert")==0)	{
-//            $sql = "INSERT INTO m_budget (budget_name, open_date, budget_descr, user_id) VALUES(";
-//            $s = getRequestParam("b_name","Бюджет?");
-//            $sql .= "'$s',";
-//            $td = date("Y-m-d H:i:s");
-//            $sql .= "'$td',";
-//            $s = getRequestParam("b_descr",1);
-//            $sql .= "'$s',";
-//            $sql .= "$uid)";
-//        } else if(strcmp($fm,"update")==0)	{
-//            $sql = "UPDATE m_budget SET ";
-//            $s = value4db(getRequestParam("b_name","Бюджет?"));
-//            $sql .= "budget_name='$s',";
-//            $s = value4db(getRequestParam("b_descr",1));
-//            $sql .= "budget_descr='$s', ";
-//            $s = str_replace("aci_", "", value4db(getRequestParam("b_curr_id",1)));
-//            $sql .= "currency_id=$s ";
-//            $sql .= "where budget_id=";
-//            $s = value4db(getRequestParam("HIDDEN_ID",0));
-//            $sql .= $s;
-//	}
-//	else if(strcmp($fm,"delete")==0)	{
-//            $s = getRequestParam("HIDDEN_ID",0);
-//            //$sql = "delete from m_budget where budget_id=$s";
-//            $sql = "update m_budget set close_date=#NOW# where budget_id=$s";
-//	}
         $hfmt = "<input id=\"%s\" name=\"%s\" type=\"hidden\" value=\"%s\">" . PHP_EOL;
         $a_ret = array();
         if(strcmp($fm,'refresh')!=0)
@@ -222,6 +205,8 @@ if($conn)	{
         $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
         $tb->setIndent(3);
         $tb->addColumn(new tcol("Наименование"), TRUE);
+        $tb->addColumn(new tcol("Родитель"), TRUE);
+        $tb->addColumn(new tcol("Валюта"), TRUE);
         $tb->addColumn(new tcol("Дата создания"), TRUE);
         $tb->addColumn(new tcol("Дата закрытия"), TRUE);
         $tb->addColumn(new tcol("Кто автор"), TRUE);
@@ -229,14 +214,16 @@ if($conn)	{
         $fmt_str = "<input name='ROW_ID' ID='=budget_id' type='radio' value='=budget_id' class='row_sel' =checked>" .
                 "<LABEL class='td' TITLE='=budget_descr' id='BNAME_=budget_id' FOR='=budget_id'>=budget_name</LABEL>";
         $tb->addColumn(new tcol($fmt_str), FALSE);
+        $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=parent_id\" id=\"T_PARENT_=budget_id\" FOR=\"=budget_id\">=parent_name</LABEL>"), FALSE);
+        $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=currency_id\" id=\"T_CURR_=budget_id\" FOR=\"=budget_id\">=currency_name</LABEL>"), FALSE);
         $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=open_date\" id=\"ODATE_=budget_id\" FOR=\"=budget_id\">=fopen_date</LABEL>"), FALSE);
         $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=close_date\" id=\"CDATE_=budget_id\" FOR=\"=budget_id\">=fclose_date</LABEL>"), FALSE);
-        $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=user_id\" id=\"USER_=budget_id\" FOR=\"=budget_id\">=user_name</LABEL>" .
-                "<input type=\"hidden\" id=\"T_CURR_=budget_id\" title=\"=currency_name\" value=\"=currency_id\">"), FALSE);
+        $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=user_id\" id=\"USER_=budget_id\" FOR=\"=budget_id\">=user_name</LABEL>"), FALSE);
         
 	$sql = "select budget_id, budget_name, budget_descr, tp.open_date, " .
                 " tp.close_date, user_name, tp.user_id, tp.currency_id, " .
-                " mcu.currency_name || ' (' || mcu.currency_abbr || ')' as currency_name " .
+                " mcu.currency_name || ' (' || mcu.currency_abbr || ')' as currency_name, " .
+                " tp.parent_id " .
                 " from m_budget tp, m_users tu, m_currency mcu " .
                 " where tp.user_id=tu.user_id and tp.close_date is null ".
                 " and tp.currency_id=mcu.currency_id order by budget_name";
@@ -256,6 +243,9 @@ if($conn)	{
                 }
                 $row['fopen_date'] = f_get_disp_date($row['open_date']);
                 $row['fclose_date'] = f_get_disp_date($row['close_date']);
+                $row['parent_name'] = f_get_single_value_parm($conn, 
+                        "select budget_name from m_budget where budget_id=:bid", 
+                        array(':bid'=>$row['parent_id']), "");
                 echo $tb->htmlRow($row);
                 $sm ++;
             }
