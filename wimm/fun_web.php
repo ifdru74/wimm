@@ -208,11 +208,9 @@ function init_superglobals()
            extract($superglobal, EXTR_SKIP);
        }
     }
+    include_once './wimm_config.php';
     set_include_path( get_include_path() . PATH_SEPARATOR . 
-            "trunk" . DIRECTORY_SEPARATOR .
-            "wimm" . DIRECTORY_SEPARATOR .
-            "cls" . DIRECTORY_SEPARATOR .
-            "table");    
+                      wimm_config::getConfigParam(wimm_config::CFG_INC, '.'));    
 }
 
 function isMSIE()

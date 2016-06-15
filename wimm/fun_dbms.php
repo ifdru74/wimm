@@ -8,10 +8,10 @@
  */
 function f_get_connection()
 {
-//    $dsn = 'mysql:dbname=wimm;host=localhost';
-    $dsn = 'sqlite:D:\\Projects\\wimm\\wimm\\sqlite\\wimm.sqlite';
-    $user = '';//wimm';
-    $password = '';//'wimm1';
+    include_once 'wimm_config.php';
+    $dsn = wimm_config::getConfigParam(wimm_config::CFG_DSN, FALSE);
+    $user = wimm_config::getConfigParam(wimm_config::CFG_USR, FALSE);
+    $password = wimm_config::getConfigParam(wimm_config::CFG_PWD, FALSE);
     try {
         $conn = new PDO($dsn, $user, $password);
 //        $conn->exec("SET NAMES utf8");
