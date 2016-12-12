@@ -164,7 +164,7 @@
                                 <input type="text" class="form-control form_field txt" 
                                        id="curr_to_name" bind_row_type="value" 
                                        bind_row_id="CURR_" value="" autocomplete="off" 
-                                       bound_id="l_curr" ac_src="/wimm2/ac_ref.php"
+                                       bound_id="l_curr" ac_src="<?php echo get_autocomplete_url();?>"
                                        ac_params="type=t_curr;filter=">
                             </div>
                             <div class="form-group">
@@ -189,22 +189,23 @@
                                 <label for="place_name">Кто выдал:</label>
                                 <input type="hidden" name="l_place" id="l_place" value=""
                                        bind_row_type="title" bind_row_id="PLACE_"
-                                       class="form_field">
+                                       class="form_field valid sendable"
+                                       pattern="^[1-9][0-9]*$" focus_on="t_place_txt">
                                 <input type="text" class="form-control form_field txt" 
                                        id="place_name" bind_row_type="label" 
                                        bind_row_id="PLACE_" value="" autocomplete="off" 
-                                       bound_id="l_place" ac_src="/wimm2/ac_ref.php"
+                                       bound_id="l_place" ac_src="<?php echo get_autocomplete_url();?>"
                                        ac_params="type=t_place;filter=">
                             </div>
                             <div class="form-group">
                                 <label for="t_budget_txt">Бюджет:</label>
                                 <input type="hidden" name="l_budget" id="l_budget" 
                                        bind_row_type="title" bind_row_id="BUDG_"
-                                       value="" class="form_field">
+                                       value="" class="form_field valid sendable">
                                 <input type="text" class="form-control form_field txt" value=""
                                        bind_row_type="value" bind_row_id="BUDG_"
                                        autocomplete="off" bound_id="l_budget" 
-                                       ac_src="/wimm2/ac_ref.php" 
+                                       ac_src="<?php echo get_autocomplete_url();?>" 
                                        ac_params="type=t_budget;filter=" id="t_budget_txt">
                             </div>
                             <div class="form-group">
