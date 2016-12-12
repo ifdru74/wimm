@@ -343,3 +343,13 @@ function print_filter($conn, $bd="",$ed="", $bg="-1")
 <?php
     }
 }
+
+/**
+ * compose auto-complete URL
+ */
+function get_autocomplete_url()
+{
+    include_once 'wimm_config.php';
+    return "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . 
+            DIRECTORY_SEPARATOR . wimm_config::getConfigParam(wimm_config::CFG_AC, "ac_ref.php");
+}

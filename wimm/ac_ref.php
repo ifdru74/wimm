@@ -22,10 +22,10 @@
                 }
                 break;
             case "t_curr":
-                $sql = "SELECT currency_id as r_id, currency_name || ' (' || currency_abbr || ')' as r_name FROM m_currency WHERE close_date is null";
+                $sql = "SELECT currency_id as r_id, #CONCAT#(currency_name #||# ' (' #||# currency_abbr #||# ')') as r_name FROM m_currency WHERE close_date is null";
                 if($filter!==FALSE)
                 {
-                    $sql .= " and currency_name like '$filter%'";
+                    $sql .= " and #CONCAT#(currency_name #||# ' (' #||# currency_abbr #||# ')') like '$filter%'";
                 }
                 if($rep_id!==FALSE)
                 {
@@ -60,7 +60,7 @@
             include_once 'fun_dbms.php';
             $sql .= " order by 2";
             $conn = f_get_connection();
-            $stmt = $conn->query($sql);
+            $stmt = $conn->query(formatSQL($conn,$sql));
             if($stmt)
             {
                 while($row = $stmt->fetch(PDO::FETCH_ASSOC))

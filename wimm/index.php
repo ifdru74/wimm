@@ -42,8 +42,32 @@
     <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
     <script language="JavaScript" type="text/JavaScript" src="js/bootstrap.js"></script>
     <script language="JavaScript" type="text/JavaScript">
+        var tmr;
+        var to;
+        function focus_fun()
+        {
+            console.log("focus_fun() begin");
+            if($('#FRM_MODE').val()=='insert')
+            {
+                document.getElementById('t_user').focus();
+                var d = new Date();
+/*                var s = d.getFullYear().toString() + "-" + 
+                        (d.getMonth()+1).toString() + "-" + 
+                        d.getDate().toString() + " " + 
+                        d.getHours().toString() + ":" + 
+                        d.getMinutes().toString() + ":" + 
+                        d.getSeconds().toString());*/
+                var s = d.toISOString().replace("T"," ");
+                document.getElementById('t_date').value = s.substr(0,19);
+            }
+            else
+                document.getElementById('t_name').focus();
+            clearTimeout(tmr);
+            console.log("focus_fun() end");
+        }
         function onLoad2()
         {
+            to = 500;
             $(window).scroll(function(e) {
                 var height = $(window).scrollTop();
                 var h = $("#buttonz").offset();
@@ -73,6 +97,13 @@
                 $('#HIDDEN_ID').val(e.currentTarget.id);
                 $('#FRM_MODE').val('update');
                 $("#dialog_box").modal('show');
+                tmr = setTimeout(function(){ focus_fun(); }, to);
+            });
+            $('#dlg_box_text').show(function f()
+            {
+                console.log("shown() begin");
+                tmr = setTimeout(function(){ focus_fun(); }, to);
+                console.log("shown() end");
             });
         }
         function doCancel2()
@@ -101,7 +132,7 @@
             $('.form_field').val('');
             $('#FRM_MODE').val('insert');
             //$('.dlg_box').show();
-            document.getElementById('t_user').focus();
+            tmr = setTimeout(function(){ focus_fun(); }, to);
             //$("#dialog_box").modal();
         }
     </script>
@@ -175,7 +206,7 @@ if($conn)	{
                                        bind_row_type="value" bind_row_id="T_TYPE_" value=""
                                        pattern="^[1-9][0-9]*$" focus_on="t_type_txt">
                                 <input type="text" name="t_type_name" class="form-control form_field txt" value=""
-                                       autocomplete="off" bound_id="t_type" ac_src="/wimm2/ac_ref.php" 
+                                       autocomplete="off" bound_id="t_type" ac_src="<?php echo get_autocomplete_url();?>" 
                                        ac_params="type=t_type;filter=" id="t_type_txt" scroll_height="10"
                                        bind_row_type="title" bind_row_id="TNAME_">
                             </div>
@@ -185,7 +216,7 @@ if($conn)	{
                                        bind_row_type="value" bind_row_id="T_CURR_"
                                        pattern="^[1-9][0-9]*$" focus_on="t_curr_txt">
                                 <input type="text" class="form-control form_field txt" value=""
-                                       autocomplete="off" bound_id="t_curr" ac_src="/wimm2/ac_ref.php" 
+                                       autocomplete="off" bound_id="t_curr" ac_src="<?php echo get_autocomplete_url();?>" 
                                        ac_params="type=t_curr;filter=" id="t_curr_txt"
                                        bind_row_type="title" bind_row_id="T_CURR_">
                             </div>
@@ -208,7 +239,7 @@ if($conn)	{
                                        bind_row_type="value" bind_row_id="T_PLACE_"
                                        pattern="^[1-9][0-9]*$" focus_on="t_place_txt">
                                 <input type="text" class="form-control form_field txt" value=""
-                                       autocomplete="off" bound_id="t_place" ac_src="/wimm2/ac_ref.php" 
+                                       autocomplete="off" bound_id="t_place" ac_src="<?php echo get_autocomplete_url();?>" 
                                        ac_params="type=t_place;filter=" id="t_place_txt"
                                        bind_row_type="label" bind_row_id="TP_NAME_">
                             </div>
@@ -218,7 +249,7 @@ if($conn)	{
                                        bind_row_type="value" bind_row_id="T_BUDG_"
                                        pattern="^[1-9][0-9]*$" focus_on="t_budget_txt">
                                 <input type="text" class="form-control form_field txt" value=""
-                                       autocomplete="off" bound_id="t_budget" ac_src="/wimm2/ac_ref.php" 
+                                       autocomplete="off" bound_id="t_budget" ac_src="<?php echo get_autocomplete_url();?>" 
                                        ac_params="type=t_budget;filter=" id="t_budget_txt"
                                        bind_row_type="title" bind_row_id="T_BUDG_">
                             </div>
@@ -295,7 +326,7 @@ if($conn)	{
 	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
         $a_vg = false;
 	$sql = "select transaction_id, t_type_name, transaction_name, transaction_sum, type_sign, transaction_date, user_name, place_name, " .
-                " place_descr, t.currency_id t_cid, mcu.currency_name || ' (' || mcu.currency_abbr || ')' as currency_name, mcu.currency_sign, mb.currency_id as bc_id, " .
+                " place_descr, t.currency_id t_cid, #CONCAT#(mcu.currency_name #||# ' (' #||# mcu.currency_abbr #||# ')') as currency_name, mcu.currency_sign, mb.currency_id as bc_id, " .
                 " t.place_id, t.budget_id, t.user_id, t.t_type_id, mb.budget_name " .
                 " from m_transactions t, m_transaction_types tt, m_users tu, m_places tp, m_currency mcu, m_budget mb " .
                 " where t.t_type_id=tt.t_type_id and t.user_id=tu.user_id and t.place_id=tp.place_id and t.currency_id=mcu.currency_id and " .

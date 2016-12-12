@@ -8,6 +8,8 @@ final class wimm_config   {
     const CFG_USR = "user";
     const CFG_PWD = "password";
     const CFG_INC = "include_path";
+    const CFG_AC = "autocomplete";
+    const CFG_SQLN = "CONN_CONFIG";
     private  static $properties = array(
             //self::CFG_DSN => 'mysql:dbname=wimm;host=localhost'
             self::CFG_DSN => 'sqlite:D:\\Projects\\wimm\\wimm\\sqlite\\wimm.sqlite',
@@ -18,7 +20,12 @@ final class wimm_config   {
             self::CFG_INC => "trunk" . DIRECTORY_SEPARATOR .
                              "wimm" . DIRECTORY_SEPARATOR .
                              "cls" . DIRECTORY_SEPARATOR .
-                             "table"
+                             "table",
+            self::CFG_AC => 'ac_ref.php',
+//            self::CFG_SQLN => array(
+//                "names" => 'SET NAMES utf8',
+//                "collation" => ''   // SET COLLATION_CONNECTION=CP1251_GENERAL_CI
+//                )
             );
     /**
      * provides access to parameters
