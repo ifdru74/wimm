@@ -117,7 +117,7 @@
             if(s1!=null && s1.length>0)
             {
                 $('#FRM_MODE').val('delete');
-                tx_submit('/wimm2/wimm_edit2.php');
+                tx_submit('<?php echo dirname($_SERVER['PHP_SELF']);?>/wimm_edit2.php');
             }
             else
             {
@@ -256,7 +256,7 @@ if($conn)	{
                         </DIV>
                         <DIV class="modal-footer" id="dlg_box_btns">
                             <button class="btn" id="OK_BTN" type="button"
-                                    onclick="if(fancy_form_validate('expenses')) tx_submit('/wimm2/wimm_edit2.php');">
+                                    onclick="if(fancy_form_validate('expenses')) tx_submit('<?php echo dirname($_SERVER['PHP_SELF']);?>/wimm_edit2.php');">
                                 <span class="glyphicon glyphicon-save"></span> Сохранить
                             </button>
                             <button class="btn" type="button"
@@ -307,16 +307,16 @@ if($conn)	{
         // body
         $tb->body->setValue(tbody::$PN_ROW_CLASS, "table-hover");
         $fmt_str = "<input class='row_sel' name=\"ROW_ID\" ID=\"=transaction_id\" type=\"radio\" value=\"=transaction_id\">" .
-                "<label class='td' TITLE=\"=t_type_name\" id=\"TNAME_=transaction_id\" FOR=\"=transaction_id\">=transaction_name</span>";
+                "<label class='td' TITLE=\"=t_type_name\" id=\"TNAME_=transaction_id\" FOR=\"=transaction_id\">=transaction_name</label>";
         $tb->addColumn(new tcol($fmt_str), FALSE);
-        $fmt_str2 = '<label class="td =tl_class" ID="T_SUMM_=transaction_id" FOR="=transaction_id" title="=transaction_sum">=sum_txt</span>'.
+        $fmt_str2 = '<label class="td =tl_class" ID="T_SUMM_=transaction_id" FOR="=transaction_id" title="=transaction_sum">=sum_txt</label>'.
                         '<input type="hidden" id="T_TYPE_=transaction_id" value="=t_type_id">'.
                         '<input type="hidden" title="=currency_name" id="T_CURR_=transaction_id" value="=t_cid">';
         $tb->addColumn(new tcol($fmt_str2), FALSE);
-        $tb->addColumn(new tcol('<label class="td" id="T_DATE_=transaction_id" for="=transaction_id" TITLE="=transaction_date">=disp_date</span>'), FALSE);
-        $tb->addColumn(new tcol("<label class='td' id=\"L_USR_=transaction_id\"FOR=\"=transaction_id\">=user_name</span>" .
+        $tb->addColumn(new tcol('<label class="td" id="T_DATE_=transaction_id" for="=transaction_id" TITLE="=transaction_date">=disp_date</label>'), FALSE);
+        $tb->addColumn(new tcol("<label class='td' id=\"L_USR_=transaction_id\"FOR=\"=transaction_id\">=user_name</label>" .
                         "<input type=\"hidden\" id=\"T_USR_=transaction_id\" value=\"=user_id\">"), FALSE);
-        $tb->addColumn(new tcol("<label class='td' id=\"TP_NAME_=transaction_id\" TITLE=\"=place_descr\" FOR=\"=transaction_id\">=place_name</span>".
+        $tb->addColumn(new tcol("<label class='td' id=\"TP_NAME_=transaction_id\" TITLE=\"=place_descr\" FOR=\"=transaction_id\">=place_name</label>".
                         "<input type=\"hidden\" id=\"T_PLACE_=transaction_id\" value=\"=place_id\">".
                         "<input type=\"hidden\" id=\"T_BUDG_=transaction_id\" value=\"=budget_id\" title=\"=budget_name\">"), FALSE);
 ?>
