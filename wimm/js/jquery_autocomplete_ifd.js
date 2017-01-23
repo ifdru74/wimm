@@ -223,6 +223,7 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     var html = "";
     var o;
     var s1;
+    var bShow = true;
     o = document.getElementById(boxID);
     if(o!=null)
     {
@@ -233,61 +234,47 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
             item_text = $("#"+sel_item_id).val();
         }
         sel_item_id = "";
-        for(i = 0; i < arr.length; i++)
+        if(arr.length==1)
         {
-            if(sel_item_id.length<1 && item_text.length>0)
-            {
-                if(arr[i].text.toString().indexOf(item_text)==0)
-                    sel_item_id = arr[i].id;
-            }
-            s1 = "<a href=\"javascript::selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+ arr[i].text + 
-                    "');\";' id='aci_" + arr[i].id;
-            var jsc = " onclick=\"selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+
-                    arr[i].text + "');\" ";
-            if(arr[i].id.toString()==sel_item_id.toString())
-            {
-                s1 += "' class='ac_link ac_bordered' " + jsc +
-                        "title='" + arr[i].text + "'>";
-            }
-            else
-            {
-                s1 += "' class='ac_link'" + jsc +
-                        "title='" + arr[i].text + "'>";
-            }
-            s1 += (arr[i].text + "</a>");
-            html += s1;
+            selectAcItem(boxID, arr[0].id, arr[0].text);
+            bShow = false;
         }
-        o.innerHTML = html;
-        if(sel_item_id.length>0)
+        else
         {
-            o.setAttribute("selected_ac_item", sel_item_id);
-            scrollToItem(boxID, sel_item_id);
+            for(i = 0; i < arr.length; i++)
+            {
+                if(sel_item_id.length<1 && item_text.length>0)
+                {
+                    if(arr[i].text.toString().indexOf(item_text)==0)
+                        sel_item_id = arr[i].id;
+                }
+                s1 = "<a href=\"javascript::selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+ arr[i].text + 
+                        "');\";' id='aci_" + arr[i].id;
+                var jsc = " onclick=\"selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+
+                        arr[i].text + "');\" ";
+                if(arr[i].id.toString()==sel_item_id.toString())
+                {
+                    s1 += "' class='ac_link ac_bordered' " + jsc +
+                            "title='" + arr[i].text + "'>";
+                }
+                else
+                {
+                    s1 += "' class='ac_link'" + jsc +
+                            "title='" + arr[i].text + "'>";
+                }
+                s1 += (arr[i].text + "</a>");
+                html += s1;
+            }
+            o.innerHTML = html;
+            if(sel_item_id.length>0)
+            {
+                o.setAttribute("selected_ac_item", sel_item_id);
+                scrollToItem(boxID, sel_item_id);
+            }
         }
     }
     else
         $("#"+boxID).text("!");
-//    $(".ac_link").click(function(e)
-//    {
-//        console.log('acLink click');
-//        selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
-//    });
-//    $(".ac_link").on("click", function(e)
-//    {
-//        console.log('acLink click');
-//        selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
-//    });
-//    //$(".ac_link").keyup(function(e)
-//    $(".ac_link").on("keyup", function(e)
-//    {
-//        var nCode = translateKeyCode(e.which);
-//        console.log('LINKKeyUp()');
-//        if(nCode!=0)
-//        {
-//            changeSelection(boxID, nCode);
-//        }
-//        //keyUpAcItem(boxID, e.currentTarget.id);
-//        console.log('acLink onKeyUp()');
-//    });
     $("#"+boxID).keyup(function(e)
     {
         var nCode = translateKeyCode(e.which);
@@ -320,7 +307,8 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     {
         $("#" + boxID).css( "overflow", "auto");
     }
-    $("#" + boxID).show();
+    if(bShow===true)
+        $("#" + boxID).show();
     console.log('leaving parseResponse()');
 }
 /**
