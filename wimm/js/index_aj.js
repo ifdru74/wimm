@@ -7,19 +7,6 @@ var bCtrlHit = false;   // ctrl held down
 var aParts = [[0,4,-1,0], [5,2,12,1], [8,2,31,1], [11,2,23,0], [14,2,59,0], [17,2,59,0]];   // text parts
 var aDays = [0,31,28,31,30,31,30,31,31,30,31,30,31];    // month's days
 var jqxr = null;    // jQuery ajax request
-// type - value type "s" - text, "n" - numeric, "d" - date
-// tbl_type - table disp type "t" - text, "v" - value, i - title
-var a_fields = [
-    {id:"t_user",len:0,type:"n",val:0,in_tbl:"#L_USR_",tbl_type:"t"},
-    {id:"t_user",len:0,type:"n",val:0,in_tbl:"#T_USR_",tbl_type:"v"},
-    {id:"t_name",len:0,type:"s",val:0,in_tbl:"#TNAME_",tbl_type:"t"},
-    {id:"t_type",len:0,type:"n",val:0,in_tbl:"#T_TYPE_",tbl_type:"v"},
-    {id:"t_curr",len:0,type:"n",val:0,in_tbl:"#T_CURR_",tbl_type:"v"},
-    {id:"t_sum",len:0,type:"n",val:0,in_tbl:"#T_SUMM_",tbl_type:"t"},
-    {id:"t_date",len:0,type:"d",val:0,in_tbl:"#T_DATE_",tbl_type:"t"},//2014-05-05 05:05:05
-    {id:"t_date",len:18,type:"d",val:0,in_tbl:"#T_DATE_",tbl_type:"i"},//2014-05-05 05:05:05
-    {id:"t_place",len:0,type:"n",val:0,in_tbl:"#T_PLACE_",tbl_type:"v"},
-    {id:"t_budget",len:0,type:"n",val:0,in_tbl:"#T_BUDG_",tbl_type:"v"}];
 
 /**
  * converts datetime string to display
@@ -33,7 +20,7 @@ function format_date(sDate)
     {
         var d = new Date();
         d.parse(sDate);
-        sRet = d.toISOString()
+        sRet = d.toISOString();
     }
     catch(e)
     {
@@ -72,35 +59,39 @@ function doCancel()
 
 function onTxComplete(jqXHR, textStatus )
 {
-    if(textStatus.indexOf("success")==0)    {
+    if(textStatus.indexOf("success")===0)    {
         var row_id = $("#HIDDEN_ID").val();
         if(row_id!==null&&row_id!==undefined&&row_id.length>0)  {
             var i, v;
             var s1 = '{"id":"1","err":"error"}';
             console_debug_log('response=' + jqXHR.responseText);
-            if(jqXHR.responseText!==null && jqXHR.responseText!==undefined && 
+            if(jqXHR.responseText!==null && 
+                    jqXHR.responseText!==undefined && 
                     jqXHR.responseText.length>0)  {
                 i = JSON.parse(jqXHR.responseText);
                 console_debug_log("id="+i.id);
                 console_debug_log("error="+i.err);
+                var v_sum = Number(i.t_sum);
+                console_debug_log("sum="+v_sum);
                 v = $("#FRM_MODE").val();
                 console_debug_log("mode="+v);
-                if(v.indexOf("delete")==0)
+                if(v.indexOf("delete")===0)
                 {
                     $("#"+row_id).parent().parent().remove();
                 }
                 else {
+                    $("#T_SUMM_"+row_id).text(v_sum.toFixed(2));
                     var form_fields = $('#expenses').find(".form_field");
                     for(i=0; i<form_fields.length; i++)
                     {
                         var bt = form_fields[i].getAttribute("bind_row_type");
                         var bi = "#" + form_fields[i].getAttribute("bind_row_id") + row_id;
                         var v = form_fields[i].value;
-                        if(v.substr(0,4)=='aci_')
+                        if(v.substr(0,4)==='aci_')
                         {
                             v = v.substr(4);
                         }
-                        if(form_fields[i].id.indexOf('t_date')==0)
+                        if(form_fields[i].id.indexOf('t_date')===0)
                         {
                             $(bi).attr('title', v);
                             $(bi).text(format_date(v));
@@ -121,23 +112,6 @@ function onTxComplete(jqXHR, textStatus )
                             }
                         }
                     }
-//                    for(i=0; i<a_fields.length; i++)    {
-//                        v = $("#"+a_fields[i].id).val();
-//                        if(a_fields[i].tbl_type.indexOf("v"))
-//                            $(a_fields[i].in_tbl + row_id).val(v);
-//                        if(a_fields[i].tbl_type.indexOf("t"))   {
-//                            if(a_fields[i].id.indexOf('t_date')==0)
-//                                $(a_fields[i].in_tbl + row_id).text(format_date(v));
-//                            else
-//                                $(a_fields[i].in_tbl + row_id).text(v);
-//                        }
-//                        if(a_fields[i].tbl_type.indexOf("i"))
-//                            $(a_fields[i].in_tbl + row_id).attr("title",v);
-//                        if(a_fields[i].tbl_type.indexOf("x"))   {
-//                            var t = $("#"+a_fields[i].id).text();
-//                            $(a_fields[i].l_tbl + row_id).text(t);
-//                        }
-//                    }
                 }
             }
             else
@@ -149,7 +123,7 @@ function onTxComplete(jqXHR, textStatus )
             console_debug_log('response=' + jqXHR.responseText);
             v = $("#FRM_MODE").val();
             console_debug_log("mode="+v);
-            if(v.indexOf("insert")==0)
+            if(v.indexOf("insert")===0)
             {
                 if(jqXHR.responseText!==null && jqXHR.responseText!==undefined && 
                         jqXHR.responseText.length>0)  {
@@ -177,7 +151,7 @@ function tx_submit(submitURL)
     var msg = "";
     var currentdate = new Date(); 
     v = $("#FRM_MODE").val();
-    if(v=='insert')
+    if(v==='insert')
     {
         $('#expenses').submit();
         return;
@@ -185,14 +159,14 @@ function tx_submit(submitURL)
     var reqStr = "time=" + Date.now() + "&FRM_MODE=" + v + 
             "&HIDDEN_ID=" + $("#HIDDEN_ID").val();
     var fields = $('#expenses').find('.sendable');
-    if(fields!=null && fields!=undefined)
+    if(fields!==null && fields!==undefined)
     {
         for(i=0; i<fields.length; i++)
         {
             try {
                 f = fields[i].getAttribute("id");;
                 v = fields[i].value;
-                if(v.substr(0,4)=='aci_')
+                if(v.substr(0,4)==='aci_')
                 {
                     v = v.substr(4);
                 }
@@ -204,12 +178,6 @@ function tx_submit(submitURL)
         }
     }
     console_debug_log("request:"+reqStr);
-    if(inv_idx>=0&&inv_idx<a_fields.length)  {
-        if(msg.length>0)
-            alert(msg);
-        console_debug_log("error at:"+inv_idx.toString());
-        return;
-    }
     console_debug_log("query!");
     jqxr = $.ajax({
         type: "POST",
@@ -217,10 +185,6 @@ function tx_submit(submitURL)
         data: reqStr,
         complete: onTxComplete
     });
-//    if(jqxr.responseText.length>0)
-//        onTxComplete(jqxr, 'success');
-//    else
-//        console_debug_log("empty response!");
     console_debug_log("end query!");
 }
 
@@ -258,7 +222,8 @@ function onPageKey(key)
  * @param {Number} nEnd - end of selection
  * @returns {undefined}
 */
-function setInputSelection(el, nStart, nEnd) {
+function setInputSelection(el, nStart, nEnd) 
+{
     var start = 0, end = 0, normalizedValue, range,
         textInputRange, len, endRange;
 
@@ -360,7 +325,7 @@ function setHandlers(jqSelector)
     {
         var pos, len, val, i;
         var caret = getInputSelection(e.currentTarget);
-        if(caret!=null)
+        if(caret!==null)
         {
             var month;
             val = $(this).val();

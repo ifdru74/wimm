@@ -225,18 +225,39 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     var s1;
     var bShow = true;
     o = document.getElementById(boxID);
-    if(o!=null)
+    if(o!==null)
     {
         o.innerHTML = "";  // clear contents
         sel_item_id = o.getAttribute("for");
-        if(sel_item_id!=null && sel_item_id.length>0)
+        if(sel_item_id!==null && sel_item_id.length>0)
         {
             item_text = $("#"+sel_item_id).val();
         }
         sel_item_id = "";
-        if(arr.length==1)
+        if(arr.length===1 && arr[0].id!=="error")
         {
             selectAcItem(boxID, arr[0].id, arr[0].text);
+            var textTargetID = document.getElementById(boxID).getAttribute("for");
+//            var ai = $('.form-control').find('#'+textTargetID).next().id;
+//            document.getElementById(ai).focus();
+            var listItems = $(".form-control");
+            for(i=0; i<listItems.length; i++)
+            {
+                if(listItems[i].id===textTargetID)
+                {
+                    if(i+1<listItems.length)
+                    {
+                        listItems[i+1].focus();
+                        break;
+                    }
+                    else
+                    {
+                        var but = $("button.btn");
+                        if(but!==null && but!==undefined && but.length>0)
+                            but[0].focus();
+                    }
+                }
+            }
             bShow = false;
         }
         else
@@ -245,14 +266,14 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
             {
                 if(sel_item_id.length<1 && item_text.length>0)
                 {
-                    if(arr[i].text.toString().indexOf(item_text)==0)
+                    if(arr[i].text.toString().indexOf(item_text)===0)
                         sel_item_id = arr[i].id;
                 }
                 s1 = "<a href=\"javascript::selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+ arr[i].text + 
                         "');\";' id='aci_" + arr[i].id;
                 var jsc = " onclick=\"selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+
                         arr[i].text + "');\" ";
-                if(arr[i].id.toString()==sel_item_id.toString())
+                if(arr[i].id.toString()===sel_item_id.toString())
                 {
                     s1 += "' class='ac_link ac_bordered' " + jsc +
                             "title='" + arr[i].text + "'>";
@@ -279,7 +300,7 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     {
         var nCode = translateKeyCode(e.which);
         console.log('BOXKeyUp()');
-        if(nCode!=0)
+        if(nCode!==0)
         {
             changeSelection(boxID, nCode);
         }
@@ -289,12 +310,12 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     var nMax;
     var n;
     s1 = $("#" + boxID).attr("scroll_height");
-    if(s1!=null && s1.length>0)
+    if(s1!==null && s1.length>0)
         nMax = Number(s1);
     else
         nMax = 50;
     s1 = $("#" + boxID).css( "height" );
-    if (s1!=null && s1!=undefined)
+    if (s1!==null && s1!==undefined)
         n = Number(s1.replace("px",""));
     else
         n = 100500;
@@ -399,6 +420,40 @@ function hideAcBox(boxID)
 {
     $("#"+boxID).hide();
     cancelQuery();
+    var textTargetID = document.getElementById(boxID).getAttribute("for");
+    if(textTargetID)
+    {
+        var vExit = 10;
+        var vi = -1;
+        var ctl = $('#dlg_box_text').find('.form-control');
+        if(ctl)
+        {
+            for(var i=0; i<ctl.length; i++)
+            {
+                console_debug_log('Control:'+ctl[i].id);
+                if(vi>=0)
+                {
+                    ctl[i].focus();
+                    vExit = -2;
+                    break;
+                }
+                else
+                {
+                    if(ctl[i].id===textTargetID)
+                    {
+                        console_debug_log('index of "'+ctl[i].id + '"='+i);
+                        vi = i;
+                    }
+                }
+            }
+        }
+        console_debug_log('Exit code:'+vExit);
+        document.getElementById(boxID).setAttribute("for", "");
+    }
+    else
+    {
+        console_debug_log('No target');
+    }
 }
 /**
  * display autocomplete box under item

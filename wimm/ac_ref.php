@@ -54,6 +54,17 @@
                     $sql .= " and budget_id<>$rep_id";
                 }
                 break;
+            case "t_credit":
+                $sql = "SELECT loan_id as r_id, loan_name as r_name FROM m_loans WHERE close_date is null";
+                if($filter!==FALSE)
+                {
+                    $sql .= " and loan_name like '$filter%'";
+                }
+                if($rep_id!==FALSE)
+                {
+                    $sql .= " and loan_id<>$rep_id";
+                }
+                break;
         }
         if($sql!==FALSE)
         {
@@ -70,7 +81,7 @@
             }
             if(count($aret)<1)
             {
-                $aret[] = array('id' => 'error', 'text' => "no values for $filter, $rep_id");
+                //$aret[] = array('id' => 'error', 'text' => "no values for $filter, $rep_id");
             }
         }
         else {
