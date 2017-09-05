@@ -55,7 +55,7 @@
                 }
                 break;
             case "t_credit":
-                $sql = "SELECT loan_id as r_id, loan_name as r_name FROM m_loans WHERE close_date is null";
+                $sql = "SELECT loan_id as r_id, loan_name as r_name FROM m_loans WHERE close_date is null and #NOW# between start_date and end_date";
                 if($filter!==FALSE)
                 {
                     $sql .= " and loan_name like '$filter%'";

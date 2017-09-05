@@ -76,7 +76,7 @@
                     table_row_selected("#"+e.currentTarget.id, "#edit_form");
                     $("#HIDDEN_ID").val(e.currentTarget.id);
                     $("#dialog_box").modal('show');
-                    document.getElementById('curr_name').focus();
+                    document.getElementById('curr_to_name').focus();
                 });
             }
             function onAdd()
@@ -174,6 +174,12 @@
                                        bind_row_type="label" bind_row_id="FRATE_">
                             </div>
                             <div class="form-group">
+                                <label for="l_lim">Лимит:</label>
+                                <input type="number" name="l_lim" id="l_lim" 
+                                       class="form-control form_field" value=""
+                                       bind_row_type="label" bind_row_id="LLIM_">
+                            </div>
+                            <div class="form-group">
                                 <label for="l_bdate">Взят:</label>
                                 <input type="date" name="l_bdate" id="l_bdate" 
                                        class="form-control form_field" value=""
@@ -210,15 +216,20 @@
                             </div>
                             <div class="form-group">
                                 <input type="checkbox" id="returned">
-                                <label for="returned">Возвращён:</label>
-                                <input type="date" name="l_2date" id="l_2date" 
-                                       class="form-control form_field" value=""
+                                <label for="l_cdate">Возвращён:</label>
+                                <input type="date" name="l_cdate" id="l_cdate" 
+                                       class="form-control form_field sendable" value=""
                                        bind_row_type="title" bind_row_id="CEDATE_">
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button class="btn" id="OK_BTN" type="submit">
                                 <span class="glyphicon glyphicon-save"></span> Сохранить
+                            </button>
+                            <button class="btn" type="button"
+                                    onclick="send_submit('recalc');"
+                                    data-dismiss="modal">
+                                <span class="glyphicon glyphicon-edit"></span> Пересчитать долг...
                             </button>
                             <button class="btn" id="DEL_BTN" type="button"
                                     onclick="send_submit('delete');">
@@ -239,7 +250,6 @@
 ?>                
             </DIV>
         <?php
-        // put your code here
         $fm = "refresh";
         if(getRequestParam("btn_refresh",FALSE)===FALSE)
         {
@@ -254,97 +264,13 @@
             $a_ret = loan_dml($conn, $fm);
             embed_diag_out($a_ret);
         }
-//        if($conn)	{
-//            if(strcmp($fm,"insert")==0)	{
-//		$sql = "INSERT INTO m_loans (place_id, loan_name, start_date, end_date, loan_rate, loan_type, " .
-//                        "close_date, user_id, currency_id, budget_id, loan_sum) VALUES(";
-//		$s = getRequestParam("l_place",1);
-//		$sql .= "$s,";
-//		$s = getRequestParam("l_name","Кредит!");
-//		$sql .= "'$s',";
-//		$td = getRequestParam("l_bdate",date("Y-m-d H:i:s"));
-//		$sql .= "'$td',";
-//		$td = getRequestParam("l_edate","");
-//                if(strlen($td)>0)
-//                    $sql .= "'$td',";
-//                else
-//                    $sql .= "NULL,";
-//		$s = getRequestParam("l_rate",5);
-//		$sql .= "$s,";
-//		$s = getRequestParam("l_type",1);
-//		$sql .= "$s,";
-//		$td = getRequestParam("l_cdate","");
-//                if(strlen($td)>0)
-//                    $sql .= "'$td',";
-//                else
-//                    $sql .= "NULL,";
-//		$s = getRequestParam("l_user",1);
-//		$sql .= "$s,";
-//		$s = getRequestParam("l_curr",2);
-//		$sql .= "$s,";
-//		$s = getRequestParam("l_budget",1);
-//		$sql .= "$s,";
-//		$s = getRequestParam("l_sum",0);
-//		$sql .= "$s";
-//                $sql .= ")";
-//            }	else if(strcmp($fm,"update")==0)	{//!!!!!!!!!!!!!!!!!!
-//                $sql = "update m_loans set ";
-//                $s = getRequestParam("l_place",-1);
-//                if($s!=-1)
-//                    $sql .= "place_id=$s, ";
-//		$s = getRequestParam("l_name","");
-//                if(strlen($s)>0)
-//                    $sql .= "loan_name='$s', ";
-//		$td = getRequestParam("l_bdate",date("Y-m-d H:i:s"));
-//		$sql .= "start_date='$td'";
-//		$td = getRequestParam("l_edate","");
-//                if(strlen($td)>0)
-//                    $sql .= ", end_date='$td'";
-//                else
-//                    $sql .= ", end_date=NULL";
-//		$s = getRequestParam("l_rate",-1);
-//                if($s!=-1)
-//                    $sql .= ", loan_rate=$s ";
-//		$s = getRequestParam("l_type",-1);
-//                if($s!=-1)
-//                    $sql .= ", loan_type=$s ";
-//		$td = getRequestParam("l_cdate","");
-//                if(strlen($td)>0)
-//                    $sql .= ", close_date='$td'";
-//                else
-//                    $sql .= ", close_date=NULL";
-//		$s = getRequestParam("l_user",-1);
-//                if($s!=-1)
-//                    $sql .= ", user_id=$s ";
-//		$s = getRequestParam("l_curr",-1);
-//                if($s!=-1)
-//                    $sql .= ", currency_id=$s ";
-//		$s = getRequestParam("l_budget",-1);
-//                if($s!=-1)
-//                    $sql .= ", budget_id=$s ";
-//		$s = getRequestParam("l_sum",-1);
-//                if($s!=-1)
-//                    $sql .= ", loan_sum=$s ";
-//                $s = getRequestParam("HIDDEN_ID",0);
-//		$sql .= "where loan_id=$s";
-//            }   else if(strcmp($fm,"delete")==0)	{
-//		$s = getRequestParam("HIDDEN_ID",0);
-//		$sql = "delete from m_loans where loan_id=$s";                
-//            }
-//            printf($hfmt, "SQL", "SQL", $sql);
-//            if(strlen($sql)>0)	{
-//                $conn->query(formatSQL($conn, $sql));
-//                //$conn->commit();
-//            }
-//        }
 	$bg = getRequestParam("f_budget","-1");
 	print_filter($conn, $bd, $ed, $bg);
-//        print_buttons("onAdd();");
         $tb = new table();
         $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
         $tb->setIndent(3);
         $tb->addColumn(new tcol("Наименование"), TRUE);
-        $tb->addColumn(new tcol("Сумма"), TRUE);
+        $tb->addColumn(new tcol("Сумма &sol; Лимит"), TRUE);
         $tb->addColumn(new tcol("Взят"), TRUE);
         $tb->addColumn(new tcol("Срок до"), TRUE);
         $tb->addColumn(new tcol("Кто"), TRUE);
@@ -355,14 +281,15 @@
                 '<input type="hidden" id="CURR_=loan_id" title="=t_cid" value="=currency_name">'.
                 '<input type="hidden" id="BUDG_=loan_id" title="=bc_id" value="=budget_name">';
         $tb->addColumn(new tcol($fmt_str), FALSE);
-        $tb->addColumn(new tcol("<LABEL class='td' id=\"FRATE_=loan_id\" FOR=\"=loan_id\" TITLE=\"=loan_rate\">=loan_sum</LABEL>"), FALSE);
+        $tb->addColumn(new tcol("<LABEL class='td' id=\"FRATE_=loan_id\" FOR=\"=loan_id\" TITLE=\"=loan_rate\">=loan_sum</LABEL> &sol;".
+                "<LABEL class='td' id=\"LLIM_=loan_id\" FOR=\"=loan_id\" >=loan_limit</LABEL>"), FALSE);
         $tb->addColumn(new tcol("<LABEL class='td' id=\"CBDATE_=loan_id\" FOR=\"=loan_id\">=start_date</LABEL>"), FALSE);
         $tb->addColumn(new tcol("<LABEL class='td' id=\"CEDATE_=loan_id\" FOR=\"=loan_id\" title=\"=close_date\">=end_date</LABEL>"), FALSE);
         $tb->addColumn(new tcol("<LABEL class='td' id=\"USR_=loan_id\" FOR=\"=loan_id\" TITLE=\"=user_id\">=user_name</LABEL>"), FALSE);
         $tb->addColumn(new tcol("<LABEL class='td' id=\"PLACE_=loan_id\" FOR=\"=loan_id\" TITLE=\"=place_id\">=place_name</LABEL>"), FALSE);
         $sql = "select loan_id, loan_name, loan_sum, loan_rate, start_date, end_date, user_name, ml.user_id, ".
                 "place_name, ml.currency_id t_cid, mcu.currency_sign, mcu.currency_name, ".
-                "mb.budget_name, mb.currency_id as bc_id, ml.place_id, ml.close_date " .
+                "mb.budget_name, mb.currency_id as bc_id, ml.place_id, ml.close_date, ml.loan_limit " .
                 "from m_loans ml, m_users mu, m_places mp, m_currency mcu, m_budget mb ".
                 "where ml.user_id=mu.user_id and ml.place_id=mp.place_id and ".
                 "ml.currency_id=mcu.currency_id and ml.budget_id=mb.budget_id and ".
@@ -370,7 +297,7 @@
 	if($bg>0)	{
 		$sql .= " and ml.budget_id=$bg ";
 	}
-        $sql .= " and (start_date between '$bd' and '$ed' or end_date between '$bd' and '$ed') ";
+        $sql .= " and (start_date between '$bd' and '$ed' or end_date between '$bd' and '$ed' or '$bd' between start_date and end_date or '$ed' between start_date and end_date) ";
 	$sql .= " order by end_date";
         printf($hfmt, "SQL2", "SQL2", $sql);
         echo $tb->htmlOpen();

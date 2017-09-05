@@ -120,6 +120,16 @@
                             $('#p_s_m').prop('checked', false);
                             $('#p_s_p').prop('checked', false);
                     }
+                    var tb = $("#ltb_"+e.currentTarget.id).attr('title');
+                    console.log("type_bits="+tb);
+                    if(tb&2)
+                    {
+                        $('#credit_pay').prop('checked', true);
+                    }
+                    else
+                    {
+                        $('#credit_pay').prop('checked', false);
+                    }
                 });
             }
             function send_submit(frm_mode)
@@ -183,8 +193,22 @@
                                        id="p_descr" value="">
                             </div>
                             <div class="form-group">
-                                <input type="radio" name="p_sign" id="p_s_m" value="-1"><label for="p_s_m"><img id="p_s_mi" src="picts/minus.gif">Расходы</label>
-                                <input type="radio" name="p_sign" id="p_s_p" value="1" ><label for="p_s_p"><img id="p_s_pi" src="picts/plus.gif">Доходы</label>
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">Тип операции</div>
+                                    <div class="panel-body">
+                                        <input type="radio" name="p_sign" id="p_s_m" value="-1"><label for="p_s_m"><img id="p_s_mi" src="picts/minus.gif">Расходы</label>
+                                        <input type="radio" name="p_sign" id="p_s_p" value="1" ><label for="p_s_p"><img id="p_s_pi" src="picts/plus.gif">Доходы</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="panel panel-primary">
+                                    <div class="panel-heading">Дополнительно</div>
+                                    <div class="panel-body">
+                                        <!--input type="checkbox" name="credit_pur" id="credit_pur" value="1"><label for="credit_bue">Покупка в кредит</label -->
+                                        <input type="checkbox" name="t_bits[]" id="credit_pay" value="2" ><label for="credit_pay">Погашение кредита</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -211,38 +235,6 @@
 ?>                
             </DIV>
 <?php
-//	$sql = "";
-//        switch ($fm)    {
-//        case "insert":
-//		$sql = "INSERT INTO m_transaction_types (t_type_name, open_date, parent_type_id, type_sign, user_id) VALUES('";
-//		$sql .= getRequestParam("p_name","Место?");
-//		$sql .= "', #NOW#,";
-//		$sql .= getRequestParam("p_descr",'NULL') . ",";
-//                $sql .= getRequestParam("p_sign",0) . ",";
-//		$sql .= "$uid)";
-//                break;
-//        case "update":
-//		$sql = "UPDATE m_transaction_types SET ";
-//		$s = getRequestParam("p_name","Место?");
-//		$sql .= "t_type_name='$s' ";
-//		$s = getRequestParam("p_descr","NULL");
-//                if(strlen($s)>0)
-//                    $sql .= ", parent_type_id=$s ";
-//                $sql .= ", type_sign=" . getRequestParam("p_sign",0) . ' ';
-//		$sql .= "where t_type_id=";
-//		$s = getRequestParam("HIDDEN_ID",0);
-//		$sql .= $s;
-//                break;
-//        case "delete":
-//		$s = getRequestParam("HIDDEN_ID",0);
-//		//$sql = "delete from m_transaction_types where t_type_id=$s";
-//                $sql = "update m_transaction_types set close_date=#NOW# where t_type_id=$s";
-//	}
-//	if(strlen($sql)>0)	{
-//            $sqlf = formatSQL($conn, $sql);
-//            print "	<input name=\"SQL\" type=\"hidden\" value=\"$sqlf\">\n";
-//            $conn->query($sqlf);
-//	}
         $a_ret = array();
         if(strcmp($fm,"refresh")!=0)
         {
@@ -265,7 +257,7 @@
 	print "<TH WIDTH=\"15%\">Дата создания</TH>\n";
 	print "<TH  WIDTH=\"20%\">Кто автор</TH>\n";
 	print "</TR></thead><tbody>\n";
-	$sql = "SELECT t_type_id, t_type_name, parent_type_id, type_sign, mtt.open_date, is_repeat, period, user_name "
+	$sql = "SELECT t_type_id, t_type_name, parent_type_id, type_sign, mtt.open_date, is_repeat, period, user_name, type_bits "
                 . "FROM m_transaction_types mtt, m_users mu "
                 . "where mtt.user_id=mu.user_id and mtt.close_date is NULL";
 	$res = $conn->query($sql);
@@ -319,7 +311,8 @@
                 $s = f_get_disp_date($t);
                 print "<TD><label class='td' for='{$row['t_type_id']}'>$s</label></TD>\n";
                 $s = $row['user_name'];
-                print "<TD><label class='td' for='{$row['t_type_id']}'>$s</label></TD>\n";
+                $tb = $row['type_bits'];
+                print "<TD><label class='td' id='ltb_{$row['t_type_id']}' for='{$row['t_type_id']}' title='$tb'>$s</label></TD>\n";
                 print "</TR>\n";
             }
 	}
