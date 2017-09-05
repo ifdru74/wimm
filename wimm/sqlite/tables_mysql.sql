@@ -1,5 +1,19 @@
 delimiter $$
 
+CREATE TABLE `m_users` (
+  `user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(200) NOT NULL,
+  `user_login` varchar(45) NOT NULL,
+  `user_password` varchar(50) NOT NULL,
+  `open_date` datetime NOT NULL,
+  `close_date` datetime DEFAULT NULL,
+  `last_update` datetime NOT NULL,
+  `security` varchar(45) NOT NULL,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='Пользователи'$$
+
+delimiter $$
+
 CREATE TABLE `m_budget` (
   `budget_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `budget_name` varchar(200) NOT NULL,
@@ -34,6 +48,23 @@ CREATE TABLE `m_currency` (
 
 delimiter $$
 
+CREATE TABLE `m_places` (
+  `place_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `place_name` varchar(100) NOT NULL,
+  `open_date` datetime NOT NULL,
+  `close_date` datetime DEFAULT NULL,
+  `place_descr` varchar(200) NOT NULL,
+  `user_id` int(10) unsigned NOT NULL DEFAULT '1',
+  `security` varchar(45) DEFAULT NULL,
+  `place_bits` int(11) NOT NULL DEFAULT '0',
+  `inn` varchar(12) DEFAULT NULL,
+  PRIMARY KEY (`place_id`),
+  KEY `FK_places_2_usr` (`user_id`),
+  CONSTRAINT `FK_places_2_usr` FOREIGN KEY (`user_id`) REFERENCES `m_users` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=253 DEFAULT CHARSET=utf8 COMMENT='Места затрат'$$
+
+delimiter $$
+
 CREATE TABLE `m_currency_rate` (
   `currency_from` int(10) unsigned NOT NULL,
   `currency_to` int(10) unsigned NOT NULL,
@@ -65,12 +96,13 @@ CREATE TABLE `m_loans` (
   `end_date` datetime DEFAULT NULL COMMENT 'date when we must return all money',
   `loan_rate` decimal(5,2) NOT NULL COMMENT 'how much does it costs (yearly)',
   `loan_type` int(11) NOT NULL COMMENT 'loan type 0 - ordinary bank loan with rate and end date, 1 - friend or family loan with end date and without rate',
-  `open_date` datetime NOT NULL,
   `close_date` datetime DEFAULT NULL COMMENT 'date when we really returns all money',
   `user_id` int(11) unsigned NOT NULL,
   `loan_sum` decimal(12,2) DEFAULT '0.00' COMMENT 'summ total',
   `budget_id` int(10) NOT NULL COMMENT 'budget reference',
   `currency_id` int(10) NOT NULL COMMENT 'currency reference',
+  `open_date` date DEFAULT NULL,
+  `loan_limit` decimal(12,2) DEFAULT '0.00',
   PRIMARY KEY (`loan_id`),
   KEY `xloans2places` (`place_id`),
   KEY `xloans_dates` (`start_date`,`end_date`),
@@ -80,7 +112,7 @@ CREATE TABLE `m_loans` (
   KEY `fk_loans_places` (`place_id`),
   CONSTRAINT `fk_loans_places` FOREIGN KEY (`place_id`) REFERENCES `m_places` (`place_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_loans_users` FOREIGN KEY (`user_id`) REFERENCES `m_users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='loans issued for user'$$
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='loans issued for user';
 
 delimiter $$
 
@@ -92,22 +124,6 @@ CREATE TABLE `m_olap` (
   PRIMARY KEY (`OLAP_ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='Переходящий остаток'$$
 
-delimiter $$
-
-CREATE TABLE `m_places` (
-  `place_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `place_name` varchar(100) NOT NULL,
-  `open_date` datetime NOT NULL,
-  `close_date` datetime DEFAULT NULL,
-  `place_descr` varchar(200) NOT NULL,
-  `user_id` int(10) unsigned NOT NULL DEFAULT '1',
-  `security` varchar(45) DEFAULT NULL,
-  `place_bits` int(11) NOT NULL DEFAULT '0',
-  `inn` varchar(12) DEFAULT NULL,
-  PRIMARY KEY (`place_id`),
-  KEY `FK_places_2_usr` (`user_id`),
-  CONSTRAINT `FK_places_2_usr` FOREIGN KEY (`user_id`) REFERENCES `m_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=253 DEFAULT CHARSET=utf8 COMMENT='Места затрат'$$
 
 delimiter $$
 
@@ -118,15 +134,16 @@ CREATE TABLE `m_transaction_types` (
   `Type_sign` decimal(10,0) NOT NULL DEFAULT '0',
   `open_date` datetime NOT NULL,
   `close_date` datetime DEFAULT NULL,
-  `type_bits` int(10) unsigned NOT NULL DEFAULT '0',
+  `is_repeat` int(10) unsigned NOT NULL DEFAULT '0',
   `period` varchar(100) DEFAULT NULL,
   `user_id` int(10) unsigned NOT NULL DEFAULT '1',
   `security` varchar(45) DEFAULT NULL,
+  `type_bits` int(10) unsigned DEFAULT '0',
   PRIMARY KEY (`t_type_id`),
   KEY `IDX_PARENT` (`parent_type_id`),
   KEY `FK_ransaction_types_2_usr` (`user_id`),
   CONSTRAINT `FK_ransaction_types_2_usr` FOREIGN KEY (`user_id`) REFERENCES `m_users` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8 COMMENT='transaction types'$$
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8 COMMENT='transaction types';
 
 delimiter $$
 
@@ -142,12 +159,15 @@ CREATE TABLE `m_transactions` (
   `close_date` datetime DEFAULT NULL,
   `place_id` int(10) unsigned NOT NULL DEFAULT '1',
   `budget_id` int(10) unsigned NOT NULL DEFAULT '1',
+  `loan_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`transaction_id`),
   KEY `FK_transactions_types` (`t_type_id`),
   KEY `FK_transactions_currency` (`currency_id`),
   KEY `FK_transactions_usr` (`user_id`),
   KEY `FK_transactions_2_place` (`place_id`),
   KEY `FK_transactions_budget` (`budget_id`),
+  KEY `FK_transactions_loan_idx` (`loan_id`),
+  CONSTRAINT `FK_transactions_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loans` (`loan_id`),
   CONSTRAINT `FK_transactions_2_place` FOREIGN KEY (`place_id`) REFERENCES `m_places` (`place_id`),
   CONSTRAINT `FK_transactions_budget` FOREIGN KEY (`budget_id`) REFERENCES `m_budget` (`budget_id`),
   CONSTRAINT `FK_transactions_currency` FOREIGN KEY (`currency_id`) REFERENCES `m_currency` (`currency_id`),
@@ -156,15 +176,65 @@ CREATE TABLE `m_transactions` (
 
 delimiter $$
 
-CREATE TABLE `m_users` (
-  `user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(200) NOT NULL,
-  `user_login` varchar(45) NOT NULL,
-  `user_password` varchar(50) NOT NULL,
-  `open_date` datetime NOT NULL,
-  `close_date` datetime DEFAULT NULL,
-  `last_update` datetime NOT NULL,
-  `security` varchar(45) NOT NULL,
-  PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='Пользователи'$$
+CREATE TABLE `m_goods` (
+  `good_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `good_barcode` VARCHAR(45) NOT NULL,
+  `good_name` VARCHAR(45) NOT NULL,
+  `item_count` INT UNSIGNED NOT NULL DEFAULT 1,
+  `net_weight` DECIMAL(10,3) NOT NULL,
+  `open_date` DATETIME NOT NULL DEFAULT now(),
+  `close_date` DATETIME NULL,
+  `user_id` INT UNSIGNED NOT NULL,
+  `good_type_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`good_id`),
+  INDEX `fk_good2usr_idx` (`user_id` ASC),
+  INDEX `fk_good2type_idx` (`good_type_id` ASC),
+  CONSTRAINT `fk_good2usr`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `wimm`.`m_users` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_good2type`
+    FOREIGN KEY (`good_type_id`)
+    REFERENCES `wimm`.`m_transaction_types` (`t_type_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB DEFAULT CHARACTER SET = utf8 COMMENT='Товары'$$
 
+CREATE TABLE `wimm`.`m_transaction_goods` (
+  `good_id` INT UNSIGNED NOT NULL,
+  `good_idx` INT UNSIGNED NOT NULL,
+  `transaction_id` INT UNSIGNED NOT NULL,
+  `store_barcode` VARCHAR(45) NULL,
+  `currency_id` INT UNSIGNED NOT NULL,
+  `transaction_sum` DECIMAL(10,2) NOT NULL DEFAULT 0,
+  `purchased_count` INT NOT NULL DEFAULT 1,
+  `purchased_weight` DECIMAL(10,3) NOT NULL DEFAULT 0,
+  `open_date` DATETIME NOT NULL DEFAULT now(),
+  `close_date` DATETIME NULL,
+  `user_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`good_id`, `good_idx`, `transaction_id`),
+  INDEX `fktrgoods2tr_idx` (`transaction_id` ASC),
+  INDEX `fktrgoods2curr_idx` (`currency_id` ASC),
+  INDEX `fktrgoods2usr_idx` (`user_id` ASC),
+  CONSTRAINT `fktrgoods2goods`
+    FOREIGN KEY (`good_id`)
+    REFERENCES `wimm`.`m_goods` (`good_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fktrgoods2tr`
+    FOREIGN KEY (`transaction_id`)
+    REFERENCES `wimm`.`m_transactions` (`transaction_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fktrgoods2curr`
+    FOREIGN KEY (`currency_id`)
+    REFERENCES `wimm`.`m_currency` (`currency_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fktrgoods2usr`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `wimm`.`m_users` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB DEFAULT CHARACTER SET = utf8 COMMENT='Товары в чеке'$$
