@@ -165,7 +165,7 @@ function transaction_dml($conn, $fm, $a_src=FALSE)
                         "user_id, open_date, place_id, budget_id";
                 if(key_exists("use_credit", $a_src))
                     $sql_dml .= ", loan_id";
-                $sql_dml .= ") VALUES(:t_name, :t_type, :t_curr, :t_sum, :t_date, :t_user, :t_open, "
+                $sql_dml .= ") VALUES(substr(:t_name,1,45), :t_type, :t_curr, :t_sum, :t_date, :t_user, :t_open, "
                         . ":t_place, :t_budget";
                 if(key_exists("use_credit", $a_src))
                     $sql_dml .= ", :loan_id)";
@@ -182,7 +182,7 @@ function transaction_dml($conn, $fm, $a_src=FALSE)
         case DML_UPD:
             if(key_exists('id', $params))
             {
-                $sql_dml = "update m_transactions set transaction_name=:t_name, "
+                $sql_dml = "update m_transactions set transaction_name=substr(:t_name,1,45), "
                         . " t_type_id=:t_type, "
                         . " transaction_date=:t_date, "
                         . " currency_id=:t_curr, "
@@ -259,12 +259,12 @@ function places_dml($conn, $fm, $a_src=FALSE)
             else
             {
                 $sql_dml = "INSERT INTO m_places (place_name, open_date, "
-                . "place_descr, inn, user_id) VALUES(:p_name, :po_date, "
+                . "place_descr, inn, user_id) VALUES(substr(:p_name,1,100), :po_date, "
                 . ":p_descr, :p_inn, :p_user)";
             }
             break;
         case DML_UPD:
-            $sql_dml = "UPDATE m_places SET inn=:p_inn, place_name=:p_name, "
+            $sql_dml = "UPDATE m_places SET inn=:p_inn, place_name=substr(:p_name,1,100), "
                 . "place_descr=:p_descr where place_id=:p_id";
             break;
         case DML_DEL:
@@ -349,7 +349,7 @@ function budget_dml($conn, $fm, $a_src=FALSE)
             {
                 $params['b_user'] = value4db(getSessionParam("UID",1));
                 $sql_dml = "INSERT INTO m_budget (budget_name, open_date, "
-                        . "budget_descr, currency_id, user_id) VALUES(:b_name, "
+                        . "budget_descr, currency_id, user_id) VALUES(substr(:b_name,1,200), "
                         . "#NOW#, :b_descr, :b_curr, :b_user)";
             }
             break;
@@ -647,9 +647,11 @@ function exchange_dml($conn, $fm, $a_src=FALSE)
         case DML_INS:
             $sql = "insert into m_currency_rate(currency_from, exchange_rate_from, "
                 . "currency_to, exchange_rate_to, open_date, close_date, "
-                . "user_id) values(:tf_curr, :from_rate, :tt_curr, :to_rate, "
-                . ":dt_open, :dt_close, :uid)";
+                . "user_id, is_oficial, currency_rate_id) values(:tf_curr, "
+                . ":from_rate, :tt_curr, :to_rate, :dt_open, :dt_close, :uid, :is_of, :nrid)";
             $params['uid'] = value4db(getSessionParam('UID', FALSE));
+            $params['is_of'] = 0;
+            $params['nrid'] = f_get_single_value($conn, "select max(currency_rate_id) from m_currency_rate", 1);
             break;
         case DML_UPD:
             $sql = "UPDATE m_currency_rate SET currency_from=:tf_curr, "
@@ -664,6 +666,10 @@ function exchange_dml($conn, $fm, $a_src=FALSE)
     if(strlen($sql)>0)
     {
         $a_ret = perform_dml($conn, $sql, $params, $a_ret);
+        if(key_exists('nrid', $params))
+        {
+            $a_ret[DML_RET_INS] = $params['nrid'];
+        }
     }
     return $a_ret;
 }

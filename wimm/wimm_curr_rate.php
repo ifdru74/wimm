@@ -35,6 +35,7 @@
 	print_body_title($p_title);
 ?>        
         <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
+        <script language="JavaScript" type="text/JavaScript" src="js/index_aj.js"></script>
         <script language="JavaScript" type="text/JavaScript" src="js/form_common.js"></script>
         <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
         <script language="JavaScript" type="text/JavaScript" src="js/bootstrap.js"></script>
@@ -230,15 +231,15 @@
             $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=close_date\" id=\"CDATE_=currency_rate_id\" FOR=\"=currency_rate_id\">=close_date</LABEL>"), FALSE);
             $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=user_id\" id=\"USER_=currency_rate_id\" FOR=\"=currency_rate_id\">=user_name</LABEL>"), FALSE);
 
-            $sql = "select currency_rate_id, currency_from, f.currency_name || ' (' || f.currency_abbr || ')' as f_name, exchange_rate_from, " .
-                    "currency_to, t.currency_name || ' (' || t.currency_abbr || ')' as t_name, exchange_rate_to, " .
+            $sql = "select currency_rate_id, currency_from, #CONCAT#(f.currency_name #||# ' (' #||# f.currency_abbr #||# ')') as f_name, exchange_rate_from, " .
+                    "currency_to, #CONCAT#(t.currency_name #||# ' (' #||# t.currency_abbr #||# ')') as t_name, exchange_rate_to, " .
                     "tp.open_date, tp.close_date, user_name, tp.user_id " .
                     "from m_currency_rate tp, m_users tu, m_currency f, m_currency t  " .
                     "where tp.user_id=tu.user_id and " .
                     "currency_from = f.currency_id and currency_to = t.currency_id " .
                     "order by f_name, t_name, tp.open_date, tp.close_date";
             printf($hfmt, "SQL2", "SQL2", $sql);
-            $res = $conn->query($sql);
+            $res = $conn->query(formatSQL($conn, $sql));
             $sm = 0;
             $sd = 0;
             $c_class = "dark";
