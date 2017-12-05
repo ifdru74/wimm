@@ -172,9 +172,10 @@ function value4db($val)
 {
     // replace everithing that could break out DB
     // replace double quote
-    $s1 = str_replace("/*","", $val);
-    $s2 = str_replace("--","&mdash;", $s1);
-    return addslashes (str_replace("\\","", $s2));
+    return addslashes (
+            str_replace("\\","", 
+                    str_replace("--","&mdash;",
+                            str_replace("/*","", $val))));
 }
 
 /**

@@ -99,10 +99,12 @@ function getItemIndex(items, itemID)
 
 function changeSelection(boxID, how)
 {
+    console.log(boxID + '=>' + how);
     var titem = "";
-    var sel = document.getElementById(boxID).getAttribute("selected_ac_item");
-    var items = $("#"+boxID).children(".ac_link");
-    if(items!=null)
+    var sel = $('#'+boxID).prop("selected_ac_item");
+    var items = $('#'+boxID).children();
+     console.log('current selection:' + sel);
+    if(items)
     {
         var i = -1;
         switch(how)
@@ -132,10 +134,7 @@ function changeSelection(boxID, how)
                 selectAcItem(boxID, titem, $("#"+titem).text());
                 return false;
 
-        }
-        if(titem.length<1)
-        {
-            if(items!=null && items!=undefined && items.length>0)
+            if(titem.length<1)
             {
                 if(i<0)
                 {
@@ -148,18 +147,25 @@ function changeSelection(boxID, how)
                 }
                 titem = items[i].id;
             }
+            console.log('new selection:' + titem);
+            if(titem.length>0)
+            {
+                console.log('changeSelection:old selection: ' + sel);
+                console.log('changeSelection:new selection: ' + titem);
+                if(sel.length>0)
+                    $("#"+sel).removeClass("ac_bordered");
+                $("#"+titem).addClass("ac_bordered");
+                scrollToItem(boxID, titem);
+                $("#"+boxID).attr("selected_ac_item", titem);
+            }
         }
-        if(titem.length>0)
-        {
-//            console.log('changeSelection:old selection: ' + sel);
-//            console.log('changeSelection:new selection: ' + titem);
-            $("#"+sel).removeClass("ac_bordered");
-            $("#"+titem).addClass("ac_bordered");
-            scrollToItem(boxID, titem);
-            $("#"+boxID).attr("selected_ac_item", titem);
-        }
+        return true;
     }
-    return true;
+    else
+    {
+        console.log('No ITEMS!');
+    }
+    return false;
 }
 function selectAcItem(boxID, itemID, itemText)
 {
@@ -196,11 +202,14 @@ function selectAcItem(boxID, itemID, itemText)
             document.getElementById(textTargetID).value = (itemText);
             if(idTargetID!=null && idTargetID.length>0)
             {
-                if(itemID.substr(0,4)=='aci_')
+                if(itemID)
                 {
-                    itemID = itemID.substr(4);
-                }                
-                $('#'+idTargetID).val(itemID);
+                    if(itemID.substr(0,4)=='aci_')
+                    {
+                        itemID = itemID.substr(4);
+                    }                
+                    $('#'+idTargetID).val(itemID);
+                }
             }
         }
         hideAcBox(boxID);
@@ -209,7 +218,7 @@ function selectAcItem(boxID, itemID, itemText)
 }
 function    parseResponse(jsonData, textStatus, jqXHR, boxID)
 {
-    if(jsonData==null || jsonData === undefined)
+    if(!jsonData)
     {
         console.log('entering parseResponse() - null result');
         return ;
@@ -248,24 +257,28 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
                     if(arr[i].text.toString().indexOf(item_text)==0)
                         sel_item_id = arr[i].id;
                 }
-                s1 = "<a href=\"javascript::selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+ arr[i].text + 
-                        "');\";' id='aci_" + arr[i].id;
-                var jsc = " onclick=\"selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+
-                        arr[i].text + "');\" ";
+                s1 = "<a href=\"javascript:void(0);\"";
+//                s1 = "<a href=\"javascript::selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+ arr[i].text + 
+//                        "');\";' id='aci_" + arr[i].id;
+                var jsc = '';/*" onclick=\"selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+
+                        arr[i].text + "');\" ";*/
                 if(arr[i].id.toString()==sel_item_id.toString())
                 {
-                    s1 += "' class='ac_link ac_bordered' " + jsc +
+                    s1 += " class='ac_link ac_bordered' " + jsc +
                             "title='" + arr[i].text + "'>";
                 }
                 else
                 {
-                    s1 += "' class='ac_link'" + jsc +
+                    s1 += " class='ac_link'" + jsc +
                             "title='" + arr[i].text + "'>";
                 }
-                s1 += (arr[i].text + "</a>");
+                s1 += (arr[i].text + "</a>\n");
                 html += s1;
             }
             o.innerHTML = html;
+            $(".ac_link").click(function(e){
+                selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
+             });
             if(sel_item_id.length>0)
             {
                 o.setAttribute("selected_ac_item", sel_item_id);
@@ -419,9 +432,9 @@ function cancelQuery()
  */
 function hideAcBox(boxID)
 {
+    var textTargetID = $("#"+boxID).prop("for");
     $("#"+boxID).hide();
     cancelQuery();
-    var textTargetID = document.getElementById(boxID).getAttribute("for");
     if(textTargetID)
     {
         var vExit = 10;
@@ -431,7 +444,7 @@ function hideAcBox(boxID)
         {
             for(var i=0; i<ctl.length; i++)
             {
-                console_debug_log('Control:'+ctl[i].id);
+                console.log('Control:'+ctl[i].id);
                 if(vi>=0)
                 {
                     ctl[i].focus();
@@ -442,18 +455,18 @@ function hideAcBox(boxID)
                 {
                     if(ctl[i].id===textTargetID)
                     {
-                        console_debug_log('index of "'+ctl[i].id + '"='+i);
+                        console.log('index of "'+ctl[i].id + '"='+i);
                         vi = i;
                     }
                 }
             }
         }
-        console_debug_log('Exit code:'+vExit);
+        console.log('Exit code:'+vExit);
 	document.getElementById(boxID).setAttribute("for", "");
     }
     else
     {
-        console_debug_log('No target');
+        console.log('No target');
     }
 
 }
@@ -476,22 +489,29 @@ function displayAcBox(boxID, itemID)
             p = $(itemSel).position();
         else
             p = $(itemSel).offset();
-        console.log('item:'+ itemID + ', top:' + p.top.toString() + ', left:' + p.left.toString())
-        var s1 = $(itemSel).css( "height" );
-        var n1 = 0;
-        n1 = Number(s1.replace("px",""));
-        n1 += n1;
-        n1 += Number(p.top);
-        p.top =  n1 ;
-        $("#ac").offset({ top: p.top, left: p.left});
-        console.log('box:'+ boxID + ', top:' + p.top.toString() + ', left:' + p.left.toString())
-        $(boxSel).css("top", p.top);
-        $(boxSel).css("left", p.left);
-        s1 = $(itemSel).css( "width" );
-        $(boxSel).css("width", s1);
-        $(boxSel).show();
-        $(boxSel).attr("for", itemID);
-        $("#"+boxID).attr("selected_ac_item", "");
+        if(p!=undefined && p!=null)
+        {
+            console.log('item:'+ itemID + ', top:' + p.top.toString() + ', left:' + p.left.toString())
+            var s1 = $(itemSel).css( "height" );
+            var n1 = 0;
+            n1 = Number(s1.replace("px",""));
+            n1 += n1;
+            n1 += Number(p.top);
+            p.top =  n1 ;
+            $("#ac").offset({ top: p.top, left: p.left});
+            console.log('box:'+ boxID + ', top:' + p.top.toString() + ', left:' + p.left.toString())
+            $(boxSel).css("top", p.top);
+            $(boxSel).css("left", p.left);
+            s1 = $(itemSel).css( "width" );
+            $(boxSel).css("width", s1);
+            $(boxSel).show();
+            $(boxSel).attr("for", itemID);
+            $("#"+boxID).attr("selected_ac_item", "");
+        }
+        else
+        {
+            console.log('no offset nor position defined');
+        }
     }
     queryAcItems(boxID, itemID);
 }
@@ -563,8 +583,11 @@ function ac_init(boxID, ac_box_sel)
             return false;
         }
     });
-    $(ac_txt).blur(function(event)
+    $(ac_txt).focus(function(event)
     {
-        hideAcBox(ac_box);
+        if($('#'+ac_box).prop('for')!==event.currentTarget.id)
+        {
+            hideAcBox(ac_box);
+        }
     });
 }

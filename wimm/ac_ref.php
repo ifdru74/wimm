@@ -1,14 +1,15 @@
 <?php
 
     include("fun_web.php");
+    include("fun_dbms.php");
     $uid = page_pre();
     $aret = array();
     if($uid!==FALSE)
     {
         $sql = FALSE;
         $rep_id = getRequestParam("except", FALSE);
-        $filter = getRequestParam("filter", FALSE);
-        switch(getRequestParam("type", FALSE))
+        $filter = value4db(getRequestParam("filter", FALSE));
+        switch(value4db(getRequestParam("type", FALSE)))
         {
             case "t_type":
                 $sql = "SELECT t_type_id as r_id, t_type_name as r_name FROM m_transaction_types  WHERE close_date is null";
@@ -18,7 +19,7 @@
                 }
                 if($rep_id!==FALSE)
                 {
-                    $sql .= " and t_type_id<>$rep_id";
+                    $sql .= " and t_type_id<>" . value4db($rep_id);
                 }
                 break;
             case "t_curr":
@@ -29,18 +30,18 @@
                 }
                 if($rep_id!==FALSE)
                 {
-                    $sql .= " and currency_id<>$rep_id";
+                    $sql .= " and currency_id<>" . value4db($rep_id);
                 }
                 break;
             case "t_place":
                 $sql = "SELECT place_id as r_id, place_name as r_name FROM m_places WHERE close_date is null";
                 if($filter!==FALSE)
                 {
-                    $sql .= " and place_name like '$filter%'";
+                    $sql .= " and (place_name like '$filter%' or place_descr like '%$filter%')";
                 }
                 if($rep_id!==FALSE)
                 {
-                    $sql .= " and place_id<>$rep_id";
+                    $sql .= " and place_id<>" . value4db($rep_id);
                 }
                 break;
             case "t_budget":
@@ -51,7 +52,7 @@
                 }
                 if($rep_id!==FALSE)
                 {
-                    $sql .= " and budget_id<>$rep_id";
+                    $sql .= " and budget_id<>" . value4db($rep_id);
                 }
                 break;
             case "t_credit":
@@ -62,7 +63,7 @@
                 }
                 if($rep_id!==FALSE)
                 {
-                    $sql .= " and loan_id<>$rep_id";
+                    $sql .= " and loan_id<>" . value4db($rep_id);
                 }
                 break;
         }
@@ -82,6 +83,7 @@
             if(count($aret)<1)
             {
                 //$aret[] = array('id' => 'error', 'text' => "no values for $filter, $rep_id");
+                $aret[] = array('sql' => formatSQL($conn,$sql));
             }
         }
         else {
