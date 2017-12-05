@@ -631,8 +631,8 @@ function exchange_dml($conn, $fm, $a_src=FALSE)
         $a_src = $_REQUEST;
     }
     $sql = "";
-    $a_ret = array();
-    $a_ret = array();
+    $a_ret = [];
+    $a_ret = [];
     $params = array();
     $def_date = date("Y-m-d H:i:s");
     $params['tf_curr']   = value4db(filter_array($a_src, "tf_curr",0));
@@ -642,22 +642,34 @@ function exchange_dml($conn, $fm, $a_src=FALSE)
     $params['dt_open']   = getDateFormValue($a_src, "dt_open",$def_date);
     $params['dt_close']  = getDateFormValue($a_src, "dt_close",$def_date);
     $params['rate_id']   = value4db(filter_array($a_src, "HIDDEN_ID",0));
+    $a_bits = filter_array($a_src, "rate_bits",FALSE);
+    $params['rate_bits'] = 0;
+    $params['t_rate_bits'] = '';
+    if(is_array($a_bits))
+    {
+        foreach ($a_bits as $bit_value) {
+            if(is_numeric($bit_value))
+            {
+                $params['rate_bits'] += value4db($bit_value);
+            }
+            $params['t_rate_bits'] .= ("_'" . value4db($bit_value) . "'") ;
+        }
+    }
     switch ($fm)
     {
         case DML_INS:
             $sql = "insert into m_currency_rate(currency_from, exchange_rate_from, "
                 . "currency_to, exchange_rate_to, open_date, close_date, "
-                . "user_id, is_oficial, currency_rate_id) values(:tf_curr, "
-                . ":from_rate, :tt_curr, :to_rate, :dt_open, :dt_close, :uid, :is_of, :nrid)";
+                . "user_id, rate_bits) values(:tf_curr, "
+                . ":from_rate, :tt_curr, :to_rate, :dt_open, :dt_close, :uid, :rate_bits)";
             $params['uid'] = value4db(getSessionParam('UID', FALSE));
-            $params['is_of'] = 0;
-            $params['nrid'] = f_get_single_value($conn, "select max(currency_rate_id) from m_currency_rate", 1);
             break;
         case DML_UPD:
             $sql = "UPDATE m_currency_rate SET currency_from=:tf_curr, "
                 . "exchange_rate_from=:from_rate, currency_to=:tt_curr, "
                 . "exchange_rate_to=:to_rate, open_date=:dt_open, "
-                . "close_date=:dt_close where currency_rate_id=:rate_id";
+                . "close_date=:dt_close, rate_bits=:rate_bits "
+                . "where currency_rate_id=:rate_id";
             break;
         case DML_DEL:
             $sql = "delete from m_currency_rate where currency_rate_id=:rate_id";
@@ -666,10 +678,6 @@ function exchange_dml($conn, $fm, $a_src=FALSE)
     if(strlen($sql)>0)
     {
         $a_ret = perform_dml($conn, $sql, $params, $a_ret);
-        if(key_exists('nrid', $params))
-        {
-            $a_ret[DML_RET_INS] = $params['nrid'];
-        }
     }
     return $a_ret;
 }

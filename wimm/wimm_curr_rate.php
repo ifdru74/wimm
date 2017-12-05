@@ -67,6 +67,15 @@
                     table_row_selected("#"+e.currentTarget.id, "#edit_form");
                     $("#HIDDEN_ID").val(e.currentTarget.id);
                     $("#dialog_box").modal('show');
+                    var rb = $("#RBITS_"+e.currentTarget.id).attr('value');
+                    if(rb & 1)
+                    {
+                        $('#rate_bit_1').prop('checked', true);
+                    }
+                    else
+                    {
+                        $('#rate_bit_1').prop('checked', false);
+                    }
                     document.getElementById('curr_from_name').focus();
                 });
             }
@@ -136,7 +145,7 @@
                                        bind_row_type="title" bind_row_id="FNAME_" class="form_field txt">
                                 <input type="text" class="form_field txt" name="curr_from_name" id="curr_from_name" 
                                        bind_row_type="label" bind_row_id="FNAME_" value="" size="45"
-                                       autocomplete="off" bound_id="tf_curr" ac_src="/wimm2/ac_ref.php"
+                                       autocomplete="off" bound_id="tf_curr" ac_src="<?php echo get_autocomplete_url();?>"
                                        ac_params="type=t_curr;filter=" title="Наименование валюты">
                                 </div>
                             </div>
@@ -149,7 +158,7 @@
                                            bind_row_type="title" bind_row_id="TNAME_" class="form_field txt">
                                     <input type="text" class="form_field txt" name="curr_to_name" id="curr_to_name" 
                                            bind_row_type="label" bind_row_id="TNAME_" value="" size="45"
-                                           autocomplete="off" bound_id="tt_curr" ac_src="/wimm2/ac_ref.php"
+                                           autocomplete="off" bound_id="tt_curr" ac_src="<?php echo get_autocomplete_url();?>"
                                            ac_params="type=t_curr;filter=" title="Наименование валюты">
                                 </div>
                             </div>
@@ -162,6 +171,12 @@
                                     <label for="dt_close">По:</label>
                                     <input type="datetime" class="form_field" name="dt_close" id="dt_close" 
                                            bind_row_type="title" bind_row_id="CDATE_" value="">
+                                </div>
+                            </div>
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <input type="checkbox" class="form_field" name="rate_bits[]" id="rate_bit_1" value="1">
+                                    <label for="rate_bit_1">Официальный курс</label>
                                 </div>
                             </div>
                         </div>
@@ -224,7 +239,8 @@
             $fmt_str = "<input name='ROW_ID' ID='=currency_rate_id' type='radio' value='=currency_rate_id' class='row_sel'>" .
                     "<LABEL class='td' TITLE='=currency_from' id='FNAME_=currency_rate_id' FOR='=currency_rate_id'>=f_name</LABEL>";
             $tb->addColumn(new tcol($fmt_str), FALSE);
-            $tb->addColumn(new tcol("<LABEL class='td' id=\"FRATE_=currency_rate_id\" FOR=\"=currency_rate_id\">=exchange_rate_from</LABEL>"), FALSE);
+            $tb->addColumn(new tcol("<input type=\"hidden\" id=\"RBITS_=currency_rate_id\" value=\"=rate_bits\">"
+                    . "<LABEL class='td' id=\"FRATE_=currency_rate_id\" FOR=\"=currency_rate_id\">=exchange_rate_from</LABEL>"), FALSE);
             $tb->addColumn(new tcol("<LABEL class='td' TITLE='=currency_to' id='TNAME_=currency_rate_id' FOR='=currency_rate_id'>=t_name</LABEL>"), FALSE);
             $tb->addColumn(new tcol("<LABEL class='td' id=\"TRATE_=currency_rate_id\" FOR=\"=currency_rate_id\">=exchange_rate_to</LABEL>"), FALSE);
             $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=open_date\" id=\"ODATE_=currency_rate_id\" FOR=\"=currency_rate_id\">=open_date</LABEL>"), FALSE);
@@ -233,11 +249,11 @@
 
             $sql = "select currency_rate_id, currency_from, #CONCAT#(f.currency_name #||# ' (' #||# f.currency_abbr #||# ')') as f_name, exchange_rate_from, " .
                     "currency_to, #CONCAT#(t.currency_name #||# ' (' #||# t.currency_abbr #||# ')') as t_name, exchange_rate_to, " .
-                    "tp.open_date, tp.close_date, user_name, tp.user_id " .
+                    "tp.open_date, tp.close_date, user_name, tp.user_id, rate_bits " .
                     "from m_currency_rate tp, m_users tu, m_currency f, m_currency t  " .
                     "where tp.user_id=tu.user_id and " .
                     "currency_from = f.currency_id and currency_to = t.currency_id " .
-                    "order by f_name, t_name, tp.open_date, tp.close_date";
+                    "order by tp.open_date desc, tp.close_date desc, f_name, t_name";
             printf($hfmt, "SQL2", "SQL2", $sql);
             $res = $conn->query(formatSQL($conn, $sql));
             $sm = 0;
