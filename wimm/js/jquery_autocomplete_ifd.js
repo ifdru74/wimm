@@ -169,10 +169,16 @@ function changeSelection(boxID, how)
 }
 function selectAcItem(boxID, itemID, itemText)
 {
+    if((itemID==null || itemID==undefined || itemID==="undefined") &&
+            (itemText==null || itemText==undefined || itemText==="undefined"))
+    {
+        console.log('leaving selectAcItem(' +boxID+','+itemID+','+itemText+')');
+        return ;
+    }
     console.log('entering selectAcItem(' +boxID+','+itemID+','+itemText+')');
+    var textTargetID = document.getElementById(boxID).getAttribute("for");
     if(($("#" + boxID).is(":visible")))
     {
-        var textTargetID = document.getElementById(boxID).getAttribute("for");
         var idTargetDest;
         if(textTargetID!=null && textTargetID.length>0)
             idTargetDest = document.getElementById(textTargetID).getAttribute("bound_dest");
@@ -216,6 +222,28 @@ function selectAcItem(boxID, itemID, itemText)
     }
     console.log('leaving selectAcItem()');
 }
+function    selectNextInput(jqSelector, selID, jqSelector2)
+{
+    console.log('selectNextInput('+jqSelector+','+selID+','+jqSelector2+')');
+    var items = $(jqSelector);
+    for(var i=0; i<items.length; i++)
+    {
+        if(items[i].id===selID)
+        {
+            console.log('selectNextInput found at '+i);
+            if((i+1)<items.length)
+            {
+                console.log('selectNextInput '+items[i+1].id);
+                $('#'+items[i+1].id).select();
+            }
+            else
+            {
+                $(jqSelector2).select();
+            }
+            break;
+        }
+    }
+}
 function    parseResponse(jsonData, textStatus, jqXHR, boxID)
 {
     if(!jsonData)
@@ -245,31 +273,45 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
         sel_item_id = "";
         if(arr.length==1)
         {
-            selectAcItem(boxID, arr[0].id, arr[0].text);
-            bShow = false;
+            if(arr[0] && arr[0].id && arr[0].text)
+            {
+                sel_item_id = o.getAttribute("for");
+                $("#"+sel_item_id).removeClass("not_found");
+                console.log('calling selectAcItem([0])');
+                selectAcItem(boxID, arr[0].id, arr[0].text);
+                selectNextInput(".form-control", sel_item_id, "#OK_BTN");
+                bShow = false;
+            }
+            else
+            {
+                sel_item_id = o.getAttribute("for");
+                hideAcBox(boxID);
+                $("#"+sel_item_id).addClass("not_found");
+                bShow = false;
+            }
         }
         else
         {
+            sel_item_id = o.getAttribute("for");
+            $("#"+sel_item_id).removeClass("not_found");
+            sel_item_id = "";
+            console.log('updating div');
             for(i = 0; i < arr.length; i++)
             {
                 if(sel_item_id.length<1 && item_text.length>0)
                 {
-                    if(arr[i].text.toString().indexOf(item_text)==0)
+                    if(arr[i].text.toString().indexOf(item_text)===0)
                         sel_item_id = arr[i].id;
                 }
-                s1 = "<a href=\"javascript:void(0);\"";
-//                s1 = "<a href=\"javascript::selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+ arr[i].text + 
-//                        "');\";' id='aci_" + arr[i].id;
-                var jsc = '';/*" onclick=\"selectAcItem('" + boxID + "', 'aci_" +arr[i].id + "','"+
-                        arr[i].text + "');\" ";*/
-                if(arr[i].id.toString()==sel_item_id.toString())
+                s1 = "<a href=\"javascript:void(0);\" id=\"" + arr[i].id + "\"";
+                if(arr[i].id.toString()===sel_item_id.toString())
                 {
-                    s1 += " class='ac_link ac_bordered' " + jsc +
+                    s1 += " class='ac_link ac_bordered' " +
                             "title='" + arr[i].text + "'>";
                 }
                 else
                 {
-                    s1 += " class='ac_link'" + jsc +
+                    s1 += " class='ac_link'" +
                             "title='" + arr[i].text + "'>";
                 }
                 s1 += (arr[i].text + "</a>\n");
@@ -277,7 +319,13 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
             }
             o.innerHTML = html;
             $(".ac_link").click(function(e){
-                selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
+                var cid = e.currentTarget.id;
+                var id = $(this).parent().attr('for');
+                selectAcItem(boxID, 'aci_' + cid, $(this).text());
+                if(id)
+                {
+                    selectNextInput(".form-control", id, "#OK_BTN");
+                }
              });
             if(sel_item_id.length>0)
             {
@@ -288,33 +336,11 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     }
     else
         $("#"+boxID).text("!");
-//    $(".ac_link").click(function(e)
-//    {
-//        console.log('acLink click');
-//        selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
-//    });
-//    $(".ac_link").on("click", function(e)
-//    {
-//        console.log('acLink click');
-//        selectAcItem(boxID, 'aci_' + e.currentTarget.id, $(this).text());
-//    });
-//    //$(".ac_link").keyup(function(e)
-//    $(".ac_link").on("keyup", function(e)
-//    {
-//        var nCode = translateKeyCode(e.which);
-//        console.log('LINKKeyUp()');
-//        if(nCode!=0)
-//        {
-//            changeSelection(boxID, nCode);
-//        }
-//        //keyUpAcItem(boxID, e.currentTarget.id);
-//        console.log('acLink onKeyUp()');
-//    });
     $("#"+boxID).keyup(function(e)
     {
         var nCode = translateKeyCode(e.which);
         console.log('BOXKeyUp()');
-        if(nCode!=0)
+        if(nCode!==0)
         {
             changeSelection(boxID, nCode);
         }
@@ -324,12 +350,12 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     var nMax;
     var n;
     s1 = $("#" + boxID).attr("scroll_height");
-    if(s1!=null && s1.length>0)
+    if(s1 && s1.length>0)
         nMax = Number(s1);
     else
         nMax = 50;
     s1 = $("#" + boxID).css( "height" );
-    if (s1!=null && s1!=undefined)
+    if (s1)
         n = Number(s1.replace("px",""));
     else
         n = 100500;

@@ -38,3 +38,11 @@ div.ac_disp_item  {
     padding: 2px 16px 2px 5px;
     cursor: pointer;
 }
+
+input.not_found {
+    background-image: url("../picts/banned.png");
+    background-size: contain;
+    background-color: pink;
+    background-position: right;
+    background-repeat: no-repeat;
+}
