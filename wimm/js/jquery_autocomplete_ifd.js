@@ -20,7 +20,38 @@
 var ac_jqxhr = null; // AJAX query handler
 var ac_box = null; // autocomplete div-box id
 var ac_txt = null; // autocomplete text box style
-
+const cSuccess      = 'success';
+const cUndefinedStr = 'undefined';
+const cSharp        = '#';
+const cEmptyString  = '';
+const cPx           = 'px';
+// direct styles
+const cFormControl   = 'form-control';
+const cNotFound       = 'not_found';
+const cAutoCILink     = 'ac_link';
+const cAutoCIBordered = 'ac_bordered';
+// attributes
+const cSelectedACItem = 'selected_ac_item';
+const cAttrFor          = 'for';
+const cAttrHeight       = 'height';
+const cAttrScrollHeight = 'scroll_height';
+const cAttrOverflow     = 'overflow';
+const cAttrTop          = 'top';
+const cAttrLeft         = 'left';
+const cAttrWidth        = 'width';
+// selectors
+const cOKBtnSel         = '#OK_BTN';
+const cFormCtlSel       = '.form-control';
+const cDialogBoxText    = '#dlg_box_text';
+const cVisibleSel       = ':visible';
+// bound configuration
+const cAttrBoundID    = 'bound_id';
+const cAttrBoundDest  = 'bound_dest';
+const cAttrBoundNodeT = 'bound_node_type';
+const cAttrBoundNodeC = 'bound_node_class';
+const cAttrBoundNodeN = 'bound_node_name';
+// autocomplete item prefix
+const cAutoCItem      = 'aci_';
 /**
  * scroll container to item (emilate combo box behaviour
  * @param {type} containerID - container to scroll
@@ -30,8 +61,8 @@ var ac_txt = null; // autocomplete text box style
 function scrollToItem(containerID, itemID)
 {
     try {
-        var container = $('#'+containerID);
-        var scrollTo = $('#'+itemID);
+        var container = $(cSharp+containerID);
+        var scrollTo = $(cSharp+itemID);
         container.scrollTop(
             scrollTo.offset().top - container.offset().top + container.scrollTop()
         );
@@ -40,11 +71,11 @@ function scrollToItem(containerID, itemID)
         console.log(e.toString());
     }
 }
+
 /**
- * action after autocomplete item has been selected
- * @param {string} boxID - autocomplete div id
- * @param {string} itemID - selected autocomplete item id
- * @param {string} itemText - selected autocomplete item text
+ * translate key code into action 
+ * @param {Number} keyCode
+ * @returns {Number}
  */
 function translateKeyCode(keyCode)
 {
@@ -83,27 +114,39 @@ function translateKeyCode(keyCode)
     return nRet;
 }
 
+/**
+ * returns item index in the collection
+ * @param {Array|Collection} items
+ * @param {String} itemID - item ID
+ * @returns {Number} -1 - no item or item index
+ */
 function getItemIndex(items, itemID)
 {
-    if(items!=null)
+    if(items)
     {
         var i;
         for(i=0; i<items.length; i++)
         {
-            if(items[i].id==itemID)
+            if(items[i].id===itemID)
                 return i;
         }
     }
     return -1;
 }
 
+/**
+ * apply action to autocomplete items
+ * @param {String} boxID - autocomplete DIV id
+ * @param {Number} how   - action to apply
+ * @returns {Boolean} true if item selected or false if not
+ */
 function changeSelection(boxID, how)
 {
     console.log(boxID + '=>' + how);
-    var titem = "";
-    var sel = $('#'+boxID).prop("selected_ac_item");
-    var items = $('#'+boxID).children();
-     console.log('current selection:' + sel);
+    var titem = cEmptyString;
+    var sel = $(cSharp+boxID).prop(cSelectedACItem);
+    var items = $(cSharp+boxID).children();
+    console.log('current selection:' + sel);
     if(items)
     {
         var i = -1;
@@ -118,7 +161,7 @@ function changeSelection(boxID, how)
             case -1:
             case 1:
                 i = getItemIndex(items, sel);
-                if(i==-1)
+                if(i===-1)
                     i = 0;
                 else
                     i += how;
@@ -130,8 +173,16 @@ function changeSelection(boxID, how)
                 i = getItemIndex(items, sel) - 11;
                 break;
             case 4:
-                titem = 'aci_' + $("#"+boxID).attr("selected_ac_item");
-                selectAcItem(boxID, titem, $("#"+titem).text());
+                titem = $(cSharp+boxID).attr(cSelectedACItem);
+                if(titem.indexOf(cAutoCItem)!==0)
+                {
+                    var titem2 = cAutoCItem + titem;
+                    selectAcItem(boxID, titem2, $(cSharp+titem2).text());
+                }
+                else
+                {
+                    selectAcItem(boxID, titem, $(cSharp+titem).text());
+                }
                 return false;
 
             if(titem.length<1)
@@ -153,10 +204,10 @@ function changeSelection(boxID, how)
                 console.log('changeSelection:old selection: ' + sel);
                 console.log('changeSelection:new selection: ' + titem);
                 if(sel.length>0)
-                    $("#"+sel).removeClass("ac_bordered");
-                $("#"+titem).addClass("ac_bordered");
+                    $(cSharp+sel).removeClass(cAutoCIBordered);
+                $(cSharp+titem).addClass(cAutoCIBordered);
                 scrollToItem(boxID, titem);
-                $("#"+boxID).attr("selected_ac_item", titem);
+                $(cSharp+boxID).attr(cSelectedACItem, titem);
             }
         }
         return true;
@@ -167,30 +218,37 @@ function changeSelection(boxID, how)
     }
     return false;
 }
+/**
+ * select autocomplete items
+ * @param {String} boxID    - an ID of the utocomplete box (usually DIV)
+ * @param {String} itemID   - selected item's element ID
+ * @param {String} itemText - selected item's element text
+ * @returns nothing
+ */
 function selectAcItem(boxID, itemID, itemText)
 {
-    if((itemID==null || itemID==undefined || itemID==="undefined") &&
-            (itemText==null || itemText==undefined || itemText==="undefined"))
+    if((itemID===null || itemID===undefined || itemID===cUndefinedStr) &&
+            (itemText===null || itemText===undefined || itemText===cUndefinedStr))
     {
         console.log('leaving selectAcItem(' +boxID+','+itemID+','+itemText+')');
         return ;
     }
     console.log('entering selectAcItem(' +boxID+','+itemID+','+itemText+')');
-    var textTargetID = document.getElementById(boxID).getAttribute("for");
-    if(($("#" + boxID).is(":visible")))
+    var textTargetID = document.getElementById(boxID).getAttribute(cAttrFor);
+    if(($(cSharp + boxID).is(cVisibleSel)))
     {
         var idTargetDest;
-        if(textTargetID!=null && textTargetID.length>0)
-            idTargetDest = document.getElementById(textTargetID).getAttribute("bound_dest");
+        if(textTargetID)
+            idTargetDest = document.getElementById(textTargetID).getAttribute(cAttrBoundDest);
 //        console.log('items set selectAcItem('+textTargetID+')');
-        if(idTargetDest!=null && idTargetDest.length>0)
+        if(idTargetDest)
         {
             // advanced bind add subitem into target destionation
             console.log('advanced bind selectAcItem()');
-            var nodeType = document.getElementById(textTargetID).getAttribute("bound_node_type");
-            var nodeClass = document.getElementById(textTargetID).getAttribute("bound_node_class");
-            var nodeName = document.getElementById(textTargetID).getAttribute("bound_node_name");
-            if(nodeName==null || nodeName.length>0)
+            var nodeType = document.getElementById(textTargetID).getAttribute(cAttrBoundNodeT);
+            var nodeClass = document.getElementById(textTargetID).getAttribute(cAttrBoundNodeC);
+            var nodeName = document.getElementById(textTargetID).getAttribute(cAttrBoundNodeN);
+            if(!nodeName)
                 nodeName = "cid";
             var html = document.getElementById(idTargetDest).innerHTML;
             html += ("<" + nodeType + " class='" + nodeClass + "' id='" + itemID + 
@@ -199,22 +257,25 @@ function selectAcItem(boxID, itemID, itemText)
                     "]' value='" + itemID + "'>" +
                     itemText + "</" + nodeType + ">");
             document.getElementById(idTargetDest).innerHTML = html;
-            document.getElementById(textTargetID).value = ('');
+            document.getElementById(textTargetID).value = (cEmptyString);
         }
         else
         {   // simple bind - text box for text + hidden for id
             console.log('simple bind selectAcItem()');
-            var idTargetID = document.getElementById(textTargetID).getAttribute("bound_id");
+            var idTargetID = document.getElementById(textTargetID).getAttribute(cAttrBoundID);
             document.getElementById(textTargetID).value = (itemText);
-            if(idTargetID!=null && idTargetID.length>0)
+            if(idTargetID)
             {
                 if(itemID)
                 {
-                    if(itemID.substr(0,4)=='aci_')
+                    if(itemID.indexOf(cAutoCItem)===0)
                     {
-                        itemID = itemID.substr(4);
-                    }                
-                    $('#'+idTargetID).val(itemID);
+                        $(cSharp+idTargetID).val(itemID.substr(4));
+                    }
+                    else
+                    {
+                        $(cSharp+idTargetID).val(itemID);
+                    }
                 }
             }
         }
@@ -222,6 +283,14 @@ function selectAcItem(boxID, itemID, itemText)
     }
     console.log('leaving selectAcItem()');
 }
+
+/**
+ * selects next field when autocomplete finished
+ * @param {String} jqSelector - selector to get input fields
+ * @param {String} selID - current field ID
+ * @param {String} jqSelector2 - object after last field
+ * @returns {undefined}
+ */
 function    selectNextInput(jqSelector, selID, jqSelector2)
 {
     console.log('selectNextInput('+jqSelector+','+selID+','+jqSelector2+')');
@@ -234,7 +303,7 @@ function    selectNextInput(jqSelector, selID, jqSelector2)
             if((i+1)<items.length)
             {
                 console.log('selectNextInput '+items[i+1].id);
-                $('#'+items[i+1].id).select();
+                $(cSharp+items[i+1].id).select();
             }
             else
             {
@@ -256,45 +325,45 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     var i;
     var item;
     var sel_item_id;
-    var item_text = "";
-    var html = "";
+    var item_text = cEmptyString;
+    var html = cEmptyString;
     var o;
     var s1;
     var bShow = true;
     o = document.getElementById(boxID);
-    if(o!=null)
+    if(o)
     {
-        o.innerHTML = "";  // clear contents
-        sel_item_id = o.getAttribute("for");
-        if(sel_item_id!=null && sel_item_id.length>0)
+        o.innerHTML = cEmptyString;  // clear contents
+        sel_item_id = o.getAttribute(cAttrFor);
+        if(sel_item_id)
         {
-            item_text = $("#"+sel_item_id).val();
+            item_text = $(cSharp+sel_item_id).val();
         }
-        sel_item_id = "";
-        if(arr.length==1)
+        sel_item_id = cEmptyString;
+        if(arr.length===1)
         {
             if(arr[0] && arr[0].id && arr[0].text)
             {
-                sel_item_id = o.getAttribute("for");
-                $("#"+sel_item_id).removeClass("not_found");
+                sel_item_id = o.getAttribute(cAttrFor);
+                $(cSharp+sel_item_id).removeClass(cNotFound);
                 console.log('calling selectAcItem([0])');
                 selectAcItem(boxID, arr[0].id, arr[0].text);
-                selectNextInput(".form-control", sel_item_id, "#OK_BTN");
+                selectNextInput(cFormCtlSel, sel_item_id, cOKBtnSel);
                 bShow = false;
             }
             else
             {
-                sel_item_id = o.getAttribute("for");
+                sel_item_id = o.getAttribute(cAttrFor);
                 hideAcBox(boxID);
-                $("#"+sel_item_id).addClass("not_found");
+                $(cSharp+sel_item_id).addClass(cNotFound);
                 bShow = false;
             }
         }
         else
         {
-            sel_item_id = o.getAttribute("for");
-            $("#"+sel_item_id).removeClass("not_found");
-            sel_item_id = "";
+            sel_item_id = o.getAttribute(cAttrFor);
+            $(cSharp+sel_item_id).removeClass(cNotFound);
+            sel_item_id = cEmptyString;
             console.log('updating div');
             for(i = 0; i < arr.length; i++)
             {
@@ -303,40 +372,40 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
                     if(arr[i].text.toString().indexOf(item_text)===0)
                         sel_item_id = arr[i].id;
                 }
-                s1 = "<a href=\"javascript:void(0);\" id=\"" + arr[i].id + "\"";
+                s1 = "<a href=\"javascript:void(0);\" id=\"" + cAutoCItem + arr[i].id + "\"";
                 if(arr[i].id.toString()===sel_item_id.toString())
                 {
-                    s1 += " class='ac_link ac_bordered' " +
+                    s1 += " class='"+cAutoCILink+" "+cAutoCIBordered+"' " +
                             "title='" + arr[i].text + "'>";
                 }
                 else
                 {
-                    s1 += " class='ac_link'" +
+                    s1 += " class='"+cAutoCILink+"'" +
                             "title='" + arr[i].text + "'>";
                 }
                 s1 += (arr[i].text + "</a>\n");
                 html += s1;
             }
             o.innerHTML = html;
-            $(".ac_link").click(function(e){
+            $("."+cAutoCILink).click(function(e){
                 var cid = e.currentTarget.id;
-                var id = $(this).parent().attr('for');
-                selectAcItem(boxID, 'aci_' + cid, $(this).text());
+                var id = $(this).parent().attr(cAttrFor);
+                selectAcItem(boxID, cid, $(this).text());
                 if(id)
                 {
-                    selectNextInput(".form-control", id, "#OK_BTN");
+                    selectNextInput(cFormCtlSel, id, cOKBtnSel);
                 }
              });
             if(sel_item_id.length>0)
             {
-                o.setAttribute("selected_ac_item", sel_item_id);
+                o.setAttribute(cSelectedACItem, sel_item_id);
                 scrollToItem(boxID, sel_item_id);
             }
         }
     }
     else
-        $("#"+boxID).text("!");
-    $("#"+boxID).keyup(function(e)
+        $(cSharp+boxID).text("!");
+    $(cSharp+boxID).keyup(function(e)
     {
         var nCode = translateKeyCode(e.which);
         console.log('BOXKeyUp()');
@@ -349,27 +418,27 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     var s1;
     var nMax;
     var n;
-    s1 = $("#" + boxID).attr("scroll_height");
+    s1 = $(cSharp + boxID).attr(cAttrScrollHeight);
     if(s1 && s1.length>0)
         nMax = Number(s1);
     else
         nMax = 50;
-    s1 = $("#" + boxID).css( "height" );
+    s1 = $(cSharp + boxID).css( cAttrHeight );
     if (s1)
-        n = Number(s1.replace("px",""));
+        n = Number(s1.replace(cPx,cEmptyString));
     else
         n = 100500;
     if(n>nMax)
     {
-        $("#" + boxID).css( "height", nMax.toString() + "px" );
-        $("#" + boxID).css( "overflow", "scroll");
+        $(cSharp + boxID).css( cAttrHeight, nMax.toString() + cPx );
+        $(cSharp + boxID).css( cAttrOverflow, "scroll");
     }
     else
     {
-        $("#" + boxID).css( "overflow", "auto");
+        $(cSharp + boxID).css( cAttrOverflow, "auto");
     }
     if(bShow===true)
-        $("#" + boxID).show();
+        $(cSharp + boxID).show();
     console.log('leaving parseResponse()');
 }
 /**
@@ -379,9 +448,9 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
  */
 function queryAcItems(boxID, itemID)
 {
-    var query_src = $("#"+itemID).attr("ac_src");
-    var query_str = "";
-    var param_str = $("#"+itemID).attr("ac_params");
+    var query_src = $(cSharp+itemID).attr("ac_src");
+    var query_str = cEmptyString;
+    var param_str = $(cSharp+itemID).attr("ac_params");
     var params = param_str.split(";");
     var i;
     var pa;
@@ -396,7 +465,7 @@ function queryAcItems(boxID, itemID)
         try
         {
             pa = params[i].split("=");
-            if(pa[1].indexOf("#")==0)
+            if(pa[1].indexOf(cSharp)===0)
             {
                 pv = $(pa[1]).val();
             }
@@ -405,9 +474,9 @@ function queryAcItems(boxID, itemID)
                 if(pa[1].length>0)
                     pv = pa[1];
                 else
-                    pv = $("#"+itemID).val();
+                    pv = $(cSharp+itemID).val();
             }
-            if(pv!=null && pv.length>0)
+            if(pv)
             {
                 if(query_str.length>0)
                     query_str += param_sep;
@@ -416,7 +485,7 @@ function queryAcItems(boxID, itemID)
         }
         catch(err)
         {
-            pv = "";
+            pv = cEmptyString;
         }
     }
     var d = new Date();
@@ -431,7 +500,7 @@ function queryAcItems(boxID, itemID)
         dataType: "json",
         data: query_str,
         success: function(jsonData, textStatus, jqXHR){
-            console.log('success');
+            console.log(cSuccess);
             parseResponse(jsonData, textStatus, jqXHR, boxID);
         }
     });
@@ -444,7 +513,7 @@ function queryAcItems(boxID, itemID)
 function cancelQuery()
 {
     try {
-        if(ac_jqxhr!=null)
+        if(ac_jqxhr)
             ac_jqxhr.abort();
         ac_jqxhr = null;    
     } catch (e) {
@@ -458,14 +527,14 @@ function cancelQuery()
  */
 function hideAcBox(boxID)
 {
-    var textTargetID = $("#"+boxID).prop("for");
-    $("#"+boxID).hide();
+    var textTargetID = $(cSharp+boxID).prop(cAttrFor);
+    $(cSharp+boxID).hide();
     cancelQuery();
     if(textTargetID)
     {
         var vExit = 10;
         var vi = -1;
-        var ctl = $('#dlg_box_text').find('.form-control');
+        var ctl = $(cDialogBoxText).find(cFormCtlSel);
         if(ctl)
         {
             for(var i=0; i<ctl.length; i++)
@@ -488,7 +557,7 @@ function hideAcBox(boxID)
             }
         }
         console.log('Exit code:'+vExit);
-	document.getElementById(boxID).setAttribute("for", "");
+	document.getElementById(boxID).setAttribute(cAttrFor, cEmptyString);
     }
     else
     {
@@ -504,35 +573,36 @@ function hideAcBox(boxID)
  */
 function displayAcBox(boxID, itemID)
 {
-    var itemSel = "#" + itemID;
-    var boxSel = "#" + boxID;
+    var itemSel = cSharp + itemID;
+    var boxSel = cSharp + boxID;
     if(itemSel.length>2 && // something to find
-            (!($(boxSel).is(":visible")) || // box not visible
-            $(boxSel).attr("for")!=itemID)) // box not under item
+            (!($(boxSel).is(cVisibleSel)) || // box not visible
+            $(boxSel).attr(cAttrFor)!==itemID)) // box not under item
     {
         var p;
-        if($(itemSel).hasClass( "form-control" ))
+        if($(itemSel).hasClass( cFormControl ))
             p = $(itemSel).position();
         else
             p = $(itemSel).offset();
-        if(p!=undefined && p!=null)
+        if(p)
         {
-            console.log('item:'+ itemID + ', top:' + p.top.toString() + ', left:' + p.left.toString())
-            var s1 = $(itemSel).css( "height" );
+            console.log('item:'+ itemID + ', top:' + p.top.toString() + ', left:' + p.left.toString());
+            var s1 = $(itemSel).css( cAttrHeight );
             var n1 = 0;
-            n1 = Number(s1.replace("px",""));
+            n1 = Number(s1.replace(cPx,cEmptyString));
             n1 += n1;
             n1 += Number(p.top);
             p.top =  n1 ;
-            $("#ac").offset({ top: p.top, left: p.left});
-            console.log('box:'+ boxID + ', top:' + p.top.toString() + ', left:' + p.left.toString())
-            $(boxSel).css("top", p.top);
-            $(boxSel).css("left", p.left);
-            s1 = $(itemSel).css( "width" );
-            $(boxSel).css("width", s1);
+//            $("#ac").offset({ top: p.top, left: p.left});
+            $(boxSel).offset({ top: p.top, left: p.left});
+            console.log('box:'+ boxID + ', top:' + p.top.toString() + ', left:' + p.left.toString());
+            $(boxSel).css(cAttrTop, p.top);
+            $(boxSel).css(cAttrLeft, p.left);
+            s1 = $(itemSel).css( cAttrWidth );
+            $(boxSel).css(cAttrWidth, s1);
             $(boxSel).show();
-            $(boxSel).attr("for", itemID);
-            $("#"+boxID).attr("selected_ac_item", "");
+            $(boxSel).attr(cAttrFor, itemID);
+            $(cSharp+boxID).attr(cSelectedACItem, cEmptyString);
         }
         else
         {
@@ -545,13 +615,15 @@ function displayAcBox(boxID, itemID)
 function textFieldKeyUp(event)
 {
     var nCode = translateKeyCode(event.which);
+    var itemID;
+    var itemText;
     console.log('entering textFieldKeyUp(' + nCode.toString() + ')');
-    if(nCode==-4 || nCode==5)
+    if(nCode===-4 || nCode===5)
     {
 //        console.log('<Esc>');
         hideAcBox(ac_box);
     }
-    if(nCode==-4)
+    if(nCode===-4)
     {
         event.preventDefault();
     }
@@ -568,7 +640,7 @@ function textFieldKeyUp(event)
         case 0:
             if(event.currentTarget.value.length>2)
             {
-                displayAcBox(ac_box,event.currentTarget.id)
+                displayAcBox(ac_box,event.currentTarget.id);
             }
             else
             {
@@ -587,6 +659,18 @@ function textFieldKeyUp(event)
                 event.preventDefault();
             }
             break;
+        case 4:
+            itemID = $(cSharp+ac_box).attr(cSelectedACItem);
+            if(itemID && itemID.length>0)
+            {
+                itemText = $(cSharp+itemID).text();
+                if(itemText)
+                {
+                    var sel_item_id = $(cSharp+ac_box).attr(cAttrFor);
+                    selectAcItem(ac_box, itemID, itemText);
+                    selectNextInput(cFormCtlSel, sel_item_id, cOKBtnSel);
+                }
+            }
     }
     console.log('leaving textFieldKeyUp()');
     return true;
@@ -602,7 +686,7 @@ function ac_init(boxID, ac_box_sel)
     });
     $(ac_txt).keypress(function(event)
     {
-        if(event.keyCode == 13)
+        if(event.keyCode === 13)
         {
             changeSelection(ac_box, 4);
             event.preventDefault();
@@ -611,7 +695,7 @@ function ac_init(boxID, ac_box_sel)
     });
     $(ac_txt).focus(function(event)
     {
-        if($('#'+ac_box).prop('for')!==event.currentTarget.id)
+        if($(cSharp+ac_box).prop(cAttrFor)!==event.currentTarget.id)
         {
             hideAcBox(ac_box);
         }

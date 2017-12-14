@@ -7,6 +7,32 @@ var bCtrlHit = false;   // ctrl held down
 var aParts = [[0,4,-1,0], [5,2,12,1], [8,2,31,1], [11,2,23,0], [14,2,59,0], [17,2,59,0]];   // text parts
 var aDays = [0,31,28,31,30,31,30,31,31,30,31,30,31];    // month's days
 var jqxr = null;    // jQuery ajax request
+const cEmptyString = '';
+const cSuccess = 'success';
+// binding parameters
+const cRowBindType = 'bind_row_type';
+const cRowBindID   = 'bind_row_id';
+// bind types
+const cBindTitle = 'title';
+const cBindValue = 'value';
+const cBindLabel = 'label';
+const cAutoCItem = 'aci_';
+// form POST modes
+const cModeRefresh = 'refresh';
+const cModeInsert  = 'insert';
+const cModeDelete  = 'delete';
+// jquery element selectors
+const cFormMode  = '#FRM_MODE';
+const cSelRowID  = '#sel_row_id';
+const cFormSelID = '#expenses';
+const cDialogBox = '#dialog_box';
+const cDialogBoxV= '#dialog_box:visible';
+const cFormID    = 'expenses';
+// form element selectors
+const cFormField    = '.form_field';
+const cFormSendable = '.sendable';
+// dialog actions
+const cFormHide = 'hide';
 
 /**
  * converts datetime string to display
@@ -36,7 +62,7 @@ function format_date(sDate)
 /**
  * 
  * @param {object} s_msg
- * @returns {undefined}
+ * @returns nothing
  */
 function console_debug_log(s_msg)
 {
@@ -46,68 +72,78 @@ function console_debug_log(s_msg)
     }
 }
 
+/**
+ * cancel all queries and close dialog
+ * @returns nothing
+ */
 function doCancel()
 {
     if(jqxr!==null) {
         jqxr.abort();
         jqxr = null;
     }
-    $("#dialog_box").hide();
-    $("#sel_row_id").val("");
-    $("#FRM_MODE").val("refresh");
+    $(cDialogBox).hide();
+    $(cSelRowID).val(cEmptyString);
+    $(cFormMode).val(cModeRefresh);
 }
 
+/**
+ * finishes AJAX request
+ * @param {object} jqXHR - query
+ * @param {String} textStatus - status
+ * @returns nothing
+ */
 function onTxComplete(jqXHR, textStatus )
 {
-    if(textStatus.indexOf("success")===0)    {
+    if(textStatus.indexOf(cSuccess)===0)    {
         var row_id = $("#HIDDEN_ID").val();
         if(row_id!==null&&row_id!==undefined&&row_id.length>0)  {
             var i, v;
             var s1 = '{"id":"1","err":"error"}';
-            console_debug_log('response=' + jqXHR.responseText);
+            console.debug_log('response=' + jqXHR.responseText);
             if(jqXHR.responseText!==null && 
                     jqXHR.responseText!==undefined && 
                     jqXHR.responseText.length>0)  {
                 i = JSON.parse(jqXHR.responseText);
-                console_debug_log("id="+i.id);
-                console_debug_log("error="+i.err);
+                console.debug_log("id="+i.id);
+                console.debug_log("error="+i.err);
                 var v_sum = Number(i.t_sum);
-                console_debug_log("sum="+v_sum);
-                v = $("#FRM_MODE").val();
-                console_debug_log("mode="+v);
-                if(v.indexOf("delete")===0)
+                console.debug_log("sum="+v_sum);
+                v = $(cFormMode).val();
+                console.debug_log("mode="+v);
+                if(v.indexOf(cModeDelete)===0)
                 {
                     $("#"+row_id).parent().parent().remove();
                 }
                 else {
                     $("#T_SUMM_"+row_id).text(v_sum.toFixed(2));
-                    var form_fields = $('#expenses').find(".form_field");
+                    var form_fields = $(cFormSelID).find(cFormField);
                     for(i=0; i<form_fields.length; i++)
                     {
-                        var bt = form_fields[i].getAttribute("bind_row_type");
-                        var bi = "#" + form_fields[i].getAttribute("bind_row_id") + row_id;
+                        var bt = form_fields[i].getAttribute(cRowBindType);
+                        var bi = "#" + form_fields[i].getAttribute(cRowBindID) + row_id;
                         var v = form_fields[i].value;
-                        if(v.substr(0,4)==='aci_')
+                        if(v.substr(0,4)===cAutoCItem)
                         {
                             v = v.substr(4);
                         }
                         if(form_fields[i].id.indexOf('t_date')===0)
                         {
-                            $(bi).attr('title', v);
+                            $(bi).attr(cBindTitle, v);
                             $(bi).text(format_date(v));
                         }
                         else
                         {
                             switch(bt)
                             {
-                            case 'value':
+                            case cBindValue:
                                 $(bi).val(v);
                                 break;
-                            case 'label':
+                            case cBindLabel:
                                 $(bi).text(v);
                                 break;
-                            case 'title':
-                                $(bi).attr('title', v);
+                            case cBindTitle:
+                                $(bi).attr(cBindTitle, v);
                                 break;
                             }
                         }
@@ -119,46 +155,50 @@ function onTxComplete(jqXHR, textStatus )
         }
         else
         {
-            console_debug_log("new row.");
-            console_debug_log('response=' + jqXHR.responseText);
-            v = $("#FRM_MODE").val();
-            console_debug_log("mode="+v);
-            if(v.indexOf("insert")===0)
+            console.debug_log("new row.");
+            console.debug_log('response=' + jqXHR.responseText);
+            v = $(cFormMode).val();
+            console.debug_log("mode="+v);
+            if(v.indexOf(cModeInsert)===0)
             {
                 if(jqXHR.responseText!==null && jqXHR.responseText!==undefined && 
                         jqXHR.responseText.length>0)  {
                     i = JSON.parse(jqXHR.responseText);
-                    console_debug_log("id="+i.id);
-                    console_debug_log("error="+i.err);
+                    console.debug_log("id="+i.id);
+                    console.debug_log("error="+i.err);
                 }                
             }
         }
     }
     else {
-        console_debug_log(textStatus);
+        console.debug_log(textStatus);
     }
 
     jqxr = null;
-    //$("#dialog_box").hide();
-    $("#dialog_box").modal('hide');
+    $(cDialogBox).modal(cFormHide);
 }
 
+/**
+ * submit AJAX request
+ * @param {String} submitURL
+ * @returns nothing
+ */
 function tx_submit(submitURL)
 {
     var i;
     var f,v;
     var inv_idx = -1;
-    var msg = "";
-    var currentdate = new Date(); 
-    v = $("#FRM_MODE").val();
-    if(v==='insert')
+    var msg = cEmptyString;
+//    var currentdate = new Date(); 
+    v = $(cFormMode).val();
+    if(v===cModeInsert)
     {
-        $('#expenses').submit();
+        $(cFormSelID).submit();
         return;
     }
     var reqStr = "time=" + Date.now() + "&FRM_MODE=" + v + 
             "&HIDDEN_ID=" + $("#HIDDEN_ID").val();
-    var fields = $('#expenses').find('.sendable');
+    var fields = $(cFormSelID).find('.sendable');
     if(fields!==null && fields!==undefined)
     {
         for(i=0; i<fields.length; i++)
@@ -166,7 +206,7 @@ function tx_submit(submitURL)
             try {
                 f = fields[i].getAttribute("id");;
                 v = fields[i].value;
-                if(v.substr(0,4)==='aci_')
+                if(v.substr(0,4)===cAutoCItem)
                 {
                     v = v.substr(4);
                 }
@@ -177,39 +217,43 @@ function tx_submit(submitURL)
             }
         }
     }
-    console_debug_log("request:"+reqStr);
-    console_debug_log("query!");
+    console.debug_log("request:"+reqStr);
     jqxr = $.ajax({
         type: "POST",
         url: submitURL,
         data: reqStr,
         complete: onTxComplete
     });
-    console_debug_log("end query!");
+    console.debug_log("end query!");
 }
 
+/**
+ * process key pressed
+ * @param {Number} key
+ * @returns nothing
+ */
 function onPageKey(key)
 {
     switch(key)
     {
         case 27:
-            if($('#dialog_box:visible').length > 0) {
+            if($(cDialogBoxV).length > 0) {
                 doCancel2();
-                $("#dialog_box").modal('hide');
+                $(cDialogBox).modal(cFormHide);
             }
             break;
         case 10:
-            if($('#dialog_box:visible').length > 0) {
-                if(fancy_form_validate('expenses')) 
+            if($(cDialogBoxV).length > 0) {
+                if(fancy_form_validate(cFormID)) 
                 {
                     tx_submit('/wimm2/wimm_edit2.php');
                 }
             }
             break;
         case 116:
-            $("#sel_row_id").val("");
-            $("#FRM_MODE").val("refresh");
-            $('#expenses').submit();
+            $(cSelRowID).val(cEmptyString);
+            $(cFormMode).val(cModeRefresh);
+            $(cFormSelID).submit();
            break;
     }
 
@@ -236,7 +280,7 @@ function setInputSelection(el, nStart, nEnd)
     }
     catch(e)
     {
-        console_debug_log("set date & time selection: " + e.toString());
+        console.debug_log("set date & time selection: " + e.toString());
     }
 }
 
@@ -262,7 +306,7 @@ function getInputSelection(el) {
     }
     catch(e)
     {
-        console_debug_log("get date & time selection: " + e.toString());
+        console.debug_log("get date & time selection: " + e.toString());
     }
     return null;
 }
@@ -278,7 +322,7 @@ function formatNumber(i, l, f)
 {
     var s1 = i.toString();
     var len = s1.length;
-    var sRet = "";
+    var sRet = cEmptyString;
     if(len<l)   {
         for(i=0; i<l-len; i++)
             sRet += f.substring(0,1);
