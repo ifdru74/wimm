@@ -223,10 +223,9 @@ function changeSelection(boxID, how)
  * @param {String} boxID    - an ID of the utocomplete box (usually DIV)
  * @param {String} itemID   - selected item's element ID
  * @param {String} itemText - selected item's element text
- * @param {boolean} callChange - disable call change handler if true
  * @returns nothing
  */
-function selectAcItem(boxID, itemID, itemText, callChange)
+function selectAcItem(boxID, itemID, itemText)
 {
     if((itemID===null || itemID===undefined || itemID===cUndefinedStr) &&
             (itemText===null || itemText===undefined || itemText===cUndefinedStr))
@@ -279,10 +278,7 @@ function selectAcItem(boxID, itemID, itemText, callChange)
                     }
                 }
                 console.log('trigger change');
-                if(!callChange)
-                {
-                    $(cSharp+idTargetID).trigger("change");
-                }
+                $(cSharp+idTargetID).trigger("change");
             }
         }
         hideAcBox(boxID);
@@ -448,10 +444,6 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     if(bShow===true)
         $(cSharp + boxID).show();
     console.log('leaving parseResponse()');
-    if(callChange)
-    {
-        $(cSharp+idTargetID).trigger("change");
-    }
 }
 /**
  * query autocomplete items, set key handlers
