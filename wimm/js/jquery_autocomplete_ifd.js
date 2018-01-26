@@ -278,11 +278,11 @@ function selectAcItem(boxID, itemID, itemText, callChange)
                         $(cSharp+idTargetID).val(itemID);
                     }
                 }
-            }
-            console.log('trigger change');
-            if(!callChange)
-            {
-                $(cSharp+idTargetID).trigger("change");
+                console.log('trigger change');
+                if(!callChange)
+                {
+                    $(cSharp+idTargetID).trigger("change");
+                }
             }
         }
         hideAcBox(boxID);
