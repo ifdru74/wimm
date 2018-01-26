@@ -1,4 +1,4 @@
-﻿<?php
+<?php
     include_once ("fun_web.php");
     $self_request = $_SERVER['REQUEST_URI'];
     $acref_request = dirname($self_request) . "/ac_ref.php";
@@ -60,9 +60,10 @@
     }
 ?>        
             <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
-            <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
+            <script language="JavaScript" type="text/JavaScript" src="js/jqc_autocomplete_ifd.js"></script>
             <script language="JavaScript" type="text/JavaScript" src="js/bootstrap.js"></script>
             <script language="JavaScript" type="text/JavaScript">
+                var pAc;
                 /**
                  * 
                  * @param {object} s_msg
@@ -93,7 +94,8 @@
                         }
                     });
                     $('#dialog_box').draggable();
-                    ac_init("ac", ".txt");
+                    pAc = new AutoCompleteIFD("ac", ".txt");
+                    pAc.call_change = true;
                     $(".row_sel").click(function(e)
                     {
                         $('.dlg_box').show();
@@ -304,7 +306,7 @@
                                            bind_row_type="title" bind_row_id="G_TYPE_" value=""
                                            pattern="^[1-9][0-9]*$" focus_on="g_type_name">
                                     <input type="text" name="g_type_name" class="form-control form_field txt" value=""
-                                           autocomplete="off" bound_id="g_type" ac_src="<?php echo $acref_request;?>" 
+                                           autocomplete="off" bound_id="g_type" ac_src="<?php echo get_autocomplete_url();?>" 
                                            ac_params="type=t_type;filter=" id="g_type_name" scroll_height="10"
                                            bind_row_type="label" bind_row_id="G_TYPE_">
                                 </div>
@@ -369,7 +371,7 @@
         $fmt_str = "<input class='row_sel' name=\"ROW_ID\" ID=\"=good_id\" type=\"radio\" value=\"=good_id\" =checked>" .
                 "<label class='td' id=\"G_NAME_=good_id\" FOR=\"=good_id\" title=\"=user_id\">=good_name</label>";
         $tb->addColumn(new tcol($fmt_str), FALSE);
-        $tb->addColumn(new tcol('<label class="td" id="G_CODE_=good_id" for="=good_id">=good_barcode</span>'), FALSE);
+        $tb->addColumn(new tcol('<label class="td" style="font-family: monospace;" id="G_CODE_=good_id" for="=good_id">=good_barcode</span>'), FALSE);
         $tb->addColumn(new tcol('<label class="td" title="=good_type_id" id="G_TYPE_=good_id" for="=good_id">=t_type_name</span>'), FALSE);
         $tb->addColumn(new tcol('<label class="td" id="G_COUNT_=good_id" for="=good_id">=item_count</span>'), FALSE);
         $tb->addColumn(new tcol('<label class="td" id="G_WEIGHT_=good_id" for="=good_id">=net_weight</span>'), FALSE);

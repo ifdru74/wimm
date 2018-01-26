@@ -66,6 +66,29 @@
                     $sql .= " and loan_id<>" . value4db($rep_id);
                 }
                 break;
+            case "t_goods":
+                $sql = "SELECT good_id as r_id, good_name as r_name FROM m_goods WHERE close_date is null and #NOW# between open_date and close_date";
+                if($filter!==FALSE)
+                {
+                    $sql .= " and good_name like '$filter%'";
+                }
+                if($rep_id!==FALSE)
+                {
+                    $sql .= " and good_id<>" . value4db($rep_id);
+                }
+                break;
+            case "t_budcur":
+                if($filter!==FALSE)
+                {
+                    $rep_id = value4db($filter);
+                    $sql = "SELECT c.currency_id as r_id, "
+                            . "#CONCAT#(c.currency_name #||# ' (' #||# c.currency_abbr #||# ')') as r_name "
+                            . "FROM m_budget b, m_currency c "
+                            . "WHERE b.close_date is null "
+                            . "and budget_id=$rep_id "
+                            . "and b.currency_id=c.currency_id";
+                }
+                break;
         }
         if($sql!==FALSE)
         {

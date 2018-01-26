@@ -1,8 +1,11 @@
-﻿<?php
+<?php
     include_once ("fun_web.php");
     $uid = page_pre();
     if($uid===FALSE)
         die();
+    $values = array();
+    $values['uid'] = $uid;
+    $values['row_bound'] = TRUE;
     include_once 'fun_dbms.php';
     include_once 'table.php';
     /**
@@ -43,6 +46,7 @@
     <script language="JavaScript" type="text/JavaScript" src="js/bootstrap.js"></script>
     <script language="JavaScript" type="text/JavaScript">
         var tmr;
+        var tmr2;
         var to;
         function focus_fun()
         {
@@ -61,7 +65,15 @@
                 document.getElementById('t_date').value = s.substr(0,19);
             }
             else
+            {
+                if($("#use_credit").val().length>0)
+                {
+                    $("#use_credit").prop("checked",true);
+                    $("#l_credit_txt").show();
+                    $("#t_credit_txt").show();
+                }
                 document.getElementById('t_name').focus();
+            }
             clearTimeout(tmr);
             console.log("focus_fun() end");
         }
@@ -135,6 +147,89 @@
             tmr = setTimeout(function(){ focus_fun(); }, to);
             //$("#dialog_box").modal();
         }
+        function toggle_credit()
+        {
+            if($("#use_credit").prop("checked"))
+            {
+                $("#t_credit_txt").prop("disabled","false");
+            }
+            else
+            {
+                $("#use_credit").val("");
+                $("#t_credit_txt").val("");
+                $("#t_credit_txt").prop("disabled","true");;
+            }
+        }
+        function parseCurrency(jsonData, textStatus, jqXHR, boxID)
+        {
+            if(!jsonData)
+            {
+                console.log('entering parseCurrency() - null result');
+                return ;
+            }
+            console.log('entering parseCurrency()');
+            var arr = jsonData;
+            if(arr.length===1)
+            {
+                if(arr[0] && arr[0].id && arr[0].text)
+                {
+//                    var v = $("#t_curr").val();
+//                    if(v)
+//                    {
+                        $("#t_curr").val(arr[0].id);
+                        $("#t_curr_txt").val(arr[0].text);
+                        console.log('result ' + arr[0].id + ' set' + arr[0].text);
+//                    }
+//                    else
+//                    {
+//                        console.log('result already set');
+//                    }
+                }
+                else
+                {
+                    console.log('invalid array');
+                }
+            }
+            else
+            {
+                console.log('invalid array length');
+            }
+            console.log('leaving parseCurrency()');
+        }
+        
+        function budget_update2()
+        {
+            clearTimeout(tmr2);
+            console.log('entering budget_update2()');
+            var v = $("#t_curr").val();
+            var b = $("#t_budget").val();
+            if(!v && b)
+            {
+                var query_src = "<?php echo get_autocomplete_url();?>";
+                var d = new Date();
+                var query_str = "type=t_budcur&filter="+b+"&d="+d;
+                console.log('params parsed: ' + query_str);
+                console.log('query to: ' + query_src);
+                // got query string - send request
+                ac_jqxhr =  $.ajax({
+                    type: "POST",
+                    url: query_src,
+                    cache: false,
+                    dataType: "json",
+                    data: query_str,
+                    success: function(jsonData, textStatus, jqXHR){
+                        parseCurrency(jsonData, textStatus, jqXHR, 'boxID');
+                    }
+                });
+            }
+            console.log('leaving budget_update2()');
+        }
+        function budget_update()
+        {
+            console.log('entering budget_update()');
+            tmr2 = setTimeout(function(){ budget_update2(); }, to);
+            console.log('leaving budget_update()');
+        }
     </script>
 <?php
         $dtm = new DateTime();
@@ -142,7 +237,7 @@
 	$bd = update_param("BDATE", "BEG_DATE", $dtm->format($ldfmt));
         $dtm->add(new DateInterval('P1M'));
 	$ed = update_param("EDATE", "END_DATE", $dtm->format($ldfmt));
-	        $dtm = DateTime::createFromFormat('Y-m-d', $bd);
+        $dtm = DateTime::createFromFormat('Y-m-d', $bd);
         $ldfmt = getSessionParam('locale_date_format', 'd.m.Y');
         $dtm2 = DateTime::createFromFormat('Y-m-d', $ed);
 	print_body_title('Расходы с ' . $dtm->format($ldfmt) . ' по ' . $dtm2->format($ldfmt));
@@ -168,6 +263,8 @@ if($conn)	{
                 case 'sql':
                     print "	<input ID=\"SQL\" type=\"hidden\" value=\"$vdml\">\n";
                     break;
+                case DML_RET_DBG:
+                    print "<div id='$kdml'>$vdml</div>" . PHP_EOL;
             }
         }
         $s = "";
@@ -190,9 +287,19 @@ if($conn)	{
                                         bind_row_type="value" bind_row_id="T_USR_" pattern="^[1-9][0-9]*$">
 <?php
 	$sql = "select user_id, user_name from m_users where close_date is null";
-	f_set_sel_options2($conn, formatSQL($conn, $sql), $uid, $uid, 2);
+	f_set_sel_options2($conn, formatSQL($conn, $sql), $values['uid'], $values['uid'], 2);
 ?>
                                 </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="t_budget">Бюджет:</label>
+                                <input type="hidden" name="t_budget" id="t_budget" class="form_field valid sendable" value=""
+                                       bind_row_type="value" bind_row_id="T_BUDG_"
+                                       pattern="^[1-9][0-9]*$" focus_on="t_budget_txt" onchange="budget_update();">
+                                <input type="text" class="form-control form_field txt" value=""
+                                       autocomplete="off" bound_id="t_budget" ac_src="<?php echo get_autocomplete_url();?>" 
+                                       ac_params="type=t_budget;filter=" id="t_budget_txt"
+                                       bind_row_type="title" bind_row_id="T_BUDG_">
                             </div>
                             <div class="form-group">
                                 <label for="t_name">Наименование:</label>
@@ -211,7 +318,7 @@ if($conn)	{
                                        bind_row_type="title" bind_row_id="TNAME_">
                             </div>
                             <div class="form-group">
-                                <label for="t_curr">Валюта:</label>
+                                <label for="t_curr_txt">Валюта:</label>
                                 <input type="hidden" name="t_curr" id="t_curr" class="form_field valid sendable" value=""
                                        bind_row_type="value" bind_row_id="T_CURR_"
                                        pattern="^[1-9][0-9]*$" focus_on="t_curr_txt">
@@ -244,14 +351,15 @@ if($conn)	{
                                        bind_row_type="label" bind_row_id="TP_NAME_">
                             </div>
                             <div class="form-group">
-                                <label for="t_budget">Бюджет:</label>
-                                <input type="hidden" name="t_budget" id="t_budget" class="form_field valid sendable" value=""
-                                       bind_row_type="value" bind_row_id="T_BUDG_"
-                                       pattern="^[1-9][0-9]*$" focus_on="t_budget_txt">
+                                <input type="checkbox" id="use_credit" name="use_credit" 
+                                       bind_row_type="value" bind_row_id="T_CRED_"
+                                       focus_on="t_credit_txt" value="" class="form_field sendable" 
+                                       onclick="toggle_credit();">
+                                <label for="use_credit">В кредит:</label>
                                 <input type="text" class="form-control form_field txt" value=""
-                                       autocomplete="off" bound_id="t_budget" ac_src="<?php echo get_autocomplete_url();?>" 
-                                       ac_params="type=t_budget;filter=" id="t_budget_txt"
-                                       bind_row_type="title" bind_row_id="T_BUDG_">
+                                       autocomplete="off" bound_id="use_credit" ac_src="<?php echo get_autocomplete_url();?>" 
+                                       ac_params="type=t_credit;filter=" id="t_credit_txt"  style="display:none"
+                                       bind_row_type="title" bind_row_id="T_CRED_">
                             </div>
                         </DIV>
                         <DIV class="modal-footer" id="dlg_box_btns">
@@ -280,7 +388,8 @@ if($conn)	{
             <DIV id="buttonz">
 <?php
 	$bg = getRequestParam("f_budget","-1");
-	print_filter($conn, $bd, $ed, $bg);
+        $bc = getRequestParam("f_credit","-1");
+	print_filter($conn, $bd, $ed, $bg, $bc);
         print_buttons("add_click2();");
 ?>
             </DIV>
@@ -318,22 +427,33 @@ if($conn)	{
                         "<input type=\"hidden\" id=\"T_USR_=transaction_id\" value=\"=user_id\">"), FALSE);
         $tb->addColumn(new tcol("<label class='td' id=\"TP_NAME_=transaction_id\" TITLE=\"=place_descr\" FOR=\"=transaction_id\">=place_name</label>".
                         "<input type=\"hidden\" id=\"T_PLACE_=transaction_id\" value=\"=place_id\">".
-                        "<input type=\"hidden\" id=\"T_BUDG_=transaction_id\" value=\"=budget_id\" title=\"=budget_name\">"), FALSE);
+                        "<input type=\"hidden\" id=\"T_BUDG_=transaction_id\" value=\"=budget_id\" title=\"=budget_name\">".
+                        "<input type=\"hidden\" id=\"T_CRED_=transaction_id\" value=\"=loan_id\" title=\"=loan_name\">"), FALSE);
 ?>
             <input type="hidden" id="bg" value="<?php echo $bg;?>">
 <?php
     echo $tb->htmlOpen();
 	//print "<TR><TD COLSPAN=\"6\">Подключён</TD></TR>\n";
         $a_vg = false;
-	$sql = "select transaction_id, t_type_name, transaction_name, transaction_sum, type_sign, transaction_date, user_name, place_name, " .
-                " place_descr, t.currency_id t_cid, #CONCAT#(mcu.currency_name #||# ' (' #||# mcu.currency_abbr #||# ')') as currency_name, mcu.currency_sign, mb.currency_id as bc_id, " .
-                " t.place_id, t.budget_id, t.user_id, t.t_type_id, mb.budget_name " .
-                " from m_transactions t, m_transaction_types tt, m_users tu, m_places tp, m_currency mcu, m_budget mb " .
-                " where t.t_type_id=tt.t_type_id and t.user_id=tu.user_id and t.place_id=tp.place_id and t.currency_id=mcu.currency_id and " .
-                " t.budget_id=mb.budget_id and #TODATE#(transaction_date#ISO_DATETIME#)>=#TODATE#('$bd'#ISO_DATE#) and  #TODATE#(transaction_date#ISO_DATETIME#)<#TODATE#('$ed'#ISO_DATE#) ";
-	if($bg>0)	{
-		//print "<TR><TD COLSPAN=\"6\">budget_id=$bg</TD></TR>\n";
-		$sql .= " and t.budget_id=$bg ";
+	$sql = "select transaction_id, t_type_name, transaction_name, transaction_sum, "
+                . "type_sign, transaction_date, user_name, place_name, place_descr, "
+                . "t.currency_id t_cid, #CONCAT#(mcu.currency_name #||# ' (' #||# mcu.currency_abbr #||# ')') as currency_name, "
+                . "mcu.currency_sign, mb.currency_id as bc_id, t.place_id, t.budget_id, "
+                . "t.user_id, t.t_type_id, mb.budget_name, t.loan_id, ml.loan_name "
+                . "from m_transactions t left join m_loans ml on t.loan_id=ml.loan_id, m_transaction_types tt, m_users tu, "
+                . "m_places tp, m_currency mcu, m_budget mb "
+                . "where t.t_type_id=tt.t_type_id and t.user_id=tu.user_id and "
+                . "t.place_id=tp.place_id and t.currency_id=mcu.currency_id and "
+                . "t.budget_id=mb.budget_id and "
+                . "#TODATE#(transaction_date#ISO_DATETIME#)>=#TODATE#('$bd'#ISO_DATE#) and "
+                . "#TODATE#(transaction_date#ISO_DATETIME#)<#TODATE#('$ed'#ISO_DATE#) ";
+	if($bg>0)
+        {
+            $sql .= " and t.budget_id=$bg ";
+	}
+	if($bc>0)
+        {
+            $sql .= " and t.loan_id=$bc ";
 	}
 	$sql .= "order by transaction_date";
         $fsql = formatSQL($conn, $sql);
@@ -349,9 +469,8 @@ if($conn)	{
                 $cid = $row['t_cid'];
                 $bid = $row['bc_id'];
                 $ns = $row['transaction_sum'];
-                if($cid!=$bid) {
-//                    $row['sum_txt'] = number_format(
-//                            f_get_exchange_rate($conn, $row['t_cid'],$row['transaction_date'],$row['transaction_sum'] ),2,","," ");
+                if($cid!=$bid)
+                {
                     $row['sum_txt'] = $row['currency_sign'] . number_format($ns, 2, ",", " ");
                     $row['transaction_sum'] = f_get_exchange_rate($conn, $row['t_cid'],$row['transaction_date'], $ns );
                 }

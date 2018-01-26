@@ -20,10 +20,10 @@
 var ac_jqxhr = null; // AJAX query handler
 var ac_box = null; // autocomplete div-box id
 var ac_txt = null; // autocomplete text box style
-const cSuccess      = 'success';
+const cSuccessJA    = 'success';
 const cUndefinedStr = 'undefined';
 const cSharp        = '#';
-const cEmptyString  = '';
+const cEmptyStringJA= '';
 const cPx           = 'px';
 // direct styles
 const cFormControl   = 'form-control';
@@ -51,7 +51,7 @@ const cAttrBoundNodeT = 'bound_node_type';
 const cAttrBoundNodeC = 'bound_node_class';
 const cAttrBoundNodeN = 'bound_node_name';
 // autocomplete item prefix
-const cAutoCItem      = 'aci_';
+const cAutoCItemJA    = 'aci_';
 /**
  * scroll container to item (emilate combo box behaviour
  * @param {type} containerID - container to scroll
@@ -143,7 +143,7 @@ function getItemIndex(items, itemID)
 function changeSelection(boxID, how)
 {
     console.log(boxID + '=>' + how);
-    var titem = cEmptyString;
+    var titem = cEmptyStringJA;
     var sel = $(cSharp+boxID).prop(cSelectedACItem);
     var items = $(cSharp+boxID).children();
     console.log('current selection:' + sel);
@@ -223,9 +223,10 @@ function changeSelection(boxID, how)
  * @param {String} boxID    - an ID of the utocomplete box (usually DIV)
  * @param {String} itemID   - selected item's element ID
  * @param {String} itemText - selected item's element text
+ * @param {boolean} callChange - disable call change handler if true
  * @returns nothing
  */
-function selectAcItem(boxID, itemID, itemText)
+function selectAcItem(boxID, itemID, itemText, callChange)
 {
     if((itemID===null || itemID===undefined || itemID===cUndefinedStr) &&
             (itemText===null || itemText===undefined || itemText===cUndefinedStr))
@@ -257,7 +258,7 @@ function selectAcItem(boxID, itemID, itemText)
                     "]' value='" + itemID + "'>" +
                     itemText + "</" + nodeType + ">");
             document.getElementById(idTargetDest).innerHTML = html;
-            document.getElementById(textTargetID).value = (cEmptyString);
+            document.getElementById(textTargetID).value = (cEmptyStringJA);
         }
         else
         {   // simple bind - text box for text + hidden for id
@@ -277,6 +278,11 @@ function selectAcItem(boxID, itemID, itemText)
                         $(cSharp+idTargetID).val(itemID);
                     }
                 }
+            }
+            console.log('trigger change');
+            if(!callChange)
+            {
+                $(cSharp+idTargetID).trigger("change");
             }
         }
         hideAcBox(boxID);
@@ -315,6 +321,7 @@ function    selectNextInput(jqSelector, selID, jqSelector2)
 }
 function    parseResponse(jsonData, textStatus, jqXHR, boxID)
 {
+    var callChange = false;
     if(!jsonData)
     {
         console.log('entering parseResponse() - null result');
@@ -325,21 +332,21 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     var i;
     var item;
     var sel_item_id;
-    var item_text = cEmptyString;
-    var html = cEmptyString;
+    var item_text = cEmptyStringJA;
+    var html = cEmptyStringJA;
     var o;
     var s1;
     var bShow = true;
     o = document.getElementById(boxID);
     if(o)
     {
-        o.innerHTML = cEmptyString;  // clear contents
+        o.innerHTML = cEmptyStringJA;  // clear contents
         sel_item_id = o.getAttribute(cAttrFor);
         if(sel_item_id)
         {
             item_text = $(cSharp+sel_item_id).val();
         }
-        sel_item_id = cEmptyString;
+        sel_item_id = cEmptyStringJA;
         if(arr.length===1)
         {
             if(arr[0] && arr[0].id && arr[0].text)
@@ -347,7 +354,8 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
                 sel_item_id = o.getAttribute(cAttrFor);
                 $(cSharp+sel_item_id).removeClass(cNotFound);
                 console.log('calling selectAcItem([0])');
-                selectAcItem(boxID, arr[0].id, arr[0].text);
+                callChange = true;
+                selectAcItem(boxID, arr[0].id, arr[0].text, callChange);
                 selectNextInput(cFormCtlSel, sel_item_id, cOKBtnSel);
                 bShow = false;
             }
@@ -363,7 +371,7 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
         {
             sel_item_id = o.getAttribute(cAttrFor);
             $(cSharp+sel_item_id).removeClass(cNotFound);
-            sel_item_id = cEmptyString;
+            sel_item_id = cEmptyStringJA;
             console.log('updating div');
             for(i = 0; i < arr.length; i++)
             {
@@ -425,7 +433,7 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
         nMax = 50;
     s1 = $(cSharp + boxID).css( cAttrHeight );
     if (s1)
-        n = Number(s1.replace(cPx,cEmptyString));
+        n = Number(s1.replace(cPx,cEmptyStringJA));
     else
         n = 100500;
     if(n>nMax)
@@ -440,6 +448,10 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
     if(bShow===true)
         $(cSharp + boxID).show();
     console.log('leaving parseResponse()');
+    if(callChange)
+    {
+        $(cSharp+idTargetID).trigger("change");
+    }
 }
 /**
  * query autocomplete items, set key handlers
@@ -449,7 +461,7 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
 function queryAcItems(boxID, itemID)
 {
     var query_src = $(cSharp+itemID).attr("ac_src");
-    var query_str = cEmptyString;
+    var query_str = cEmptyStringJA;
     var param_str = $(cSharp+itemID).attr("ac_params");
     var params = param_str.split(";");
     var i;
@@ -485,7 +497,7 @@ function queryAcItems(boxID, itemID)
         }
         catch(err)
         {
-            pv = cEmptyString;
+            pv = cEmptyStringJA;
         }
     }
     var d = new Date();
@@ -497,10 +509,11 @@ function queryAcItems(boxID, itemID)
     ac_jqxhr =  $.ajax({
         type: "POST",
         url: query_src,
+        cache: false,
         dataType: "json",
         data: query_str,
         success: function(jsonData, textStatus, jqXHR){
-            console.log(cSuccess);
+            console.log(cSuccessJA);
             parseResponse(jsonData, textStatus, jqXHR, boxID);
         }
     });
@@ -557,7 +570,7 @@ function hideAcBox(boxID)
             }
         }
         console.log('Exit code:'+vExit);
-	document.getElementById(boxID).setAttribute(cAttrFor, cEmptyString);
+	document.getElementById(boxID).setAttribute(cAttrFor, cEmptyStringJA);
     }
     else
     {
@@ -589,7 +602,7 @@ function displayAcBox(boxID, itemID)
             console.log('item:'+ itemID + ', top:' + p.top.toString() + ', left:' + p.left.toString());
             var s1 = $(itemSel).css( cAttrHeight );
             var n1 = 0;
-            n1 = Number(s1.replace(cPx,cEmptyString));
+            n1 = Number(s1.replace(cPx,cEmptyStringJA));
             n1 += n1;
             n1 += Number(p.top);
             p.top =  n1 ;
@@ -602,7 +615,7 @@ function displayAcBox(boxID, itemID)
             $(boxSel).css(cAttrWidth, s1);
             $(boxSel).show();
             $(boxSel).attr(cAttrFor, itemID);
-            $(cSharp+boxID).attr(cSelectedACItem, cEmptyString);
+            $(cSharp+boxID).attr(cSelectedACItem, cEmptyStringJA);
         }
         else
         {
