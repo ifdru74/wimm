@@ -334,6 +334,7 @@ function budget_dml($conn, $fm, $a_src=FALSE)
     $params['b_descr'] = value4db(filter_array($a_src, "b_descr",""));
     $params['b_curr'] = str_replace("aci_", "", value4db(filter_array($a_src, "b_curr_id",1)));
     $params['b_id'] = value4db(filter_array($a_src, "HIDDEN_ID",0));
+    $params['b_parent'] = str_replace("aci_", "", value4db(filter_array($a_src, "b_parent_id",1)));
     switch($fm)
     {
         case DML_INS:
@@ -349,13 +350,15 @@ function budget_dml($conn, $fm, $a_src=FALSE)
             {
                 $params['b_user'] = value4db(getSessionParam("UID",1));
                 $sql_dml = "INSERT INTO m_budget (budget_name, open_date, "
-                        . "budget_descr, currency_id, user_id) VALUES(substr(:b_name,1,200), "
-                        . "#NOW#, :b_descr, :b_curr, :b_user)";
+                        . "budget_descr, currency_id, user_id, parent_id, security) "
+                        . "VALUES(substr(:b_name,1,200), #NOW#, :b_descr, "
+                        . ":b_curr, :b_user, :b_parent, '')";
             }
             break;
         case DML_UPD:
-            $sql_dml = "update m_budget set budget_name=:b_name, open_date=:bo_date, "
-                . "budget_descr=:b_descr, currency_id=:b_curr where budget_id=:b_id";
+            $sql_dml = "update m_budget set budget_name=:b_name, "
+                . "open_date=:bo_date, budget_descr=:b_descr, "
+                . "currency_id=:b_curr, parent_id=:b_parent where budget_id=:b_id";
             break;
         case DML_DEL:
             $sql_dml = "update m_budget set close_date=#NOW# where budget_id=:b_id";
@@ -462,13 +465,15 @@ function goods_dml($conn, $fm, $a_src=FALSE)
     $params['g_count'] = value4db(filter_array($a_src, "g_count",0));
     $params['g_weight'] = value4db(filter_array($a_src, "g_weight",0));
     $params['g_type'] = value4db(filter_array($a_src, "g_type",0));
+    $params['g_user'] = value4db(getSessionParam("UID",1));
     $params['g_id'] = value4db(filter_array($a_src, "HIDDEN_ID",0));
     switch($fm)
     {
         case DML_INS:
             $dup_id = f_get_single_value_parm($conn, 
                             "select good_id from m_goods where "
-                            . "(good_barcode=:g_barcode or good_name=:g_name)"
+                            . "(((:g_barcode is null or length(:g_barcode)<1) and good_name=SUBSTR(:g_name,1,45)) "
+                            . "or (length(:g_barcode)>0 and good_barcode=:g_barcode) ) "
                             . "and close_date is null ", 
                             array(':g_barcode'=>$params['g_barcode'],
                                 ':g_name'=>$params['g_name']), 
@@ -482,14 +487,14 @@ function goods_dml($conn, $fm, $a_src=FALSE)
                 $params['g_user'] = value4db(filter_array($a_src, "g_user",1));
                 $sql_dml = "insert into m_goods (good_barcode, good_name, "
                     . "item_count, net_weight, user_id, good_type_id, open_date) "
-                    . "values(:g_barcode, :g_name, :g_count, :g_weight, :g_user, "
+                    . "values(:g_barcode, SUBSTR(:g_name,1,45), :g_count, :g_weight, :g_user, "
                     . ":g_type, #NOW#)";
             }
             //$good_id = $conn->lastInsertId();
             break;
         case DML_UPD:
             $sql_dml = "update m_goods set good_barcode=:g_barcode, "
-                    . "good_name=:g_name, item_count=:g_count, "
+                    . "good_name=SUBSTR(:g_name,1,45), item_count=:g_count, "
                     . "net_weight=:g_weight, user_id=:g_user, "
                     . "good_type_id=:g_type where good_id=:g_id";
             break;

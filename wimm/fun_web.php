@@ -323,37 +323,44 @@ function print_buttons($add_btn_js)
 function print_filter($conn, $bd="",$ed="", $bg="-1", $bc="-1")
 {
 ?>
-    <div style="display: block; width: 100%;">
+    <div style="display: block; width: 100%;" id="div_filter_main">
 <?php
     if(strlen($bd)>0)	{
 ?>
-        <div  class="form-group form-inline" xxx="filt_cont">
-            <div class="form-group form-inline">
+        <div  class="form-group form-inline" xxx="filt_cont" id="div_main_filt_cont">
+            <div class="form-group form-inline" id="div_main_filt_begin">
             <label for="BDATE">Дата начала периода:</label>
-            <input class="dtp form-control" id="BDATE" name="BDATE" type="date" value="<?php echo $bd;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
+            <input class="dtp form-control" id="BDATE" name="BDATE" type="date" 
+                   value="<?php echo $bd;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
             </div>
-            <div class="form-group form-inline">
+            <div class="form-group form-inline" id="div_main_filt_end">
             <label for="EDATE">Дата окончания периода:</label>
-            <input class="dtp form-control" id="EDATE" name="EDATE" type="date" value="<?php echo $ed;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
+            <input class="dtp form-control" id="EDATE" name="EDATE" type="date" 
+                   value="<?php echo $ed;?>" pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$">
             </div>
-            <div class="form-group form-inline">
-            <label for="f_budget">Бюджет:</label>
-            <select size="1" id="f_budget" name="f_budget" onchange="$('#FRM_MODE').val('refresh'); $('#expenses').submit();" class="form-control">
+            <button id="filter_more" onclick="onFilter(true);" class="btn"
+                    type="button" title='Показать все параметры фильтра'>
+                <span class="glyphicon glyphicon-menu-hamburger"></span> Больше параметров</button>
+        </div>
+    </div>
+    <div class="form-group form-inline" id="filter_additional" style="display:none">
+                <label for="f_budget">Бюджет:</label>
+                <select size="1" id="f_budget" name="f_budget" class="form-control">
 <?php
             $sql = "SELECT budget_id, budget_name FROM m_budget WHERE close_date is null";
             f_set_sel_options2($conn, $sql, $bg, $bg, 2);
 ?>
-            </select>
-            <label for="f_credit">Кредит:</label>
-            <select size="1" id="f_credit" name="f_credit" onchange="$('#FRM_MODE').val('refresh'); $('#expenses').submit();" class="form-control">
+                </select>
+                <label for="f_credit">Кредит:</label>
+                <select size="1" id="f_credit" name="f_credit" class="form-control">
 <?php
             $sql = "SELECT loan_id, loan_name FROM m_loans WHERE close_date is null and (start_date between '$bd' and '$ed' or end_date between '$bd' and '$ed' or '$bd' between start_date and end_date or '$ed' between start_date and end_date)";
             f_set_sel_options2($conn, $sql, $bc, $bc, 2);
 ?>
-            </select>
-            </div>
+                </select>
+                <button id="filter_less" onclick="onFilter(false);" class="btn"
+                        type="button"  title='Показать только основные параметры фильтра'> Меньше параметров</button>
         </div>
-    </div>
 <?php
     }
 }

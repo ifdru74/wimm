@@ -34,6 +34,7 @@
 ?>        
         <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
         <script language="JavaScript" type="text/JavaScript" src="js/bootstrap.js"></script>
+        <script language="JavaScript" type="text/JavaScript" src="js/index_aj.js"></script>
         <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
         <script language="JavaScript" type="text/JavaScript">
             function onLoad()
@@ -138,22 +139,22 @@
                         </div>
                         <div class="form-group">
                             <label for="t_curr_txt">Валюта:</label>
-                            <input type="hidden" name="b_curr_id" id="b_curr_id" 
-                                   class="form_field" value=""
-                                   bind_row_type="title" bind_row_id="T_CURR_">
+                            <input type="hidden" name="b_curr_id" id="b_curr_id" class="form_field valid sendable" value=""
+                                   bind_row_type="title" bind_row_id="T_CURR_"
+                                   pattern="^[1-9][0-9]*$" focus_on="t_curr_txt">
                             <input type="text" class="form-control form_field txt" value=""
-                                   autocomplete="off" bound_id="b_curr_id" ac_src="/wimm2/ac_ref.php" 
-                                   ac_params="type=t_curr;filter=" id="t_curr_txt"
-                                   bind_row_type="label" bind_row_id="T_CURR_">
+                                   autocomplete="off" bound_id="b_curr_id" ac_src="<?php echo get_autocomplete_url();?>" 
+                                   ac_params="type=t_curr;ac_filter=" id="t_curr_txt"
+                                   bind_row_type="label" bind_row_id="T_CURR_">                            
                         </div>
                         <div class="form-group">
                             <label for="b_parent">Родитель:</label>
-                            <input type="hidden" name="b_parent_id" id="b_parent_id" 
-                                   class="form_field" value=""
-                                   bind_row_type="title" bind_row_id="T_PARENT_">
+                            <input type="hidden" name="b_parent_id" id="b_parent_id" class="form_field valid sendable" value=""
+                                   bind_row_type="title" bind_row_id="T_PARENT_"
+                                   pattern="^[1-9][0-9]*$" focus_on="b_parent">
                             <input type="text" class="form-control form_field txt" value=""
-                                   autocomplete="off" bound_id="b_parent_id" ac_src="/wimm2/ac_ref.php" 
-                                   ac_params="type=t_budget;filter=" id="b_parent"
+                                   autocomplete="off" bound_id="b_parent_id" ac_src="<?php echo get_autocomplete_url();?>" 
+                                   ac_params="type=t_budget;ac_filter=" id="b_parent"
                                    bind_row_type="label" bind_row_id="T_PARENT_">
                         </div>
                     </div>
@@ -220,13 +221,21 @@ if($conn)	{
         $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=close_date\" id=\"CDATE_=budget_id\" FOR=\"=budget_id\">=fclose_date</LABEL>"), FALSE);
         $tb->addColumn(new tcol("<LABEL class='td' TITLE=\"=user_id\" id=\"USER_=budget_id\" FOR=\"=budget_id\">=user_name</LABEL>"), FALSE);
         
-	$sql = "select budget_id, budget_name, budget_descr, tp.open_date, " .
-                " tp.close_date, user_name, tp.user_id, tp.currency_id, " .
-                " mcu.currency_name || ' (' || mcu.currency_abbr || ')' as currency_name, " .
-                " tp.parent_id " .
-                " from m_budget tp, m_users tu, m_currency mcu " .
-                " where tp.user_id=tu.user_id and tp.close_date is null ".
-                " and tp.currency_id=mcu.currency_id order by budget_name";
+	$sql = "select budget_id, 
+		   budget_name, 
+		   budget_descr, 
+		   tp.open_date, 
+		   tp.close_date, 
+		   user_name, 
+		   tp.user_id, 
+		   tp.currency_id, 
+		   CONCAT( mcu.currency_name ,' (', mcu.currency_abbr , ')') as currency_name, 
+		   tp.parent_id 
+                from m_budget tp 
+                join m_users tu on tp.user_id=tu.user_id
+                join m_currency mcu on  tp.currency_id=mcu.currency_id
+                where tp.close_date is null 
+                order by budget_name";
 	$res = $conn->query($sql);
 	$sm = 0;
 	$sd = 0;
@@ -254,7 +263,7 @@ if($conn)	{
             $message  = f_get_error_text($conn, "Invalid query: ");
             print "<TR><TD COLSPAN=\"6\">$message</TD></TR>\n";
 	}
-        print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество мест</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
+        print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество бюджетов</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
 	echo $tb->htmlClose();
 //	print_buttons("onAdd();");
 }

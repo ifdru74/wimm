@@ -121,7 +121,7 @@
                             $('#p_s_p').prop('checked', false);
                     }
                     var tb = $("#ltb_"+e.currentTarget.id).attr('title');
-                    console.log("type_bits="+tb);
+			console.log("type_bits="+tb);
                     if(tb&2)
                     {
                         $('#credit_pay').prop('checked', true);
@@ -193,13 +193,8 @@
                                        id="p_descr" value="">
                             </div>
                             <div class="form-group">
-                                <div class="panel panel-primary">
-                                    <div class="panel-heading">Тип операции</div>
-                                    <div class="panel-body">
-                                        <input type="radio" name="p_sign" id="p_s_m" value="-1"><label for="p_s_m"><img id="p_s_mi" src="picts/minus.gif">Расходы</label>
-                                        <input type="radio" name="p_sign" id="p_s_p" value="1" ><label for="p_s_p"><img id="p_s_pi" src="picts/plus.gif">Доходы</label>
-                                    </div>
-                                </div>
+                                <input type="radio" name="p_sign" id="p_s_m" value="-1"><label for="p_s_m"><img id="p_s_mi" src="picts/minus.gif">Расходы</label>
+                                <input type="radio" name="p_sign" id="p_s_p" value="1" ><label for="p_s_p"><img id="p_s_pi" src="picts/plus.gif">Доходы</label>
                             </div>
                             <div class="form-group">
                                 <div class="panel panel-primary">
@@ -311,7 +306,7 @@
                 $s = f_get_disp_date($t);
                 print "<TD><label class='td' for='{$row['t_type_id']}'>$s</label></TD>\n";
                 $s = $row['user_name'];
-                $tb = $row['type_bits'];
+		$tb = $row['type_bits'];
                 print "<TD><label class='td' id='ltb_{$row['t_type_id']}' for='{$row['t_type_id']}' title='$tb'>$s</label></TD>\n";
                 print "</TR>\n";
             }

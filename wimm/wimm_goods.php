@@ -298,7 +298,8 @@
                                 <div class="form-group">
                                     <label for="t_name">Штрихкод:</label>
                                     <input class="form-control form_field valid sendable" name="g_barcode" id="g_barcode" 
-                                           type="text" bind_row_type="label" bind_row_id="G_CODE_" pattern="(^$|\b[1-6][0-9]{8})" value="">
+                                           type="number" bind_row_type="label" bind_row_id="G_CODE_" 
+										   pattern="^\d{12,13}$" value="">
                                 </div>
                                 <div class="form-group">
                                     <label for="t_type">Тип:</label>
@@ -313,14 +314,14 @@
                                 <div class="form-group">
                                     <label for="t_name">Товаров в упаковке (штук):</label>
                                     <input class="form-control form_field valid sendable" name="g_count" id="g_count" 
-                                           type="text" bind_row_type="label" bind_row_id="G_COUNT_" 
-                                           pattern="^[1-9][0-9]*$" value="">
+                                           type="number" bind_row_type="label" bind_row_id="G_COUNT_" 
+                                           pattern="^\d+$" value="">
                                 </div>
                                 <div class="form-group">
                                     <label for="t_name">Вес упаковки (килограмм):</label>
                                     <input class="form-control form_field valid sendable" name="g_weight" id="g_weight" 
                                            type="text" bind_row_type="label" bind_row_id="G_WEIGHT_" 
-                                           pattern="^[-+]?[0-9]*\.?[0-9]+$" value="">
+                                           pattern="^\d*([.,]\d{1,3})?$" value="">
                                 </div>
                             </DIV>
                             <DIV class="modal-footer" id="dlg_box_btns">

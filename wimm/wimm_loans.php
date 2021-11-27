@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <?php
     include_once ("fun_web.php");
     $uid = page_pre();
@@ -181,13 +180,13 @@
                             </div>
                             <div class="form-group">
                                 <label for="l_bdate">Взят:</label>
-                                <input type="date" name="l_bdate" id="l_bdate" 
+                                <input type="datetime" name="l_bdate" id="l_bdate" 
                                        class="form-control form_field" value=""
                                        bind_row_type="label" bind_row_id="CBDATE_">
                             </div>
                             <div class="form-group">
                                 <label for="l_edate">Вернуть до:</label>
-                                <input type="date" name="l_edate" id="l_edate" 
+                                <input type="datetime" name="l_edate" id="l_edate" 
                                        class="form-control form_field" value=""
                                        bind_row_type="label" bind_row_id="CEDATE_">
                             </div>
@@ -217,7 +216,7 @@
                             <div class="form-group">
                                 <input type="checkbox" id="returned">
                                 <label for="l_cdate">Возвращён:</label>
-                                <input type="date" name="l_cdate" id="l_cdate" 
+                                <input type="datetime" name="l_cdate" id="l_cdate" 
                                        class="form-control form_field sendable" value=""
                                        bind_row_type="title" bind_row_id="CEDATE_">
                             </div>

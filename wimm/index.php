@@ -55,12 +55,6 @@
             {
                 document.getElementById('t_user').focus();
                 var d = new Date();
-/*                var s = d.getFullYear().toString() + "-" + 
-                        (d.getMonth()+1).toString() + "-" + 
-                        d.getDate().toString() + " " + 
-                        d.getHours().toString() + ":" + 
-                        d.getMinutes().toString() + ":" + 
-                        d.getSeconds().toString());*/
                 var s = d.toISOString().replace("T"," ");
                 document.getElementById('t_date').value = s.substr(0,19);
             }
@@ -79,6 +73,7 @@
         }
         function onLoad2()
         {
+            console.log("page loaded");
             to = 500;
             $(window).scroll(function(e) {
                 var height = $(window).scrollTop();
@@ -99,6 +94,121 @@
                 onPageKey(e.keyCode);
             });
             setHandlers(".dtp");
+			$('#t_sum').keydown(function(e)
+			{
+				switch(e.keyCode)
+				{
+					case 48:
+					case 49:
+					case 50:
+					case 51:
+					case 52:
+					case 53:
+					case 54:
+					case 55:
+					case 56:
+					case 57:
+						console.log('keydown:Digit');
+						break;
+					case 96:
+					case 97:
+					case 98:
+					case 99:
+					case 100:
+					case 101:
+					case 102:
+					case 103:
+					case 104:
+					case 105:
+						console.log('keydown:Numpad Digit');
+						break;
+					case 190:
+						break;
+					case 110:
+					case 188:
+						console.log('keydown:replace , to .');
+						e.keyCode = 190;
+						e.charCode= 190;
+						e.which   = 190;
+						e.preventDefault();
+						var e1 = jQuery.Event( "keydown", { keyCode: 190 } );
+						//jQuery( '#t_sum' ).trigger(e1);//$('#t_sum').trigger(e1);
+						e1.currentTarget = e.currentTarget;
+						e1.data = e.data;
+						e1.delegateTarget = e.delegateTarget;
+						e1.metaKey = e.metaKey;
+						//e1.namespace = e.namespace;
+						e1.pageX = e.pageX;
+						e1.pageY = e.pageY;
+						e1.relatedTarget = e.relatedTarget;
+						e1.result = e.result;
+						e1.target = e.target;
+						e1.timeStamp = e.timeStamp;
+						e1.which = e.which;
+						$( '#t_sum' ).trigger(e1);
+						break;
+					default:
+						//console.log('keydown:Num code:' + e.keyCode.toString());
+						break;
+				}
+			});
+			$('#t_sum').keyup(function(e)
+			{
+				switch(e.keyCode)
+				{
+					case 48:
+					case 49:
+					case 50:
+					case 51:
+					case 52:
+					case 53:
+					case 54:
+					case 55:
+					case 56:
+					case 57:
+						console.log('keyup:Digit');
+						break;
+					case 96:
+					case 97:
+					case 98:
+					case 99:
+					case 100:
+					case 101:
+					case 102:
+					case 103:
+					case 104:
+					case 105:
+						console.log('keyup:Numpad Digit');
+						break;
+					case 190:
+						break;
+					case 110:
+					case 188:
+						console.log('keyup:replace , to .');
+						e.keyCode = 190;
+						e.charCode= 190;
+						e.which   = 190;
+						e.preventDefault();
+						var e1 = jQuery.Event( "keyup", { keyCode: 190 } );
+						e1.currentTarget = e.currentTarget;
+						e1.data = e.data;
+						e1.delegateTarget = e.delegateTarget;
+						e1.metaKey = e.metaKey;
+						//e1.namespace = e.namespace;
+						e1.pageX = e.pageX;
+						e1.pageY = e.pageY;
+						e1.relatedTarget = e.relatedTarget;
+						e1.result = e.result;
+						e1.target = e.target;
+						e1.timeStamp = e.timeStamp;
+						e1.which = e.which;
+						$( '#t_sum' ).trigger(e1);
+						break;
+					default:
+						//console.log('keyup:Num code:' + e.keyCode.toString());
+						break;
+				}
+			});
             $('#dialog_box').draggable();
             ac_init("ac", ".txt");
             $(".row_sel").click(function(e)
@@ -113,9 +223,13 @@
             });
             $('#dlg_box_text').show(function f()
             {
-                console.log("shown() begin");
-                tmr = setTimeout(function(){ focus_fun(); }, to);
-                console.log("shown() end");
+                console.log("shown() begin with:"+gFilterEvent);
+                if(gFilterEvent==false)
+                {
+                    console.log("shown() begin");
+                    tmr = setTimeout(function(){ focus_fun(); }, to);
+                    console.log("shown() end");
+                }
             });
         }
         function doCancel2()
@@ -143,21 +257,23 @@
             $('#HIDDEN_ID').val('');
             $('.form_field').val('');
             $('#FRM_MODE').val('insert');
-            //$('.dlg_box').show();
             tmr = setTimeout(function(){ focus_fun(); }, to);
-            //$("#dialog_box").modal();
         }
         function toggle_credit()
         {
             if($("#use_credit").prop("checked"))
             {
-                $("#t_credit_txt").prop("disabled","false");
+                $("#t_credit_txt").removeAttr('disabled');
+		$("#t_credit_txt").show();
+		console.log("toggle_credit() show");
             }
             else
             {
                 $("#use_credit").val("");
                 $("#t_credit_txt").val("");
-                $("#t_credit_txt").prop("disabled","true");;
+                $("#t_credit_txt").prop("disabled","true");
+		$("#t_credit_txt").hide();
+		console.log("toggle_credit() hide");
             }
         }
         function parseCurrency(jsonData, textStatus, jqXHR, boxID)
@@ -173,17 +289,9 @@
             {
                 if(arr[0] && arr[0].id && arr[0].text)
                 {
-//                    var v = $("#t_curr").val();
-//                    if(v)
-//                    {
-                        $("#t_curr").val(arr[0].id);
-                        $("#t_curr_txt").val(arr[0].text);
-                        console.log('result ' + arr[0].id + ' set' + arr[0].text);
-//                    }
-//                    else
-//                    {
-//                        console.log('result already set');
-//                    }
+					$("#t_curr").val(arr[0].id);
+					$("#t_curr_txt").val(arr[0].text);
+					console.log('result ' + arr[0].id + ' set' + arr[0].text);
                 }
                 else
                 {
@@ -207,7 +315,7 @@
             {
                 var query_src = "<?php echo get_autocomplete_url();?>";
                 var d = new Date();
-                var query_str = "type=t_budcur&filter="+b+"&d="+d;
+                var query_str = "type=t_budcur&ac_filter="+b+"&d="+d;
                 console.log('params parsed: ' + query_str);
                 console.log('query to: ' + query_src);
                 // got query string - send request
@@ -298,7 +406,7 @@ if($conn)	{
                                        pattern="^[1-9][0-9]*$" focus_on="t_budget_txt" onchange="budget_update();">
                                 <input type="text" class="form-control form_field txt" value=""
                                        autocomplete="off" bound_id="t_budget" ac_src="<?php echo get_autocomplete_url();?>" 
-                                       ac_params="type=t_budget;filter=" id="t_budget_txt"
+                                       ac_params="type=t_budget;ac_filter=" id="t_budget_txt"
                                        bind_row_type="title" bind_row_id="T_BUDG_">
                             </div>
                             <div class="form-group">
@@ -314,7 +422,7 @@ if($conn)	{
                                        pattern="^[1-9][0-9]*$" focus_on="t_type_txt">
                                 <input type="text" name="t_type_name" class="form-control form_field txt" value=""
                                        autocomplete="off" bound_id="t_type" ac_src="<?php echo get_autocomplete_url();?>" 
-                                       ac_params="type=t_type;filter=" id="t_type_txt" scroll_height="10"
+                                       ac_params="type=t_type;ac_filter=" id="t_type_txt" scroll_height="10"
                                        bind_row_type="title" bind_row_id="TNAME_">
                             </div>
                             <div class="form-group">
@@ -324,20 +432,21 @@ if($conn)	{
                                        pattern="^[1-9][0-9]*$" focus_on="t_curr_txt">
                                 <input type="text" class="form-control form_field txt" value=""
                                        autocomplete="off" bound_id="t_curr" ac_src="<?php echo get_autocomplete_url();?>" 
-                                       ac_params="type=t_curr;filter=" id="t_curr_txt"
+                                       ac_params="type=t_curr;ac_filter=" id="t_curr_txt"
                                        bind_row_type="title" bind_row_id="T_CURR_">
                             </div>
                             <div class="form-group">
                                 <label for="t_sum">Сумма:</label>
                                 <input class="form-control form_field valid sendable" id="t_sum" name="t_sum" 
-                                       type="text" value="" bind_row_type="title" bind_row_id="T_SUMM_"
-                                       pattern="^[1-9][0-9]*[.,]?[0-9]?[0-9]?$">
+                                       type="number" value="" bind_row_type="title" bind_row_id="T_SUMM_"
+                                       pattern="^[1-9]\d*([.,]\d{1,2})?$"
+                                       step="0.01">
                             </div>
                             <div class="form-group">
                                 <label for="t_date">Дата:</label>
                                 <input class="dtp form-control form_field valid sendable" id="t_date" 
                                        name="t_date" type="text" value="" bind_row_type="title" 
-                                       pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1]) ([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$" 
+                                       pattern="^[1-2]\d{3}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1]) ([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$" 
                                        bind_row_id="T_DATE_" autocomplete="off">
                             </div>
                             <div class="form-group">
@@ -347,7 +456,7 @@ if($conn)	{
                                        pattern="^[1-9][0-9]*$" focus_on="t_place_txt">
                                 <input type="text" class="form-control form_field txt" value=""
                                        autocomplete="off" bound_id="t_place" ac_src="<?php echo get_autocomplete_url();?>" 
-                                       ac_params="type=t_place;filter=" id="t_place_txt"
+                                       ac_params="type=t_place;ac_filter=" id="t_place_txt"
                                        bind_row_type="label" bind_row_id="TP_NAME_">
                             </div>
                             <div class="form-group">
@@ -358,7 +467,7 @@ if($conn)	{
                                 <label for="use_credit">В кредит:</label>
                                 <input type="text" class="form-control form_field txt" value=""
                                        autocomplete="off" bound_id="use_credit" ac_src="<?php echo get_autocomplete_url();?>" 
-                                       ac_params="type=t_credit;filter=" id="t_credit_txt"  style="display:none"
+                                       ac_params="type=t_credit;ac_filter=" id="t_credit_txt"  style="display:none"
                                        bind_row_type="title" bind_row_id="T_CRED_">
                             </div>
                         </DIV>

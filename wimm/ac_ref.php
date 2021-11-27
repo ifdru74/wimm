@@ -8,7 +8,7 @@
     {
         $sql = FALSE;
         $rep_id = getRequestParam("except", FALSE);
-        $filter = value4db(getRequestParam("filter", FALSE));
+        $filter = value4db(getRequestParam("ac_filter", FaLSE));
         switch(value4db(getRequestParam("type", FALSE)))
         {
             case "t_type":

@@ -198,7 +198,7 @@ function formatSQL($conn, $sql) {
         case "mysql":
             return str_replace("#||#", ",", 
                     str_replace("#CONCAT#", "CONCAT", 
-                        str_replace("#PASSWORD#", "PASSWORD", 
+                        str_replace("#PASSWORD#", "MD5", 
                             str_replace("#NOW#", "NOW()", 
                                 str_replace("#TODATE#", '', 
                                     str_replace("#ISO_DATETIME#", '', 

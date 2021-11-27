@@ -1,4 +1,4 @@
-﻿<?php
+<?php
     include_once ("fun_web.php");
     $uid = page_pre();
     if($uid===FALSE)

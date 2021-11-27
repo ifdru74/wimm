@@ -51,7 +51,6 @@
             }
         </script>
         <div class="container">
-            <form name="expenses" action="wimm_report.php" method="post">
 
 <?php
     print_body_title('');
@@ -61,12 +60,12 @@
     $row_class = "table-hover";
     $conn = f_get_connection();
     if($conn)	{
+        print "<form name=\"expenses\" action=\"wimm_report.php\" method=\"post\">\n";
         print_filter($conn, $bd,$ed,$bg);
         print_buttons(FALSE);
         print "<h2>Где потратили деньги с $bfd по $efd</h2>" . PHP_EOL;
-            $fm = getRequestParam("FRM_MODE","refresh");
-            print "<form name=\"expenses\" action=\"wimm_report.php\" method=\"post\">\n";
-            print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
+        $fm = getRequestParam("FRM_MODE","refresh");
+        print "<input name=\"FRM_MODE\" type=\"hidden\" value=\"refresh\">\n";
             print "<TABLE class=\"$table_class\">\n";
             print "<TR>\n";
             print "<TH>Место</TH>\n";

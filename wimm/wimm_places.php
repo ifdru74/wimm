@@ -147,8 +147,10 @@ if($conn)	{
                             </div>
                             <div class="form-group">
                                 <label for="p_inn">ИНН:</label>
-                                <input type="text" id="p_inn" name="p_inn" value=""
-                                       class="form-control form_field" bind_row_type="label" bind_row_id="INN_">
+                                <input type="number" id="p_inn" name="p_inn" value=""
+                                       class="form-control form_field" 
+									   bind_row_type="label" bind_row_id="INN_"
+									   pattern="^\d{12}$">
                             </div>
                         </div>
                         <div class="modal-footer">

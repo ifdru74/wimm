@@ -139,8 +139,10 @@
                             <div class="panel panel-default">
                                 <div class="panel-heading">Меняем:</div>
                                 <div class="panel-body">
-                                <input type="text" class="form_field" name="from_rate" id="from_rate" 
-                                       bind_row_type="label" bind_row_id="FRATE_" value="" title="Количество дензнаков">
+                                <input type="number" class="form_field" name="from_rate" id="from_rate" 
+                                       bind_row_type="label" bind_row_id="FRATE_" value="" 
+									   title="Количество дензнаков" step="0.0001"
+									   pattern="^[1-9]\d*(.\d{1,4})?$">
                                 <input type="hidden" name="tf_curr" id="tf_curr" value=""
                                        bind_row_type="title" bind_row_id="FNAME_" class="form_field txt">
                                 <input type="text" class="form_field txt" name="curr_from_name" id="curr_from_name" 
@@ -152,8 +154,10 @@
                             <div class="panel panel-default">
                                 <div class="panel-heading">На:</div>
                                 <div class="panel-body">
-                                    <input type="text" class="form_field" name="to_rate" id="to_rate" 
-                                           bind_row_type="label" bind_row_id="TRATE_" value="" title="Количество дензнаков">
+                                    <input type="number" class="form_field" name="to_rate" id="to_rate" 
+                                           bind_row_type="label" bind_row_id="TRATE_" value="" 
+										   title="Количество дензнаков" step="0.0001"
+										   pattern="^[1-9]\d*(.\d{1,4})?$">
                                     <input type="hidden" name="tt_curr" id="tt_curr" value=""
                                            bind_row_type="title" bind_row_id="TNAME_" class="form_field txt">
                                     <input type="text" class="form_field txt" name="curr_to_name" id="curr_to_name" 
@@ -167,10 +171,12 @@
                                 <div class="panel-body">
                                     <label for="dt_open">С:</label>
                                     <input type="datetime" class="form_field" name="dt_open" id="dt_open" 
-                                           bind_row_type="title" bind_row_id="ODATE_" value="">
+                                           bind_row_type="title" bind_row_id="ODATE_" value=""
+										   pattern="^[1-2]\d{3}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1]) ([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$">
                                     <label for="dt_close">По:</label>
                                     <input type="datetime" class="form_field" name="dt_close" id="dt_close" 
-                                           bind_row_type="title" bind_row_id="CDATE_" value="">
+                                           bind_row_type="title" bind_row_id="CDATE_" value=""
+										   pattern="^[1-2]\d{3}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1]) ([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$">
                                 </div>
                             </div>
                             <div class="panel panel-default">

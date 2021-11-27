@@ -11,21 +11,19 @@ final class wimm_config   {
     const CFG_AC = "autocomplete";
     const CFG_SQLN = "CONN_CONFIG";
     private  static $properties = array(
-            //self::CFG_DSN => 'mysql:dbname=wimm;host=localhost'
-            self::CFG_DSN => 'sqlite:D:\\Projects\\wimm\\wimm\\sqlite\\wimm.sqlite',
-            //self::CFG_USR => 'wimm',
-            self::CFG_USR => '',
-            //self::CFG_PWD => 'wimm1',
-            self::CFG_PWD => '',
-            self::CFG_INC => "trunk" . DIRECTORY_SEPARATOR .
-                             "wimm" . DIRECTORY_SEPARATOR .
-                             "cls" . DIRECTORY_SEPARATOR .
+            self::CFG_DSN => 'mysql:dbname=wimm;host=localhost',
+            //self::CFG_DSN => 'sqlite:D:\\Projects\\wimm\\wimm\\sqlite\\wimm.sqlite',
+            self::CFG_USR => 'wimm',
+            //self::CFG_USR => '',
+            self::CFG_PWD => 'wimm1',
+            //self::CFG_PWD => '',
+            self::CFG_INC => "cls" . DIRECTORY_SEPARATOR .
                              "table",
             self::CFG_AC => 'ac_ref.php',
-//            self::CFG_SQLN => array(
-//                "names" => 'SET NAMES utf8',
-//                "collation" => ''   // SET COLLATION_CONNECTION=CP1251_GENERAL_CI
-//                )
+            self::CFG_SQLN => array(
+		"names" => 'SET NAMES utf8',
+		"collation" => ''   // SET COLLATION_CONNECTION=CP1251_GENERAL_CI
+		)
             );
     /**
      * provides access to parameters
