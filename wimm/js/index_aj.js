@@ -100,17 +100,17 @@ function onTxComplete(jqXHR, textStatus )
         if(row_id!==null&&row_id!==undefined&&row_id.length>0)  {
             var i, v;
             var s1 = '{"id":"1","err":"error"}';
-            console.debug_log('response=' + jqXHR.responseText);
+            console.debug('response=' + jqXHR.responseText);
             if(jqXHR.responseText!==null && 
                     jqXHR.responseText!==undefined && 
                     jqXHR.responseText.length>0)  {
                 i = JSON.parse(jqXHR.responseText);
-                console.debug_log("id="+i.id);
-                console.debug_log("error="+i.err);
+                console.debug("id="+i.id);
+                console.debug("error="+i.err);
                 var v_sum = Number(i.t_sum);
-                console.debug_log("sum="+v_sum);
+                console.debug("sum="+v_sum);
                 v = $(cFormMode).val();
-                console.debug_log("mode="+v);
+                console.debug("mode="+v);
                 if(v.indexOf(cModeDelete)===0)
                 {
                     $("#"+row_id).parent().parent().remove();
@@ -155,23 +155,23 @@ function onTxComplete(jqXHR, textStatus )
         }
         else
         {
-            console.debug_log("new row.");
-            console.debug_log('response=' + jqXHR.responseText);
+            console.debug("new row.");
+            console.debug('response=' + jqXHR.responseText);
             v = $(cFormMode).val();
-            console.debug_log("mode="+v);
+            console.debug("mode="+v);
             if(v.indexOf(cModeInsert)===0)
             {
                 if(jqXHR.responseText!==null && jqXHR.responseText!==undefined && 
                         jqXHR.responseText.length>0)  {
                     i = JSON.parse(jqXHR.responseText);
-                    console.debug_log("id="+i.id);
-                    console.debug_log("error="+i.err);
+                    console.debug("id="+i.id);
+                    console.debug("error="+i.err);
                 }                
             }
         }
     }
     else {
-        console.debug_log(textStatus);
+        console.debug(textStatus);
     }
 
     jqxr = null;
@@ -217,14 +217,14 @@ function tx_submit(submitURL)
             }
         }
     }
-    console.debug_log("request:"+reqStr);
+    console.debug("request:"+reqStr);
     jqxr = $.ajax({
         type: "POST",
         url: submitURL,
         data: reqStr,
         complete: onTxComplete
     });
-    console.debug_log("end query!");
+    console.debug("end query!");
 }
 
 /**
@@ -280,7 +280,7 @@ function setInputSelection(el, nStart, nEnd)
     }
     catch(e)
     {
-        console.debug_log("set date & time selection: " + e.toString());
+        console.debug("set date & time selection: " + e.toString());
     }
 }
 
@@ -306,7 +306,7 @@ function getInputSelection(el) {
     }
     catch(e)
     {
-        console.debug_log("get date & time selection: " + e.toString());
+        console.debug("get date & time selection: " + e.toString());
     }
     return null;
 }

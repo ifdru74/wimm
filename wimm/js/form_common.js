@@ -3,6 +3,27 @@
  * and open the template in the editor.
  */
 
+var tmr;// timer
+var to; // timeout
+var tStart=0;
+var gFilterEvent = false;
+function onTimer()
+{
+    var mode = $('#FRM_MODE').val();
+    clearTimeout(tmr);
+    $('#dialog_box').find( "[where2focus='"+mode+"']" ).focus();
+}
+
+function setTimerInterval(ito)
+{
+	to = ito;
+}
+
+function runTimer()
+{
+	tmr = window.setTimeout(onTimer, to);
+}
+
 function my_form_validate(frm_name)
 {
     var ret = true;
@@ -258,7 +279,7 @@ function re_pattern_validate_field(field_id)
         var patt = element.pattern;//getAttribute("pattern");
         if(patt!=null && patt!=undefined)
         {
-            var val = element.value;
+            var val = get_elem_value(field_id);
             if(val!=null && val!=undefined)
             {
                 var re = RegExp(patt);
@@ -335,18 +356,10 @@ function fancy_form_validate(form_id)
                 {
                     if(ff_id)
                     {
-                        // focus on field
                         console_debug_log("select:"+ff_id);
                         $('#'+ff_id).select();
                         console_debug_log("focus:"+ff_id);
                         $('#'+ff_id).focus();
-//                        var elem = document.getElementById(ff_id);
-//                        //alert('Что-то не так');
-//                        if(elem!=null && elem!=undefined)
-//                        {
-//                            elem.selected = true;
-//                            elem.focus();
-//                        }
                         v_ret = false;
                         break;
                     }
@@ -355,4 +368,31 @@ function fancy_form_validate(form_id)
         }
     }
     return v_ret;
+}
+
+/**
+ * switch filter
+ * @param {bool} bShowFilter pass true to show filter or false to hide
+ * @returns {nothing}
+ */
+function onFilter(bShowFilter)
+{
+    var d = new Date();
+    if(d.getTime()-tStart>1000)
+    {
+        console.log("onFilter("+gFilterEvent+")="+bShowFilter);
+        gFilterEvent = bShowFilter;
+        if(bShowFilter)
+        {
+            set_elem_disp('filter_additional', 'block');
+            set_elem_disp('filter_more', 'none');
+        }
+        else
+        {
+            set_elem_disp('filter_additional', 'none');
+            set_elem_disp('filter_more', 'inline');
+        }
+        tStart = d.getTime();
+        console.log("onFilter("+gFilterEvent+")="+bShowFilter);
+    }
 }
