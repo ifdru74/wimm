@@ -245,6 +245,7 @@ function table_row_selected(sel_id, form_id)
     var i;
     var bt;
     var bi;
+    var currFrac = get_elem_value('T_FRAC_'+db_id);
     for(i=0; i<form_fields.length; i++)
     {
         bt = form_fields[i].getAttribute("bind_row_type");

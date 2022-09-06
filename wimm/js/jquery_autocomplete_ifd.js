@@ -62,12 +62,17 @@ function scrollToItem(containerID, itemID)
 {
     try {
         var container = $(cSharp+containerID);
+        if(itemID.indexOf(cAutoCItemJA)!=0)
+        {
+            itemID = cAutoCItemJA + itemID;
+        }
         var scrollTo = $(cSharp+itemID);
         container.scrollTop(
             scrollTo.offset().top - container.offset().top + container.scrollTop()
         );
         
     } catch (e) {
+        console.log(containerID+"=>"+itemID);
         console.log(e.toString());
     }
 }

@@ -348,8 +348,7 @@
         $dtm = DateTime::createFromFormat('Y-m-d', $bd);
         $ldfmt = getSessionParam('locale_date_format', 'd.m.Y');
         $dtm2 = DateTime::createFromFormat('Y-m-d', $ed);
-	print_body_title('Расходы с ' . $dtm->format($ldfmt) . ' по ' . 
-                $dtm2->format($ldfmt));
+	print_body_title('Расходы с ' . $dtm->format($ldfmt) . ' по ' . $dtm2->format($ldfmt));
 if($conn)	{
         $fm = "refresh";
         if(getRequestParam("btn_refresh",FALSE)===FALSE)
@@ -362,21 +361,15 @@ if($conn)	{
             switch($kdml)
             {
                 case 'dup_id':
-                    echo '    <div><label for="dup_r">Дублирование записи:'. 
-                            '</label>' . PHP_EOL;
-                    echo '        <a id="dup_r" href="wimm_edit2.php?REC_ID='.
-                            $vdml.'"'. PHP_EOL;
-                    echo '           title="Используйте эту ссылку для просмотра"'.
-                            PHP_EOL;
-                    echo '           target="_blank">'.$vdml.'</a>'.PHP_EOL;
-                    echo '    </div>'.PHP_EOL;
+?>
+    <div>Дублирование записи <?php echo $vdml;?></div>
+<?php            
                     break;
-//                case 'dup_id':
-//                    echo $vdml;
-//                    break;
+                case 'dup_id':
+                    echo $vdml;
+                    break;
                 case 'sql':
-                    print "	<input ID=\"SQL\" type=\"hidden\" ". 
-                            "value=\"$vdml\">\n";
+                    print "	<input ID=\"SQL\" type=\"hidden\" value=\"$vdml\">\n";
                     break;
                 case DML_RET_DBG:
                     print "<div id='$kdml'>$vdml</div>" . PHP_EOL;
@@ -444,10 +437,14 @@ if($conn)	{
                             </div>
                             <div class="form-group">
                                 <label for="t_sum">Сумма:</label>
-                                <input class="form-control form_field valid sendable" id="t_sum" name="t_sum" 
+                                <div style="width: 100%; display: block;">
+                                <input class="form_field valid sendable" id="t_sum_i" name="t_sum_i" 
                                        type="number" value="" bind_row_type="title" bind_row_id="T_SUMM_"
-                                       pattern="^[1-9]\d*([.,]\d{1,2})?$"
-                                       step="0.01">
+                                       min="1" max="999999999" step="1" style="width: 40%; display: inline-block;">
+                                <input class="form_field valid sendable" id="t_sum_f" name="t_sum_f" 
+                                       type="number" value="" bind_row_type="title" bind_row_id="T_SUMM_"
+                                       min="1" max="99" step="1" style="width: 20%; display: inline-block;">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="t_date">Дата:</label>
@@ -484,7 +481,7 @@ if($conn)	{
                                 <span class="glyphicon glyphicon-save"></span> Сохранить
                             </button>
                             <button class="btn" type="button"
-                                    onclick="submit_myform('expenses','wimm_edit2.php','refresh');"
+                                    onclick="submit_myform('expenses','wimm_edit3.php','refresh');"
                                     data-dismiss="modal">
                                 <span class="glyphicon glyphicon-edit"></span> Подробнее...
                             </button>
@@ -544,7 +541,8 @@ if($conn)	{
         $tb->addColumn(new tcol("<label class='td' id=\"TP_NAME_=transaction_id\" TITLE=\"=place_descr\" FOR=\"=transaction_id\">=place_name</label>".
                         "<input type=\"hidden\" id=\"T_PLACE_=transaction_id\" value=\"=place_id\">".
                         "<input type=\"hidden\" id=\"T_BUDG_=transaction_id\" value=\"=budget_id\" title=\"=budget_name\">".
-                        "<input type=\"hidden\" id=\"T_CRED_=transaction_id\" value=\"=loan_id\" title=\"=loan_name\">"), FALSE);
+                        "<input type=\"hidden\" id=\"T_CRED_=transaction_id\" value=\"=loan_id\" title=\"=loan_name\">".
+                        "<input type=\"hidden\" id=\"T_FRAC_=transaction_id\" value=\"=curr_fraction\">"), FALSE);
 ?>
             <input type="hidden" id="bg" value="<?php echo $bg;?>">
 <?php
@@ -555,7 +553,7 @@ if($conn)	{
                 . "type_sign, transaction_date, user_name, place_name, place_descr, "
                 . "t.currency_id t_cid, #CONCAT#(mcu.currency_name #||# ' (' #||# mcu.currency_abbr #||# ')') as currency_name, "
                 . "mcu.currency_sign, mb.currency_id as bc_id, t.place_id, t.budget_id, "
-                . "t.user_id, t.t_type_id, mb.budget_name, t.loan_id, ml.loan_name "
+                . "t.user_id, t.t_type_id, mb.budget_name, t.loan_id, ml.loan_name, mcu.curr_fraction "
                 . "from m_transactions t left join m_loans ml on t.loan_id=ml.loan_id, m_transaction_types tt, m_users tu, "
                 . "m_places tp, m_currency mcu, m_budget mb "
                 . "where t.t_type_id=tt.t_type_id and t.user_id=tu.user_id and "
