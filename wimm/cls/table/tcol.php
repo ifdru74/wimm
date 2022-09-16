@@ -18,8 +18,8 @@ class tcol extends tbase{
     protected $format_str;
     /**
      * constructs new class intance
-     * @param string $fmtStr - format string for contents
-     * @param string $className - CSS class name for initial display
+     * @param ?string $fmtStr - format string for contents
+     * @param ?string $className - CSS class name for initial display
      */
     public function __construct($fmtStr=FALSE, $className=FALSE) {
         parent::__construct();
