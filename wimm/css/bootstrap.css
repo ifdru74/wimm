@@ -2598,7 +2598,7 @@ textarea.form-control {
 input[type="search"] {
   -webkit-appearance: none;
 }
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
+/*@media screen and (-webkit-min-device-pixel-ratio: 0) {
   input[type="date"].form-control,
   input[type="time"].form-control,
   input[type="datetime-local"].form-control,
@@ -2616,7 +2616,7 @@ input[type="search"] {
   .input-group-lg input[type="date"],
   .input-group-lg input[type="time"],
   .input-group-lg input[type="datetime-local"]
-}
+}*/
 .form-group {
   margin-bottom: 15px;
 }
@@ -2999,12 +2999,12 @@ select[multiple].input-lg {
   white-space: nowrap;
   vertical-align: middle;
   -ms-touch-action: manipulation;
-      touch-action: manipulation;
+/*      touch-action: manipulation;*/
   cursor: pointer;
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
-          user-select: none;
+/*          user-select: none;*/
   background-image: none;
   border: 1px solid transparent;
   border-radius: 4px;
