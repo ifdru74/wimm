@@ -295,7 +295,8 @@ function print_buttons($add_btn_js)
     {
 ?>
             <button type="button" class="btn quick_acc" onclick="<?php echo $add_btn_js;?>"
-                    data-toggle="modal" data-target="#dialog_box" title="Добавить">
+                    data-toggle="modal" data-target="#dialog_box" 
+                    title="Добавить">
                 <span class="glyphicon glyphicon-plus"></span> Добавить
             </button>
             <button type="reset" class="btn quick_acc" title="Снять выделение">
