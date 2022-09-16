@@ -8,8 +8,9 @@
     {
         $sql = FALSE;
         $rep_id = getRequestParam("except", FALSE);
-        $filter = value4db(getRequestParam("ac_filter", FaLSE));
-        switch(value4db(getRequestParam("type", FALSE)))
+        $filter = value4db(getRequestParam("ac_filter", FALSE));
+        $selector = value4db(getRequestParam("type", FALSE));
+        switch($selector)
         {
             case "t_type":
                 $sql = "SELECT t_type_id as r_id, t_type_name as r_name FROM m_transaction_types  WHERE close_date is null";
@@ -42,6 +43,13 @@
                 if($rep_id!==FALSE)
                 {
                     $sql .= " and place_id<>" . value4db($rep_id);
+                }
+                break;
+            case "t_place_inn":
+                $sql = "SELECT place_id as r_id, place_name as r_name FROM m_places WHERE close_date is null";
+                if($filter!==FALSE)
+                {
+                    $sql .= " and inn like '$filter%'";
                 }
                 break;
             case "t_budget":
@@ -89,6 +97,8 @@
                             . "and b.currency_id=c.currency_id";
                 }
                 break;
+            default :
+                break;
         }
         if($sql!==FALSE)
         {
@@ -110,7 +120,8 @@
             }
         }
         else {
-            $aret[] = array('id' => 'error', 'text' => "empty selector");
+            $aret[] = array('id' => 'error', 'text' => "empty selector", 
+                            'type'=>$selector, 'filter'=>$filter);
         }
     }
     else {

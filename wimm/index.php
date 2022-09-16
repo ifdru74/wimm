@@ -1,13 +1,13 @@
 <?php
     include_once ("fun_web.php");
     $uid = page_pre();
-    if($uid===FALSE)
+    if ($uid === FALSE) {
         die();
-    $values = array();
-    $values['uid'] = $uid;
-    $values['row_bound'] = TRUE;
+    }
+    $values = ['uid'=>$uid, 'row_bound'=>TRUE];
     include_once 'fun_dbms.php';
     include_once 'table.php';
+    $curDir = dirname($_SERVER['PHP_SELF']);
     /**
      * @var $conn PDO 
      */
@@ -26,330 +26,21 @@
     </head>
     <body onload="onLoad2();">
         <div class="container">
-    <script language="JavaScript" type="text/JavaScript" src="js/form_common.js"></script>
-<?php    
-    if(isMSIE())   {
-?>        
-    <script language="JavaScript" type="text/JavaScript" src="js/jquery-1.11.1.js"></script>
-    <script language="JavaScript" type="text/JavaScript" src="js/json2.js"></script>
-<?php    
-    }
-    else {
-?>        
-    <script language="JavaScript" type="text/JavaScript" src="js/jquery-2.1.1.js"></script>
-<?php    
-    }
-?>        
-    <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
-    <script language="JavaScript" type="text/JavaScript" src="js/index_aj.js"></script>
-    <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
-    <script language="JavaScript" type="text/JavaScript" src="js/bootstrap.js"></script>
-    <script language="JavaScript" type="text/JavaScript">
-        var tmr;
-        var tmr2;
-        var to;
-        function focus_fun()
-        {
-            console.log("focus_fun() begin");
-            if($('#FRM_MODE').val()=='insert')
-            {
-                document.getElementById('t_user').focus();
-                var d = new Date();
-                var s = d.toISOString().replace("T"," ");
-                document.getElementById('t_date').value = s.substr(0,19);
-            }
-            else
-            {
-                if($("#use_credit").val().length>0)
-                {
-                    $("#use_credit").prop("checked",true);
-                    $("#l_credit_txt").show();
-                    $("#t_credit_txt").show();
-                }
-                document.getElementById('t_name').focus();
-            }
-            clearTimeout(tmr);
-            console.log("focus_fun() end");
-        }
-        function onLoad2()
-        {
-            console.log("page loaded");
-            to = 500;
-            $(window).scroll(function(e) {
-                var height = $(window).scrollTop();
-                var h = $("#buttonz").offset();
-                console.log("nav:" + h.top);
-                if(height>50)
-                {
-                    $(".btn_up").show();
-                    $("#buttonz").addClass("filt_fixed");
-                }
-                else
-                {
-                    $(".btn_up").hide();
-                    $("#buttonz").removeClass("filt_fixed");
-                }
-            });
-            $("body").keydown(function(e) {
-                onPageKey(e.keyCode);
-            });
-            setHandlers(".dtp");
-			$('#t_sum').keydown(function(e)
-			{
-				switch(e.keyCode)
-				{
-					case 48:
-					case 49:
-					case 50:
-					case 51:
-					case 52:
-					case 53:
-					case 54:
-					case 55:
-					case 56:
-					case 57:
-						console.log('keydown:Digit');
-						break;
-					case 96:
-					case 97:
-					case 98:
-					case 99:
-					case 100:
-					case 101:
-					case 102:
-					case 103:
-					case 104:
-					case 105:
-						console.log('keydown:Numpad Digit');
-						break;
-					case 190:
-						break;
-					case 110:
-					case 188:
-						console.log('keydown:replace , to .');
-						e.keyCode = 190;
-						e.charCode= 190;
-						e.which   = 190;
-						e.preventDefault();
-						var e1 = jQuery.Event( "keydown", { keyCode: 190 } );
-						//jQuery( '#t_sum' ).trigger(e1);//$('#t_sum').trigger(e1);
-						e1.currentTarget = e.currentTarget;
-						e1.data = e.data;
-						e1.delegateTarget = e.delegateTarget;
-						e1.metaKey = e.metaKey;
-						//e1.namespace = e.namespace;
-						e1.pageX = e.pageX;
-						e1.pageY = e.pageY;
-						e1.relatedTarget = e.relatedTarget;
-						e1.result = e.result;
-						e1.target = e.target;
-						e1.timeStamp = e.timeStamp;
-						e1.which = e.which;
-						$( '#t_sum' ).trigger(e1);
-						break;
-					default:
-						//console.log('keydown:Num code:' + e.keyCode.toString());
-						break;
-				}
-			});
-			$('#t_sum').keyup(function(e)
-			{
-				switch(e.keyCode)
-				{
-					case 48:
-					case 49:
-					case 50:
-					case 51:
-					case 52:
-					case 53:
-					case 54:
-					case 55:
-					case 56:
-					case 57:
-						console.log('keyup:Digit');
-						break;
-					case 96:
-					case 97:
-					case 98:
-					case 99:
-					case 100:
-					case 101:
-					case 102:
-					case 103:
-					case 104:
-					case 105:
-						console.log('keyup:Numpad Digit');
-						break;
-					case 190:
-						break;
-					case 110:
-					case 188:
-						console.log('keyup:replace , to .');
-						e.keyCode = 190;
-						e.charCode= 190;
-						e.which   = 190;
-						e.preventDefault();
-						var e1 = jQuery.Event( "keyup", { keyCode: 190 } );
-						e1.currentTarget = e.currentTarget;
-						e1.data = e.data;
-						e1.delegateTarget = e.delegateTarget;
-						e1.metaKey = e.metaKey;
-						//e1.namespace = e.namespace;
-						e1.pageX = e.pageX;
-						e1.pageY = e.pageY;
-						e1.relatedTarget = e.relatedTarget;
-						e1.result = e.result;
-						e1.target = e.target;
-						e1.timeStamp = e.timeStamp;
-						e1.which = e.which;
-						$( '#t_sum' ).trigger(e1);
-						break;
-					default:
-						//console.log('keyup:Num code:' + e.keyCode.toString());
-						break;
-				}
-			});
-            $('#dialog_box').draggable();
-            ac_init("ac", ".txt");
-            $(".row_sel").click(function(e)
-            {
-                $('.dlg_box').show();
-                $('#dlg_box_cap').text('Изменение записи');
-                table_row_selected("#"+e.currentTarget.id, "#expenses");
-                $('#HIDDEN_ID').val(e.currentTarget.id);
-                $('#FRM_MODE').val('update');
-                $("#dialog_box").modal('show');
-                tmr = setTimeout(function(){ focus_fun(); }, to);
-            });
-            $('#dlg_box_text').show(function f()
-            {
-                console.log("shown() begin with:"+gFilterEvent);
-                if(gFilterEvent==false)
-                {
-                    console.log("shown() begin");
-                    tmr = setTimeout(function(){ focus_fun(); }, to);
-                    console.log("shown() end");
-                }
-            });
-        }
-        function doCancel2()
-        {
-            $('#dialog_box').hide();
-            $('#FRM_MODE').val('refresh');
-        }
-        function del_click2()
-        {
-            var s1 = $('#HIDDEN_ID').val();
-            if(s1!=null && s1.length>0)
-            {
-                $('#FRM_MODE').val('delete');
-                tx_submit('<?php echo dirname($_SERVER['PHP_SELF']);?>/wimm_edit2.php');
-            }
-            else
-            {
-                alert("Запись для удаления не выбрана");
-            }
-        }
-        function add_click2()
-        {
-            $('#dlg_box_cap').text('Добавление записи');
-            $('#DEL_BTN').hide();
-            $('#HIDDEN_ID').val('');
-            $('.form_field').val('');
-            $('#FRM_MODE').val('insert');
-            tmr = setTimeout(function(){ focus_fun(); }, to);
-        }
-        function toggle_credit()
-        {
-            if($("#use_credit").prop("checked"))
-            {
-                $("#t_credit_txt").removeAttr('disabled');
-		$("#t_credit_txt").show();
-		console.log("toggle_credit() show");
-            }
-            else
-            {
-                $("#use_credit").val("");
-                $("#t_credit_txt").val("");
-                $("#t_credit_txt").prop("disabled","true");
-		$("#t_credit_txt").hide();
-		console.log("toggle_credit() hide");
-            }
-        }
-        function parseCurrency(jsonData, textStatus, jqXHR, boxID)
-        {
-            if(!jsonData)
-            {
-                console.log('entering parseCurrency() - null result');
-                return ;
-            }
-            console.log('entering parseCurrency()');
-            var arr = jsonData;
-            if(arr.length===1)
-            {
-                if(arr[0] && arr[0].id && arr[0].text)
-                {
-					$("#t_curr").val(arr[0].id);
-					$("#t_curr_txt").val(arr[0].text);
-					console.log('result ' + arr[0].id + ' set' + arr[0].text);
-                }
-                else
-                {
-                    console.log('invalid array');
-                }
-            }
-            else
-            {
-                console.log('invalid array length');
-            }
-            console.log('leaving parseCurrency()');
-        }
-        
-        function budget_update2()
-        {
-            clearTimeout(tmr2);
-            console.log('entering budget_update2()');
-            var v = $("#t_curr").val();
-            var b = $("#t_budget").val();
-            if(!v && b)
-            {
-                var query_src = "<?php echo get_autocomplete_url();?>";
-                var d = new Date();
-                var query_str = "type=t_budcur&ac_filter="+b+"&d="+d;
-                console.log('params parsed: ' + query_str);
-                console.log('query to: ' + query_src);
-                // got query string - send request
-                ac_jqxhr =  $.ajax({
-                    type: "POST",
-                    url: query_src,
-                    cache: false,
-                    dataType: "json",
-                    data: query_str,
-                    success: function(jsonData, textStatus, jqXHR){
-                        parseCurrency(jsonData, textStatus, jqXHR, 'boxID');
-                    }
-                });
-            }
-            console.log('leaving budget_update2()');
-        }
-        function budget_update()
-        {
-            console.log('entering budget_update()');
-            tmr2 = setTimeout(function(){ budget_update2(); }, to);
-            console.log('leaving budget_update()');
-        }
-    </script>
 <?php
-        $dtm = new DateTime();
-        $ldfmt = 'Y-m-01';//str_replace('d','01',getSessionParam('locale_date_format', 'd.m.Y'));
-	$bd = update_param("BDATE", "BEG_DATE", $dtm->format($ldfmt));
-        $dtm->add(new DateInterval('P1M'));
-	$ed = update_param("EDATE", "END_DATE", $dtm->format($ldfmt));
-        $dtm = DateTime::createFromFormat('Y-m-d', $bd);
-        $ldfmt = getSessionParam('locale_date_format', 'd.m.Y');
-        $dtm2 = DateTime::createFromFormat('Y-m-d', $ed);
-	print_body_title('Расходы с ' . $dtm->format($ldfmt) . ' по ' . 
-                $dtm2->format($ldfmt));
+    /**
+     * @var DateTime current date and time to fill empty values from 
+     *      BDATE/BEG_DATE and EDATE/END_DATE
+     */
+    $date_be = new DateTime();
+    $cdfmt = 'Y-m-01';//str_replace('d','01',getSessionParam('locale_date_format', 'd.m.Y'));
+    $bd = update_param("BDATE", "BEG_DATE", $date_be->format($cdfmt));
+    $date_be->add(new DateInterval('P1M'));
+    $ed = update_param("EDATE", "END_DATE", $date_be->format($cdfmt));
+    $bdate_head = DateTime::createFromFormat('Y-m-d', $bd);
+    $hdfmt = getSessionParam('locale_date_format', 'd.m.Y');
+    $edate_head = DateTime::createFromFormat('Y-m-d', $ed);
+    print_body_title('Расходы с ' . $bdate_head->format($hdfmt) . ' по ' . 
+                $edate_head->format($hdfmt));
 if($conn)	{
         $fm = "refresh";
         if(getRequestParam("btn_refresh",FALSE)===FALSE)
@@ -371,9 +62,6 @@ if($conn)	{
                     echo '           target="_blank">'.$vdml.'</a>'.PHP_EOL;
                     echo '    </div>'.PHP_EOL;
                     break;
-//                case 'dup_id':
-//                    echo $vdml;
-//                    break;
                 case 'sql':
                     print "	<input ID=\"SQL\" type=\"hidden\" ". 
                             "value=\"$vdml\">\n";
@@ -388,6 +76,62 @@ if($conn)	{
             <input id="FRM_MODE" name="FRM_MODE" type="hidden" value="refresh">
             <input id="HIDDEN_ID" name="HIDDEN_ID" type="hidden" value="0">
             <input name="UID" type="hidden" value="<?php echo getRequestParam("UID", "");?>">
+            <!-- Import -->
+            <DIV class="ui-widget-content modal fade" id="import_box" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <DIV class="modal-header" id="dlg_box_cap">Импорт текста</DIV>
+                        <DIV class="modal-body" id="dlg_box_text" >
+                            <div class="form-group">
+                                <label for="txt2Import">Текст для импорта:</label>
+                                <textarea id="txt2Import" rows="12" cols="60"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="sel_for">Оплата за:</label>
+                                <select size="1" id="sel_for">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sel_type">Тип платежа:</label>
+                                <select size="1" id="sel_type">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sel_amount">Сумма платежа:</label>
+                                <select size="1" id="sel_amount">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sel_dtm">Дата и время платежа:</label>
+                                <select size="1" id="sel_dtm">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="sel_where">Получатель платежа:</label>
+                                <select size="1" id="sel_where">
+                                </select>
+                            </div>
+                        </DIV>
+                        <DIV class="modal-footer" id="dlg_box_btns">
+                            <button class="btn" id="DETECT_BTN" type="button"
+                                    onclick="detectFields();">
+                                <span class="glyphicon glyphicon-list"></span> Разобрать
+                            </button>
+                            <button class="btn" id="TRANSFER_BTN" type="button"
+                                    onclick="transferData('#dialog_box','#import_box','<?php echo get_autocomplete_url();?>');"
+                                    data-dismiss="modal">
+                                <span class="glyphicon glyphicon-ok"></span> Перенести
+                            </button>
+                            <button class="btn" type="button"
+                                    onclick="doCancelImport('#import_box');"
+                                    data-dismiss="modal">
+                                <span class="glyphicon glyphicon-erase"></span> Отмена
+                            </button>
+                        </DIV>
+                    </div><!--modal-content-->
+                </div><!--modal-dialog-->
+            </div><!--dialog-box-->
             <!-- Modal -->
             <DIV class="ui-widget-content modal fade" id="dialog_box" role="dialog">
                 <div class="modal-dialog">
@@ -407,7 +151,7 @@ if($conn)	{
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="t_budget">Бюджет:</label>
+                                <label for="t_budget_txt">Бюджет:</label>
                                 <input type="hidden" name="t_budget" id="t_budget" class="form_field valid sendable" value=""
                                        bind_row_type="value" bind_row_id="T_BUDG_"
                                        pattern="^[1-9][0-9]*$" focus_on="t_budget_txt" onchange="budget_update();">
@@ -423,7 +167,7 @@ if($conn)	{
                                        pattern="^(?!\s*$).+" value="">
                             </div>
                             <div class="form-group">
-                                <label for="t_type">Тип:</label>
+                                <label for="t_type_txt">Тип:</label>
                                 <input class="form_field valid sendable" type="hidden" name="t_type" id="t_type" 
                                        bind_row_type="value" bind_row_id="T_TYPE_" value=""
                                        pattern="^[1-9][0-9]*$" focus_on="t_type_txt">
@@ -457,7 +201,7 @@ if($conn)	{
                                        bind_row_id="T_DATE_" autocomplete="off">
                             </div>
                             <div class="form-group">
-                                <label for="t_place">Место:</label>
+                                <label for="t_place_txt">Место:</label>
                                 <input type="hidden" name="t_place" id="t_place" class="form_field valid sendable" value=""
                                        bind_row_type="value" bind_row_id="T_PLACE_"
                                        pattern="^[1-9][0-9]*$" focus_on="t_place_txt">
@@ -471,7 +215,8 @@ if($conn)	{
                                        bind_row_type="value" bind_row_id="T_CRED_"
                                        focus_on="t_credit_txt" value="" class="form_field sendable" 
                                        onclick="toggle_credit();">
-                                <label for="use_credit">В кредит:</label>
+                                <label for="use_credit">В кредит</label>
+                                <label for="t_credit_txt">:</label>
                                 <input type="text" class="form-control form_field txt" value=""
                                        autocomplete="off" bound_id="use_credit" ac_src="<?php echo get_autocomplete_url();?>" 
                                        ac_params="type=t_credit;ac_filter=" id="t_credit_txt"  style="display:none"
@@ -480,22 +225,31 @@ if($conn)	{
                         </DIV>
                         <DIV class="modal-footer" id="dlg_box_btns">
                             <button class="btn" id="OK_BTN" type="button"
-                                    onclick="if(fancy_form_validate('expenses')) tx_submit('<?php echo dirname($_SERVER['PHP_SELF']);?>/wimm_edit2.php');">
-                                <span class="glyphicon glyphicon-save"></span> Сохранить
+                                    onclick="if(fancy_form_validate('expenses')) tx_submit('<?php echo $curDir;?>/wimm_edit2.php');">
+                                <span class="glyphicon glyphicon-save">
+                                </span> Сохранить
                             </button>
                             <button class="btn" type="button"
                                     onclick="submit_myform('expenses','wimm_edit2.php','refresh');"
                                     data-dismiss="modal">
-                                <span class="glyphicon glyphicon-edit"></span> Подробнее...
+                                <span class="glyphicon glyphicon-edit">
+                                </span> Подробнее...
+                            </button>
+                            <button class="btn" type="button"
+                                    onclick="openImport();">
+                                <span class="glyphicon glyphicon-magnet">
+                                </span> Импорт текста...
                             </button>
                             <button class="btn" id="DEL_BTN" type="button"
                                     onclick="del_click2();">
-                                <span class="glyphicon glyphicon-remove"></span> Удалить
+                                <span class="glyphicon glyphicon-remove">
+                                </span> Удалить
                             </button>
                             <button class="btn" type="button"
                                     onclick="doCancel2();"
                                     data-dismiss="modal">
-                                <span class="glyphicon glyphicon-erase"></span> Отмена
+                                <span class="glyphicon glyphicon-erase">
+                                </span> Отмена
                             </button>
                         </DIV>
                     </div>
@@ -514,21 +268,21 @@ if($conn)	{
         $tb->setValue(tbase::$PN_CLASS, "table table-bordered table-responsive table-striped visual2");
         $tb->setIndent(3);
         // header
-        $tc = new tcol("Описание");
-        $tc->setValue("WIDTH", "38%");
-        $tb->addColumn($tc, TRUE);
-        $tc = new tcol("Сумма");
-        $tc->setValue("WIDTH", "10%");
-        $tb->addColumn($tc, TRUE);
-        $tc = new tcol("Дата и время");
-        $tc->setValue("WIDTH", "15%");
-        $tb->addColumn($tc, TRUE);
-        $tc = new tcol("Кто");
-        $tc->setValue("WIDTH", "17%");
-        $tb->addColumn($tc, TRUE);
-        $tc = new tcol("Где");
-        $tc->setValue("WIDTH", "20%");
-        $tb->addColumn($tc, TRUE);
+        $tc1 = new tcol("Описание");
+        $tc1->setValue("WIDTH", "38%");
+        $tb->addColumn($tc1, TRUE);
+        $tc2 = new tcol("Сумма");
+        $tc2->setValue("WIDTH", "10%");
+        $tb->addColumn($tc2, TRUE);
+        $tc3 = new tcol("Дата и время");
+        $tc3->setValue("WIDTH", "15%");
+        $tb->addColumn($tc3, TRUE);
+        $tc4 = new tcol("Кто");
+        $tc4->setValue("WIDTH", "17%");
+        $tb->addColumn($tc4, TRUE);
+        $tc5 = new tcol("Где");
+        $tc5->setValue("WIDTH", "20%");
+        $tb->addColumn($tc5, TRUE);
         // body
         $tb->body->setValue(tbody::$PN_ROW_CLASS, "table-hover");
         $fmt_str = "<input class='row_sel' name=\"ROW_ID\" ID=\"=transaction_id\" type=\"radio\" value=\"=transaction_id\">" .
@@ -617,36 +371,46 @@ if($conn)	{
             print $tb->htmlError("$message - $sql");
 	}
 	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\" ALIGN=\"RIGHT\">";
-	$t = number_format($sd,2,","," ");
-        if($sd>0)
-            $c_class = "tl_plus";//tl_plus
-        else
-            $c_class = "tl_none";//tl_none
-	print "Итого, доходы:</TD><TD COLSPAN=\"4\"><LABEL class=\"$c_class\">$t</LABEL></TD></TR>" . PHP_EOL;
+	$income_total = number_format($sd,2,',',' ');
+        if ($sd > 0) {
+            $c_class = "tl_plus";
+        }//tl_plus
+        else {
+            $c_class = "tl_none";
+        } //tl_none
+	print "Итого, доходы:</TD><TD COLSPAN=\"4\"><LABEL class=\"$c_class\">"
+                . "$income_total</LABEL></TD></TR>" . PHP_EOL;
 	print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" ALIGN=\"RIGHT\">";
-	$t = number_format($sm,2,","," ");
-        if($sm>0)
-            $c_class = "tl_minus";//tl_minus
-        else
-            $c_class = "tl_none";//tl_none
-	print "Итого, расходы:</TD><TD COLSPAN=\"4\"><LABEL class=\"$c_class\">$t</LABEL></TD></TR>" . PHP_EOL;
+	$expenses_total = number_format($sm,2,',',' ');
+        if ($sm > 0) {
+            $c_class = "tl_minus";
+        }//tl_minus
+        else {
+            $c_class = "tl_none";
+        } //tl_none
+	print "Итого, расходы:</TD><TD COLSPAN=\"4\"><LABEL class=\"$c_class\">"
+                . "$expenses_total</LABEL></TD></TR>" . PHP_EOL;
 	$sr = $sd - $sm;
 	$c_class = "white_bold";
 	if($sr>0)
         {
             $c_class = "tl_plus";//tl_plus
-            $t = number_format($sr,2,","," ");
+            $diff_total = number_format($sr,2,","," ");
         }
 	else
         {
-            if($sr<0)
-                $c_class = "tl_minus";//tl_minus
-            else
-                $c_class = "tl_none";//tl_none
-            $t = number_format($sr*-1,2,","," ");
+            if ($sr < 0) {
+                $c_class = "tl_minus";
+            }//tl_minus
+            else {
+                $c_class = "tl_none";
+            } //tl_none
+            $diff_total = number_format($sr*-1,2,","," ");
         }
-        print "<TR  class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Расходы - Доходы\" ALIGN=\"RIGHT\">";
-        print "Итого, разница:</TD><TD COLSPAN=\"4\"><LABEL class=\"$c_class\">$t</LABEL></TD></TR>" . PHP_EOL;
+        print "<TR  class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Расходы - "
+            . "Доходы\" ALIGN=\"RIGHT\">";
+        print "Итого, разница:</TD><TD COLSPAN=\"4\"><LABEL class=\"$c_class\">"
+                . "$diff_total</LABEL></TD></TR>" . PHP_EOL;
 	echo $tb->htmlClose();
 	//print_buttons("add_click2();");
         if($a_vg)   {
@@ -671,6 +435,320 @@ if($conn)	{
 ?>
         </form>
         </div>
+    <script language="JavaScript" type="text/JavaScript" src="js/form_common.js"></script>
+<?php    
+    if(isMSIE())   {
+        echo '<script language="JavaScript" type="text/JavaScript" '
+            . 'src="js/jquery-1.11.1.js"></script>' . PHP_EOL;
+        echo '<script language="JavaScript" type="text/JavaScript" '
+            . 'src="js/json2.js"></script>' . PHP_EOL;
+    }
+    else {
+        echo '<script language="JavaScript" type="text/JavaScript" '
+            . 'src="js/jquery-2.1.1.js"></script>' . PHP_EOL;
+    }
+?>        
+    <script language="JavaScript" type="text/JavaScript" src="js/jquery-ui.js"></script>
+    <script language="JavaScript" type="text/JavaScript" src="js/index_aj.js"></script>
+    <script language="JavaScript" type="text/JavaScript" src="js/jquery_autocomplete_ifd.js"></script>
+    <script language="JavaScript" type="text/JavaScript" src="js/bootstrap.js"></script>
+    <script language="JavaScript" type="text/JavaScript" src="js/invoice_text_import.js"></script>
+    <script language="JavaScript" type="text/JavaScript">
+        var tmr;
+        var tmr2;
+        var to;
+        function focus_fun()
+        {
+            //console.log("focus_fun() begin");
+            if($('#FRM_MODE').val()=='insert')
+            {
+                document.getElementById('t_user').focus();
+                var d = new Date();
+                var s = d.toISOString().replace("T"," ");
+                document.getElementById('t_date').value = s.substr(0,19);
+            }
+            else
+            {
+                if($("#use_credit").val().length>0)
+                {
+                    $("#use_credit").prop("checked",true);
+                    $("#l_credit_txt").show();
+                    $("#t_credit_txt").show();
+                }
+                document.getElementById('t_name').focus();
+            }
+            clearTimeout(tmr);
+            //console.log("focus_fun() end");
+        }
+        function onLoad2()
+        {
+            console.log("page loaded");
+            to = 500;
+            $(window).scroll(function(e) {
+                var height = $(window).scrollTop();
+                var h = $("#buttonz").offset();
+                //console.log("nav:" + h.top);
+                if(height>50)
+                {
+                    $(".btn_up").show();
+                    $("#buttonz").addClass("filt_fixed");
+                }
+                else
+                {
+                    $(".btn_up").hide();
+                    $("#buttonz").removeClass("filt_fixed");
+                }
+            });
+            $("body").keydown(function(e) {
+                onPageKey(e.keyCode);
+            });
+            setHandlers(".dtp");
+			$('#t_sum').keydown(function(e)
+			{
+				switch(e.keyCode)
+				{
+					case 48:
+					case 49:
+					case 50:
+					case 51:
+					case 52:
+					case 53:
+					case 54:
+					case 55:
+					case 56:
+					case 57:
+						//console.log('keydown:Digit');
+						break;
+					case 96:
+					case 97:
+					case 98:
+					case 99:
+					case 100:
+					case 101:
+					case 102:
+					case 103:
+					case 104:
+					case 105:
+						//console.log('keydown:Numpad Digit');
+						break;
+					case 190:
+						break;
+					case 110:
+					case 188:
+						//console.log('keydown:replace , to .');
+						e.keyCode = 190;
+						e.charCode= 190;
+						e.which   = 190;
+						e.preventDefault();
+						var e1 = jQuery.Event( "keydown", { keyCode: 190 } );
+						//jQuery( '#t_sum' ).trigger(e1);//$('#t_sum').trigger(e1);
+						e1.currentTarget = e.currentTarget;
+						e1.data = e.data;
+						e1.delegateTarget = e.delegateTarget;
+						e1.metaKey = e.metaKey;
+						//e1.namespace = e.namespace;
+						e1.pageX = e.pageX;
+						e1.pageY = e.pageY;
+						e1.relatedTarget = e.relatedTarget;
+						e1.result = e.result;
+						e1.target = e.target;
+						e1.timeStamp = e.timeStamp;
+						e1.which = e.which;
+						$( '#t_sum' ).trigger(e1);
+						break;
+					default:
+						//console.log('keydown:Num code:' + e.keyCode.toString());
+						break;
+				}
+			});
+			$('#t_sum').keyup(function(e)
+			{
+				switch(e.keyCode)
+				{
+					case 48:
+					case 49:
+					case 50:
+					case 51:
+					case 52:
+					case 53:
+					case 54:
+					case 55:
+					case 56:
+					case 57:
+						//console.log('keyup:Digit');
+						break;
+					case 96:
+					case 97:
+					case 98:
+					case 99:
+					case 100:
+					case 101:
+					case 102:
+					case 103:
+					case 104:
+					case 105:
+						//console.log('keyup:Numpad Digit');
+						break;
+					case 190:
+						break;
+					case 110:
+					case 188:
+						//console.log('keyup:replace , to .');
+						e.keyCode = 190;
+						e.charCode= 190;
+						e.which   = 190;
+						e.preventDefault();
+						var e1 = jQuery.Event( "keyup", { keyCode: 190 } );
+						e1.currentTarget = e.currentTarget;
+						e1.data = e.data;
+						e1.delegateTarget = e.delegateTarget;
+						e1.metaKey = e.metaKey;
+						//e1.namespace = e.namespace;
+						e1.pageX = e.pageX;
+						e1.pageY = e.pageY;
+						e1.relatedTarget = e.relatedTarget;
+						e1.result = e.result;
+						e1.target = e.target;
+						e1.timeStamp = e.timeStamp;
+						e1.which = e.which;
+						$( '#t_sum' ).trigger(e1);
+						break;
+					default:
+						//console.log('keyup:Num code:' + e.keyCode.toString());
+						break;
+				}
+			});
+            $('#dialog_box').draggable();
+            $('#import_box').draggable();
+            ac_init("ac", ".txt");
+            $(".row_sel").click(function(e)
+            {
+                $('.dlg_box').show();
+                $('#dlg_box_cap').text('Изменение записи');
+                table_row_selected("#"+e.currentTarget.id, "#expenses");
+                $('#HIDDEN_ID').val(e.currentTarget.id);
+                $('#FRM_MODE').val('update');
+                $("#dialog_box").modal('show');
+                tmr = setTimeout(function(){ focus_fun(); }, to);
+            });
+            $('#dlg_box_text').show(function f()
+            {
+                //console.log("shown() begin with:"+gFilterEvent);
+                if(gFilterEvent==false)
+                {
+                    //console.log("shown() begin");
+                    tmr = setTimeout(function(){ focus_fun(); }, to);
+                    //console.log("shown() end");
+                }
+            });
+        }
+        function doCancel2()
+        {
+            $('#dialog_box').hide();
+            $('#FRM_MODE').val('refresh');
+        }
+        function del_click2()
+        {
+            var s1 = $('#HIDDEN_ID').val();
+            if(s1!=null && s1.length>0)
+            {
+                $('#FRM_MODE').val('delete');
+                tx_submit('<?php echo $curDir;?>/wimm_edit2.php');
+            }
+            else
+            {
+                alert("Запись для удаления не выбрана");
+            }
+        }
+        function add_click2()
+        {
+            $('#dlg_box_cap').text('Добавление записи');
+            $('#DEL_BTN').hide();
+            $('#HIDDEN_ID').val('');
+            $('.form_field').val('');
+            $('#FRM_MODE').val('insert');
+            tmr = setTimeout(function(){ focus_fun(); }, to);
+        }
+        function toggle_credit()
+        {
+            if($("#use_credit").prop("checked"))
+            {
+                $("#t_credit_txt").removeAttr('disabled');
+		$("#t_credit_txt").show();
+		//console.log("toggle_credit() show");
+            }
+            else
+            {
+                $("#use_credit").val("");
+                $("#t_credit_txt").val("");
+                $("#t_credit_txt").prop("disabled","true");
+		$("#t_credit_txt").hide();
+		//console.log("toggle_credit() hide");
+            }
+        }
+        function parseCurrency(jsonData, textStatus, jqXHR, boxID)
+        {
+            if(!jsonData)
+            {
+                //console.log('entering parseCurrency() - null result');
+                return ;
+            }
+            //console.log('entering parseCurrency()');
+            var arr = jsonData;
+            if(arr.length===1)
+            {
+                if(arr[0] && arr[0].id && arr[0].text)
+                {
+                    $("#t_curr").val(arr[0].id);
+                    $("#t_curr_txt").val(arr[0].text);
+                    //console.log('result ' + arr[0].id + ' set' + arr[0].text);
+                }
+                else
+                {
+                    console.log('invalid array');
+                }
+            }
+            else
+            {
+                console.log('invalid array length');
+            }
+            //console.log('leaving parseCurrency()');
+        }
+        
+        function budget_update2()
+        {
+            clearTimeout(tmr2);
+            //console.log('entering budget_update2()');
+            var v = $("#t_curr").val();
+            var b = $("#t_budget").val();
+            if(!v && b)
+            {
+                const query_src = "<?php echo get_autocomplete_url();?>";
+                var d = new Date();
+                var query_str = "type=t_budcur&ac_filter="+b+"&d="+d;
+                console.log('params parsed: ' + query_str);
+                console.log('query to: ' + query_src);
+                // got query string - send request
+                ac_jqxhr =  $.ajax({
+                    type: "POST",
+                    url: query_src,
+                    cache: false,
+                    dataType: "json",
+                    data: query_str,
+                    success: function(jsonData, textStatus, jqXHR){
+                        parseCurrency(jsonData, textStatus, jqXHR, 'boxID');
+                    }
+                });
+            }
+            //console.log('leaving budget_update2()');
+        }
+        function budget_update()
+        {
+            //console.log('entering budget_update()');
+            tmr2 = setTimeout(function(){ budget_update2(); }, to);
+            //console.log('leaving budget_update()');
+        }
+    </script>
     </body>
 
 </html>

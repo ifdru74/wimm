@@ -139,9 +139,14 @@ function transaction_dml($conn, $fm, $a_src=FALSE)
     $a_ret[DML_RET_DBG] .= sprintf($div_fmt, "t_budget", $params['t_budget']);
     $params['t_sum'] = clear_number(filter_array($a_src, "t_sum",0));
     $tid = value4db(filter_array($a_src, "HIDDEN_ID",FALSE));
-    if(key_exists("use_credit", $a_src))
+    $loan_id = value4db(filter_array($a_src, "use_credit",FALSE));
+    if($loan_id!==FALSE && strlen($loan_id)<1)
     {
-        $params['loan_id'] = clear_number(filter_array($a_src, "use_credit",FALSE));
+        $loan_id = FALSE;
+    }
+    else
+    {
+        $params['loan_id'] = clear_number($loan_id);
     }
     if($tid!==FALSE)
     {
@@ -163,7 +168,7 @@ function transaction_dml($conn, $fm, $a_src=FALSE)
                 $sql_dml = "INSERT INTO m_transactions (transaction_name, ".
                         "t_type_id, currency_id, transaction_sum, transaction_date, ".
                         "user_id, open_date, place_id, budget_id";
-                if(key_exists("use_credit", $a_src))
+                if($loan_id)
                     $sql_dml .= ", loan_id";
                 $sql_dml .= ") VALUES(substr(:t_name,1,45), :t_type, :t_curr, :t_sum, :t_date, :t_user, :t_open, "
                         . ":t_place, :t_budget";
@@ -189,7 +194,7 @@ function transaction_dml($conn, $fm, $a_src=FALSE)
                         . " transaction_sum=:t_sum, "
                         . " user_id=:t_user, "
                         . " place_id=:t_place, ";
-                if(key_exists("use_credit", $a_src))
+                if($loan_id)
                     $sql_dml .= " loan_id=:loan_id, ";
                 $sql_dml .= " budget_id=:t_budget "
                         . " where transaction_id=:id";
@@ -210,7 +215,7 @@ function transaction_dml($conn, $fm, $a_src=FALSE)
         }
         $a_ret['SQL'] = $sql_dml;
         $a_ret['t_sum'] = $params['t_sum'];
-        if(key_exists("use_credit", $a_src) && strcmp($fm, DML_DEL)!=0)
+        if($loan_id && strcmp($fm, DML_DEL)!=0)
         {
             update_credit_dml($conn, $params['t_type'], $params['t_curr'], 
                     $params['t_sum'], $params['loan_id']);
