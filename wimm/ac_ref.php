@@ -53,7 +53,10 @@
                 }
                 break;
             case "t_budget":
-                $sql = "SELECT budget_id as r_id, budget_name as r_name FROM m_budget WHERE close_date is null";
+                $sql = "SELECT b.budget_id as r_id, b.budget_name as r_name, "
+                    . "b.currency_id as r_id2, #CONCAT#(c.currency_name #||# ' (' #||# c.currency_abbr #||# ')') as r_name2 "
+                    . "FROM m_budget b join m_currency c on b.currency_id=c.currency_id "
+                    . "WHERE b.close_date is null";
                 if($filter!==FALSE)
                 {
                     $sql .= " and budget_name like '$filter%'";
@@ -64,7 +67,10 @@
                 }
                 break;
             case "t_credit":
-                $sql = "SELECT loan_id as r_id, loan_name as r_name FROM m_loans WHERE close_date is null and #NOW# between start_date and end_date";
+                $sql = "SELECT loan_id as r_id, loan_name as r_name "
+                    . "FROM m_loans "
+                    . "WHERE close_date is null and "
+                    . "#NOW# between start_date and end_date";
                 if($filter!==FALSE)
                 {
                     $sql .= " and loan_name like '$filter%'";
@@ -75,7 +81,10 @@
                 }
                 break;
             case "t_goods":
-                $sql = "SELECT good_id as r_id, good_name as r_name FROM m_goods WHERE close_date is null and #NOW# between open_date and close_date";
+                $sql = "SELECT good_id as r_id, good_name as r_name "
+                    . "FROM m_goods "
+                    . "WHERE close_date is null and "
+                    . "#NOW# between open_date and close_date";
                 if($filter!==FALSE)
                 {
                     $sql .= " and good_name like '$filter%'";
@@ -110,7 +119,18 @@
             {
                 while($row = $stmt->fetch(PDO::FETCH_ASSOC))
                 {
-                    $aret[] = array('id' => $row['r_id'], 'text' => $row['r_name']);
+                    if(array_key_exists('r_id2', $row)) {
+                        $aret[] = array('id' => $row['r_id'], 
+                            'text' => $row['r_name'], 
+                            'id2' => $row['r_id2'], 
+                            'text2' => $row['r_name2']);
+                    }
+                    else
+                    {
+                        $aret[] = array('id' => $row['r_id'], 
+                            'text' => $row['r_name'],
+                            'id2' => '', 'text2' => '');
+                    }
                 }
             }
             if(count($aret)<1)

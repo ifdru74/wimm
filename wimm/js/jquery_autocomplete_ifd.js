@@ -52,6 +52,12 @@ const cAttrBoundNodeC = 'bound_node_class';
 const cAttrBoundNodeN = 'bound_node_name';
 // autocomplete item prefix
 const cAutoCItemJA    = 'aci_';
+const autoCompleteItem = {
+  id: 0,
+  text: "",
+  id2: 0,
+  text2: ""
+};
 /**
  * scroll container to item (emilate combo box behaviour
  * @param {type} containerID - container to scroll
@@ -179,41 +185,18 @@ function changeSelection(boxID, how)
                 break;
             case 4:
                 titem = $(cSharp+boxID).attr(cSelectedACItem);
-                if(titem.indexOf(cAutoCItem)!==0)
+                const acx = Object.create(autoCompleteItem);
+                if(titem.toString().indexOf(cAutoCItem)!==0)
                 {
-                    var titem2 = cAutoCItem + titem;
-                    selectAcItem(boxID, titem2, $(cSharp+titem2).text());
+                    acx.id = titem;
                 }
                 else
                 {
-                    selectAcItem(boxID, titem, $(cSharp+titem).text());
+                    acx.id = titem.toString().substr(cAutoCItem.toString().length);
                 }
+                acx.text = $(cSharp+titem2).text();
+                selectAcItem(boxID, acx);
                 return false;
-
-            if(titem.length<1)
-            {
-                if(i<0)
-                {
-                    i = 0;
-                }
-                else
-                {
-                    if(i>items.length)
-                        i = items.length - 1;
-                }
-                titem = items[i].id;
-            }
-            console.log('new selection:' + titem);
-            if(titem.length>0)
-            {
-                console.log('changeSelection:old selection: ' + sel);
-                console.log('changeSelection:new selection: ' + titem);
-                if(sel.length>0)
-                    $(cSharp+sel).removeClass(cAutoCIBordered);
-                $(cSharp+titem).addClass(cAutoCIBordered);
-                scrollToItem(boxID, titem);
-                $(cSharp+boxID).attr(cSelectedACItem, titem);
-            }
         }
         return true;
     }
@@ -225,20 +208,24 @@ function changeSelection(boxID, how)
 }
 /**
  * select autocomplete items
- * @param {String} boxID    - an ID of the utocomplete box (usually DIV)
- * @param {String} itemID   - selected item's element ID
- * @param {String} itemText - selected item's element text
+ * @param {String} boxID an ID of the utocomplete box (usually DIV)
+ * @param {autoCompleteItem} item2Select selected item's element ID
  * @returns nothing
  */
-function selectAcItem(boxID, itemID, itemText)
+function selectAcItem(boxID, item2Select)
 {
-    if((itemID===null || itemID===undefined || itemID===cUndefinedStr) &&
-            (itemText===null || itemText===undefined || itemText===cUndefinedStr))
-    {
-        console.log('leaving selectAcItem(' +boxID+','+itemID+','+itemText+')');
+    if(!item2Select) {
+        console.log('leaving selectAcItem(' +boxID+','+item2Select+')');
         return ;
     }
-    console.log('entering selectAcItem(' +boxID+','+itemID+','+itemText+')');
+    
+    if((item2Select.id===null || item2Select.id===undefined || item2Select.id===cUndefinedStr) &&
+            (item2Select.text===null || item2Select.text===undefined || item2Select.text===cUndefinedStr))
+    {
+        console.log('leaving selectAcItem(' +boxID+','+item2Select.id+','+item2Select.text+')');
+        return ;
+    }
+    console.log('entering selectAcItem(' +boxID+','+item2Select.id+','+item2Select.text+')');
     var textTargetID = document.getElementById(boxID).getAttribute(cAttrFor);
     if(($(cSharp + boxID).is(cVisibleSel)))
     {
@@ -256,34 +243,45 @@ function selectAcItem(boxID, itemID, itemText)
             if(!nodeName)
                 nodeName = "cid";
             var html = document.getElementById(idTargetDest).innerHTML;
-            html += ("<" + nodeType + " class='" + nodeClass + "' id='" + itemID + 
+            html += ("<" + nodeType + " class='" + nodeClass + "' id='" + item2Select.id + 
                     "' title='Click to remove' onclick='$(this).remove();'>" + 
-                    "<input type='hidden' name='" + nodeName + "[" + itemID + 
-                    "]' value='" + itemID + "'>" +
-                    itemText + "</" + nodeType + ">");
+                    "<input type='hidden' name='" + nodeName + "[" + item2Select.id + 
+                    "]' value='" + item2Select.id + "'>" +
+                    item2Select.text + "</" + nodeType + ">");
             document.getElementById(idTargetDest).innerHTML = html;
             document.getElementById(textTargetID).value = (cEmptyStringJA);
         }
         else
         {   // simple bind - text box for text + hidden for id
             console.log('simple bind selectAcItem()');
-            var idTargetID = document.getElementById(textTargetID).getAttribute(cAttrBoundID);
-            document.getElementById(textTargetID).value = (itemText);
+            var textTarget = document.getElementById(textTargetID);
+            var idTargetID = textTarget.getAttribute(cAttrBoundID);
+            textTarget.value = (item2Select.text);
             if(idTargetID)
             {
-                if(itemID)
+                if(item2Select.id)
                 {
-                    if(itemID.indexOf(cAutoCItem)===0)
+                    if(item2Select.id.toString().indexOf(cAutoCItem)===0)
                     {
-                        $(cSharp+idTargetID).val(itemID.substr(4));
+                        $(cSharp+idTargetID).val(item2Select.id.substr(4));
                     }
                     else
                     {
-                        $(cSharp+idTargetID).val(itemID);
+                        $(cSharp+idTargetID).val(item2Select.id);
                     }
                 }
-                console.log('trigger change');
-                $(cSharp+idTargetID).trigger("change");
+                if(!item2Select.id2) {
+                    console.log('trigger change');
+                    $(cSharp+idTargetID).trigger("change");
+                }
+                else {
+                    var textTargetId2 = textTarget.getAttribute("linked_id");
+                    console.log('direct change ('+textTargetId2+')');
+                    var textTarget2 = document.getElementById(textTargetId2);
+                    textTarget2.value = item2Select.text2
+                    var idTargetId2 = textTarget2.getAttribute(cAttrBoundID);
+                    document.getElementById(idTargetId2).value = item2Select.id2
+                }
             }
         }
         hideAcBox(boxID);
@@ -355,8 +353,8 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
                 sel_item_id = o.getAttribute(cAttrFor);
                 $(cSharp+sel_item_id).removeClass(cNotFound);
                 console.log('calling selectAcItem([0])');
-                callChange = true;
-                selectAcItem(boxID, arr[0].id, arr[0].text, callChange);
+                console.log(arr[0]);
+                selectAcItem(boxID, arr[0]);
                 selectNextInput(cFormCtlSel, sel_item_id, cOKBtnSel);
                 bShow = false;
             }
@@ -399,7 +397,10 @@ function    parseResponse(jsonData, textStatus, jqXHR, boxID)
             $("."+cAutoCILink).click(function(e){
                 var cid = e.currentTarget.id;
                 var id = $(this).parent().attr(cAttrFor);
-                selectAcItem(boxID, cid, $(this).text());
+                const acx = Object.create(autoCompleteItem);
+                acx.id = cid;
+                acx.text = $(this).text();
+                selectAcItem(boxID, acx);
                 if(id)
                 {
                     selectNextInput(cFormCtlSel, id, cOKBtnSel);
@@ -677,7 +678,10 @@ function textFieldKeyUp(event)
                 if(itemText)
                 {
                     var sel_item_id = $(cSharp+ac_box).attr(cAttrFor);
-                    selectAcItem(ac_box, itemID, itemText);
+                    const acx = Object.create(autoCompleteItem);
+                    acx.id = itemID;
+                    acx.text = itemText;
+                    selectAcItem(ac_box, acx);
                     selectNextInput(cFormCtlSel, sel_item_id, cOKBtnSel);
                 }
             }

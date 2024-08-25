@@ -261,13 +261,15 @@
                     "currency_from = f.currency_id and currency_to = t.currency_id " .
                     "order by tp.open_date desc, tp.close_date desc, f_name, t_name";
             printf($hfmt, "SQL2", "SQL2", $sql);
-            $res = $conn->query(formatSQL($conn, $sql));
+            include_once 'QueryRunner.php';
+            $query = new QueryRunner($conn, $sql, FALSE);
             $sm = 0;
             $sd = 0;
             $c_class = "dark";
             echo $tb->htmlOpen();
-            if($res)	{
-                while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
+            if($query)	{
+                $query->execute();
+                while ($row = $query->fetch()) {
                     $row['fopen_date'] = f_get_disp_date($row['open_date']);
                     $row['fclose_date'] = f_get_disp_date($row['close_date']);
                     echo $tb->htmlRow($row);
@@ -280,7 +282,6 @@
             }
             print "<TR class=\"white_bold\"><TD COLSPAN=\"3\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество обменных курсов</TD><TD COLSPAN=\"4\">$sm</TD></TR>\n";
             echo $tb->htmlClose();
-//            print_buttons("onAdd();");
         }
         ?>
         </form>

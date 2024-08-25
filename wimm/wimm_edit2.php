@@ -113,7 +113,8 @@
         if($rec_id)
         {
             $sql = "select transaction_id, t_type_name, transaction_name, "
-                    . "transaction_sum, transaction_date, user_name, "
+                    . "transaction_sum, DATE(transaction_date) as T_DATE, "
+                    . "TIME(transaction_date) as T_TIME, user_name, "
                     . "place_name, t.currency_id t_cid, "
                     . "#CONCAT#(mcu.currency_name #||# ' (' #||# "
                     . "mcu.currency_abbr #||# ')') as currency_name, "
@@ -207,17 +208,29 @@
                     </div>
                     <div class="form-group">
                         <label for="t_sum">Сумма:</label>
-                        <input class="form-control form_field valid sendable" id="t_sum" 
-                               name="t_sum" type="text" 
-                               value="<?php echo $row['transaction_sum'];?>"
-                               pattern="^[1-9][0-9]*[.,]?[0-9]?[0-9]?$">
+                        <input class="form_field valid sendable" id="t_sum" 
+                               name="t_sum" type="number" 
+                               value="<?php echo substr($row['transaction_sum'], 0, strlen($row['transaction_sum'])-3);?>"
+                               min="1" step="1">
+                        <label for="f_sum">.</label>
+                        <input class="form_field valid sendable" id="f_sum" 
+                               name="f_sum" type="number" 
+                               value="<?php echo substr($row['transaction_sum'], strlen($row['transaction_sum'])-2);?>"
+                               min="0" max="99" step="1">
                     </div>
                     <div class="form-group">
                         <label for="t_date">Дата:</label>
-                        <input class="dtp form-control form_field valid sendable" 
-                               id="t_date" name="t_date" type="text" 
-                               value="<?php echo $row['transaction_date'];?>" 
-                               pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1]) ([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$" 
+                        <input class="form_field valid sendable" 
+                               id="t_date" name="t_date" type="date" 
+                               value="<?php echo $row['T_DATE'];?>" 
+                               pattern="^[0-9]{4,4}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$" 
+                               autocomplete="off">
+                        <label for="t_time">Время:</label>
+                        <input class="form_field valid sendable" 
+                               id="t_time" name="t_date" type="time" 
+                               value="<?php echo $row['T_TIME'];?>" 
+                               pattern="^([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$"
+                               placeholder="hrs:mins:secs"
                                autocomplete="off">
                     </div>
                     <div class="form-group">
@@ -254,7 +267,7 @@
                     <span class="glyphicon glyphicon-save"></span> Сохранить
                 </button>
                 <button class="btn" type="button"
-                        onclick="openImport('#dialog_box','#import_box');">
+                        onclick="openImport('#dialog_box','#import_box', '#txt2Import');">
                     <span class="glyphicon glyphicon-edit"></span> Импорт текста...
                 </button>
                 <button class="btn" type="submit" data-dismiss="modal">

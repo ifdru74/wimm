@@ -155,9 +155,11 @@ if($conn)	{
                                 <input type="hidden" name="t_budget" id="t_budget" class="form_field valid sendable" value=""
                                        bind_row_type="value" bind_row_id="T_BUDG_"
                                        pattern="^[1-9][0-9]*$" focus_on="t_budget_txt" onchange="budget_update();">
-                                <input type="text" class="form-control form_field txt" value=""
-                                       autocomplete="off" bound_id="t_budget" ac_src="<?php echo get_autocomplete_url();?>" 
-                                       ac_params="type=t_budget;ac_filter=" id="t_budget_txt"
+                                <input type="text" class="form-control form_field txt" 
+                                       value="" autocomplete="off" id="t_budget_txt"
+                                       bound_id="t_budget" linked_id="t_curr_txt"
+                                       ac_src="<?php echo get_autocomplete_url();?>" 
+                                       ac_params="type=t_budget;ac_filter=" 
                                        bind_row_type="title" bind_row_id="T_BUDG_">
                             </div>
                             <div class="form-group">
@@ -187,18 +189,36 @@ if($conn)	{
                                        bind_row_type="title" bind_row_id="T_CURR_">
                             </div>
                             <div class="form-group">
-                                <label for="t_sum">Сумма:</label>
-                                <input class="form-control form_field valid sendable" id="t_sum" name="t_sum" 
-                                       type="number" value="" bind_row_type="title" bind_row_id="T_SUMM_"
-                                       pattern="^[1-9]\d*([.,]\d{1,2})?$"
-                                       step="0.01">
+                                <label for="i_sum">Сумма:</label>
+                                <input type="hidden" id="t_sum" name="t_sum"
+                                       class="form_control form_field valid sendable"
+                                       value="" bind_row_type="title" 
+                                       split_by="." split_to="i_sum,f_sum"
+                                       bind_row_id="T_SUMM_">
+                                <input class="form_control valid" id="i_sum" name="i_sum" 
+                                       type="number" value="" min="0" step="1">
+                                <label for="f_sum">.</label>
+                                <input class="form_control valid" id="f_sum" name="f_sum" 
+                                        type="number" min="0" max="99" step="1">
                             </div>
                             <div class="form-group">
-                                <label for="t_date">Дата:</label>
-                                <input class="dtp form-control form_field valid sendable" id="t_date" 
-                                       name="t_date" type="text" value="" bind_row_type="title" 
-                                       pattern="^[1-2]\d{3}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1]) ([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$" 
-                                       bind_row_id="T_DATE_" autocomplete="off">
+                                <label for="t_dat">Дата:</label>
+                                <input type="hidden" id="t_date" name="t_date"
+                                       class="valid sendable form-control form_field"
+                                       value="" bind_row_type="title" 
+                                       split_by=" " split_to="t_dat,t_time"
+                                       bind_row_id="T_DATE_">
+                                <input class="form_control valid" id="t_dat" 
+                                       name="t_dat" type="date" value=""
+                                       pattern="^[1-2]\d{3}-([0][1-9]|[1][0-2])-([0][1-9]|[1-2][0-9]|[3][0-1])$" 
+                                       autocomplete="off">
+                                <label for="t_time">Время:</label>
+                                <input class="form_control valid" 
+                                       id="t_time" name="t_time" type="time" 
+                                       value="" bind_row_id="T_DATE_" step="1"
+                                       pattern="^([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9]$"
+                                       placeholder="hrs:mins:secs"
+                                       autocomplete="off">
                             </div>
                             <div class="form-group">
                                 <label for="t_place_txt">Место:</label>
@@ -315,27 +335,19 @@ if($conn)	{
                 . "where t.t_type_id=tt.t_type_id and t.user_id=tu.user_id and "
                 . "t.place_id=tp.place_id and t.currency_id=mcu.currency_id and "
                 . "t.budget_id=mb.budget_id and "
-                . "#TODATE#(transaction_date#ISO_DATETIME#)>=#TODATE#('$bd'#ISO_DATE#) and "
-                . "#TODATE#(transaction_date#ISO_DATETIME#)<#TODATE#('$ed'#ISO_DATE#) ";
-	if($bg>0)
-        {
-            $sql .= " and t.budget_id=$bg ";
-	}
-	if($bc>0)
-        {
-            $sql .= " and t.loan_id=$bc ";
-	}
-	$sql .= "order by transaction_date";
-        $fsql = formatSQL($conn, $sql);
-        $res = $conn->query($fsql);
-	//$res = mysql_query($sql,$conn);
+                . "#TODATE#(transaction_date#ISO_DATETIME#)>=#TODATE#(:bd#ISO_DATE#) and "
+                . "#TODATE#(transaction_date#ISO_DATETIME#)<#TODATE#(:ed#ISO_DATE#) and "
+                . "(:bid=0 or t.budget_id=:bid) and (:lid=0 or t.loan_id=:lid) "
+                . "order by transaction_date";
 	$sm = 0;
 	$sd = 0;
-	$plus_pict = "picts/plus.gif";
-	$minus_pict = "picts/minus.gif";
-	$locale_info = localeconv();
-	if($res)	{
-            while ($row =  $res->fetch(PDO::FETCH_ASSOC)) {
+        include_once 'QueryRunner.php';
+        $query = new QueryRunner($conn, $sql);
+        if($query->isGood())
+        {
+            $a_params = ['bd'=>$bd, 'ed'=>$ed, 'bid'=>$bg, 'lid'=>$bc];
+            $query->executeWithParams($a_params);
+            while($row = $query->fetch()) {
                 $cid = $row['t_cid'];
                 $bid = $row['bc_id'];
                 $ns = $row['transaction_sum'];
@@ -350,23 +362,19 @@ if($conn)	{
                 $ts = $row['type_sign'];
                 if($ts>0)	{
                     $row['tl_class'] = "tl_plus";//tl_plus
-                    $pn = $plus_pict;
                     $sd += $row['transaction_sum'];
                 }
                 else	if($ts<0)	{
                     $row['tl_class'] = "tl_minus";//tl_minus
-                    $pn = $minus_pict;
                     $sm += $row['transaction_sum'];
                 }
                 else	{
                     $row['tl_class'] = "tl_none";//tl_none
-                        $pn = "";
                 }
                 $row['disp_date'] = f_get_disp_date($row['transaction_date']);
-                echo $tb->htmlRow($row);
-            }	
-        }
-	else	{
+                echo $tb->htmlRow($row);                
+            }
+        }   else   {
             $message  = f_get_error_text($conn, "Invalid query: ");
             print $tb->htmlError("$message - $sql");
 	}
@@ -430,8 +438,6 @@ if($conn)	{
             }
         }
 }
-
-        echo "<input type='hidden' id='main_sql' value=\"$fsql\">\n";
 ?>
         </form>
         </div>
@@ -667,6 +673,8 @@ if($conn)	{
             $('#HIDDEN_ID').val('');
             $('.form_field').val('');
             $('#FRM_MODE').val('insert');
+            $('#t_date').val('<?php $dtmc = new DateTime(); echo $dtmc->format('Y-m-d H:i:s'); ?>');
+            val_split('t_date');
             tmr = setTimeout(function(){ focus_fun(); }, to);
         }
         function toggle_credit()

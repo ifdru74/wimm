@@ -33,6 +33,10 @@ const cFormField    = '.form_field';
 const cFormSendable = '.sendable';
 // dialog actions
 const cFormHide = 'hide';
+// split/combine constants
+const cSplitBy = 'split_by';
+const cSplitTo = 'split_to';
+const cSplitDef = ',';
 
 /**
  * converts datetime string to display
@@ -204,11 +208,17 @@ function tx_submit(submitURL)
         for(i=0; i<fields.length; i++)
         {
             try {
-                f = fields[i].getAttribute("id");;
-                v = fields[i].value;
-                if(v.substr(0,4)===cAutoCItem)
+                f = fields[i].getAttribute("id");
+                if(f.hasAttribute(cSplitTo) && f.hasAttribute(cSplitBy))    {
+                    v = combine_val(f);
+                }
+                else
                 {
-                    v = v.substr(4);
+                    v = fields[i].value;
+                    if(v.substr(0,4)===cAutoCItem)
+                    {
+                        v = v.substr(4);
+                    }
                 }
                 reqStr += ("&" + f.toString() + "=" + encodeURIComponent(v));
             } catch (e) {
@@ -475,4 +485,225 @@ function setHandlers(jqSelector)
             //e.preventDefault();
         }
     });
+}
+
+/**
+ * split value with delimiter
+ * @param {string} src_id data source element ID
+ * @returns {undefined}
+ */
+function val_split(src_id)
+{
+    var s_e = document.getElementById(src_id);
+    var sep = cSplitDef;
+    if(s_e.hasAttribute(cSplitBy))    {
+        sep = s_e.getAttribute(cSplitBy);
+    }
+    var dn = '';
+    if(s_e.hasAttribute(cSplitTo))    {
+        dn = s_e.getAttribute(cSplitTo);
+    }
+    var aie = dn.split(cSplitDef);
+    var av = new Array();
+    var vc = get_elem_value(src_id);
+    console.log('sep:'+sep.toString()+', names:'+dn.toString()+', val:'+vc.toString());
+    if(vc.length>sep.length+2)  {
+        av = vc.split(sep);
+        if(av.length<=aie.length)    {
+            var i;
+            for(i=0; i<av.length; i++)  {
+                if(i<aie.length)    {
+                    set_elem_value(aie[i], av[i]);
+                }
+            }
+            console.log('ok');
+            return;
+        }
+    }
+    console.log('failure');
+    for(i=0; i<aie.length; i++)  {
+        set_elem_value(aie[i], '');
+    }
+}
+
+/**
+ * deletes row from table without page reload
+ * @returns {undefined}
+ */
+function delete_table_row()
+{
+    var id=$("#e_row_id").val();
+    $("#row_"+id).parent().parent().remove();
+}
+
+/**
+ * transfer row data into edit box
+ * @param {string} sel_id selected element ID
+ * @param {string} form_id form element ID
+ * @returns {undefined}
+ */
+function table_row_selected(sel_id, form_id)
+{
+    var db_id = $(sel_id).val();
+    var form_fields = $(form_id).find(".form_field");
+    var i;
+    var bt;
+    var bi;
+    for(i=0; i<form_fields.length; i++)
+    {
+        var f = form_fields[i];
+        bt = f.getAttribute("bind_row_type");
+        bi = "#" + f.getAttribute("bind_row_id") + db_id;
+        console.log("bind type="+bt+", id="+bi);
+        switch(bt)
+        {
+        case 'value':
+            f.value = ($(bi).val());
+            break;
+        case 'label':
+            f.value = ($(bi).text());
+            break;
+        case 'title':
+            f.value = ($(bi).attr('title'));
+            break;
+        }
+        if(f.hasAttribute(cSplitTo) && f.hasAttribute(cSplitBy))    {
+            val_split(f.id);
+        }
+    }
+}
+
+/**
+ * validated field value against regexp pattern
+ * @param {String} field_id
+ * @returns {String|Boolean} field_id or false if field value was validated successfully
+ */
+function re_pattern_validate_field(field_id)
+{
+    var ret_id=false;
+    var element = document.getElementById(field_id);
+    if(element!==null && element!==undefined)
+    {
+        var patt = element.pattern;//getAttribute("pattern");
+        if(patt!==null && patt!==undefined)
+        {
+            var val = get_elem_value(field_id);
+            if(val!==null && val!==undefined)
+            {
+                var re = RegExp(patt);
+                if(re.test(val))
+                {
+                    // match!
+                    ret_id = true;
+                }
+                else
+                {
+                    console_debug_log("pattern '"+patt + "' don't match '"+val+"'");
+                }
+            }
+            else
+            {
+                console_debug_log("bad value:"+field_id);
+            }
+        }
+        else
+        {
+            console_debug_log("bad pattern: '"+patt+"'");
+            var val = element.value;
+            if(val!==null && val!==undefined && val.length>0)
+            {
+                ret_id = true;
+            }
+            else
+            {
+                console_debug_log("empty value:"+field_id);
+            }
+        }
+        if(ret_id)
+        {
+            ret_id = false;
+        }
+        else
+        {
+            ret_id = element.getAttribute("focus_on");
+            if(ret_id===null || ret_id===undefined)
+            {
+                ret_id = field_id;
+            }
+            else
+            {
+                if(ret_id.length<1 || ret_id.trim().length<1)
+                {
+                    ret_id = field_id;
+                }
+            }
+        }
+    }
+    else
+    {
+        console_debug_log("bad element:"+field_id);
+        ret_id = field_id;
+    }
+    return ret_id;
+}
+
+/**
+ * 
+ * @param {DOM.Element} f form field
+ * @returns {undefined}
+ */
+function combine_val(f)
+{
+    var sep = f.getAttribute(cSplitBy);
+    var dn = f.getAttribute(cSplitTo);
+    var ain = dn.split(cSplitDef);
+    console.log('combine dn:'+dn.toString()+', sep:'+sep.toString());
+    var v = '';
+    for(var i=0; i<ain.length; i++) {
+        if(v.length>0) {
+            v += sep;
+        }
+        v += get_elem_value(ain[i]);
+    }
+    console.log('combine into:"'+f.id.toString()+'" into:' + v.toString()+'"');
+    return v;
+}
+
+/**
+ * validate form_fields
+ * @param {string} form_id
+ * @returns {Boolean}
+ */
+function fancy_form_validate(form_id)
+{
+    var v_ret = true;
+    var fields = $('#'+form_id).find(".valid");
+    if(fields!==null && fields!==undefined)
+    {
+        var i;
+        for(i=0; i<fields.length; i++)
+        {
+            var f = fields[i];
+            var field_id = f.getAttribute("id");
+            if(field_id!==null && field_id!==undefined)
+            {
+                if(f.hasAttribute(cSplitBy) && f.hasAttribute(cSplitTo))    {
+                    $('#'+field_id).val(combine_val(f));
+                    console.log('combined:"'+f.value+'"');
+                }
+                var ff_id = re_pattern_validate_field(field_id);
+                if(ff_id!==null && ff_id!==undefined)
+                {
+                    if(ff_id)
+                    {
+                        $('#'+ff_id).select();
+                        $('#'+ff_id).focus();
+                        v_ret = false;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return v_ret;
 }

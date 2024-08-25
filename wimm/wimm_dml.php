@@ -51,27 +51,35 @@ function perform_dml($conn, $sql_dml, $a_params, $a_ret)
                 $a_ret[DML_RET_DBG] .= ("<div id=\"show_$pkey\" style=\"display:none;\">$pvalue</div>" . PHP_EOL);
             }
         }
-        $a_ret[DML_RETCODE] = $stmt->execute($a_params);
-        if($a_ret[DML_RETCODE]===FALSE)
-        {
-            $a_ret[DML_RETCODE] = -1;
-            $a_ret[DML_RET_ERR] = 'SQL error';
-            foreach ($stmt->errorInfo() as $key => $value) {
-                $a_ret[DML_RET_ERR] .= $value . PHP_EOL;
-            }
-        }
-        else
-        {
-            if($a_ret[DML_RETCODE]==0)
+        try {
+            $a_ret[DML_RETCODE] = $stmt->execute($a_params);
+            if($a_ret[DML_RETCODE]===FALSE)
             {
-                $a_ret[DML_RET_ERR] = 'no rows affected';
+                $a_ret[DML_RETCODE] = -1;
+                $a_ret[DML_RET_ERR] = 'SQL error';
+                foreach ($stmt->errorInfo() as $key => $value) {
+                    $a_ret[DML_RET_ERR] .= $value . PHP_EOL;
+                }
             }
             else
             {
-                if(stripos(trim($sql_dml), 'insert')==0)
+                if($a_ret[DML_RETCODE]==0)
                 {
-                    $a_ret[DML_RET_INS] = $conn->lastInsertId();
+                    $a_ret[DML_RET_ERR] = 'no rows affected';
                 }
+                else
+                {
+                    if(stripos(trim($sql_dml), 'insert')==0)
+                    {
+                        $a_ret[DML_RET_INS] = $conn->lastInsertId();
+                    }
+                }
+            }
+        } catch (PDOException $e)   {
+            $a_ret[DML_RETCODE] = -1;
+            $a_ret[DML_RET_ERR] = $e;
+            foreach ($stmt->errorInfo() as $key => $value) {
+                $a_ret[DML_RET_ERR] .= $value . PHP_EOL;
             }
         }
     }
@@ -168,14 +176,16 @@ function transaction_dml($conn, $fm, $a_src=FALSE)
                 $sql_dml = "INSERT INTO m_transactions (transaction_name, ".
                         "t_type_id, currency_id, transaction_sum, transaction_date, ".
                         "user_id, open_date, place_id, budget_id";
-                if($loan_id)
+                if ($loan_id) {
                     $sql_dml .= ", loan_id";
+                }
                 $sql_dml .= ") VALUES(substr(:t_name,1,45), :t_type, :t_curr, :t_sum, :t_date, :t_user, :t_open, "
                         . ":t_place, :t_budget";
-                if(key_exists("use_credit", $a_src))
+                if (key_exists("use_credit", $a_src)) {
                     $sql_dml .= ", :loan_id)";
-                else
+                } else {
                     $sql_dml .= ")";
+                }
             }
             break;
         case DML_DEL:
@@ -194,8 +204,9 @@ function transaction_dml($conn, $fm, $a_src=FALSE)
                         . " transaction_sum=:t_sum, "
                         . " user_id=:t_user, "
                         . " place_id=:t_place, ";
-                if($loan_id)
+                if ($loan_id) {
                     $sql_dml .= " loan_id=:loan_id, ";
+                }
                 $sql_dml .= " budget_id=:t_budget "
                         . " where transaction_id=:id";
             }
@@ -206,8 +217,9 @@ function transaction_dml($conn, $fm, $a_src=FALSE)
         $a_ret = perform_dml($conn, $sql_dml, $params, $a_ret);
         if(strcmp($fm, DML_INS)==0)
         {
-            if(key_exists(DML_RET_INS, $a_ret))
+            if (key_exists(DML_RET_INS, $a_ret)) {
                 $a_ret['id'] = $a_ret[DML_RET_INS];
+            }
         }
         else
         {
@@ -362,8 +374,8 @@ function budget_dml($conn, $fm, $a_src=FALSE)
             break;
         case DML_UPD:
             $sql_dml = "update m_budget set budget_name=:b_name, "
-                . "open_date=:bo_date, budget_descr=:b_descr, "
-                . "currency_id=:b_curr, parent_id=:b_parent where budget_id=:b_id";
+                . "budget_descr=:b_descr, currency_id=:b_curr, "
+                . "parent_id=:b_parent where budget_id=:b_id";
             break;
         case DML_DEL:
             $sql_dml = "update m_budget set close_date=#NOW# where budget_id=:b_id";
@@ -462,7 +474,6 @@ function goods_dml($conn, $fm, $a_src=FALSE)
         $a_src = $_REQUEST;
     }
     $sql_dml = "";
-    $a_ret = array();
     $a_ret = array();
     $params = array();
     $params['g_barcode'] = value4db(filter_array($a_src, "g_barcode",""));
@@ -641,8 +652,7 @@ function exchange_dml($conn, $fm, $a_src=FALSE)
         $a_src = $_REQUEST;
     }
     $sql = "";
-    $a_ret = [];
-    $a_ret = [];
+    $a_ret = array();
     $params = array();
     $def_date = date("Y-m-d H:i:s");
     $params['tf_curr']   = value4db(filter_array($a_src, "tf_curr",0));
@@ -784,8 +794,7 @@ function loan_dml($conn, $fm, $a_src=FALSE)
     return $a_ret;
 }
 
-$a_constants = array(
-    "DML_INS" => "insert",
+$a_constants = ["DML_INS" => "insert",
     "DML_UPD" => "update",
     "DML_DEL" => "delete",
     "DML_RET_DBG" => "dbg_out",
@@ -794,7 +803,7 @@ $a_constants = array(
     'DML_RET_ERR' => 'error',
     'DML_RET_INS' => 'insert_id',
     'DML_RET_DUP' => 'dup_id'
-);
+   ];
 
 foreach ($a_constants as $key => $value) {
     if(!defined($key))

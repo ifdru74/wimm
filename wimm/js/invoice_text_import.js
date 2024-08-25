@@ -1,6 +1,8 @@
 /* 
  */
 
+/* global aSp */
+
 /**
  * detects date and time and fills #sel_dtm
  * @param {type} str text to look into
@@ -8,7 +10,7 @@
  */
 function detectDateAndTime(str)
 {
-    let phRe = /(\d{2,4}.\d{2}.\d{2,4}\s+\d{2}.\d{2}(\:\d\d)?)/gm;
+    let phRe = /((\d{2,4}.\d{2}.\d{2,4}\s+\d{2}.\d{2}(\:\d\d)?)|\d\d\.\d\d\.\d{4}\s+\|\s+\d\d\:\d\d)/gm;
     let aVars = [];
 
     let oHtml="";
@@ -37,7 +39,7 @@ function detectDateAndTime(str)
                     aVars.push(match);
                     let dtmText = match;
                     let dtmValue = match;
-                    let pdRe = /^(\d{2,4}).(\d{2}).(\d{2,4})\s+(\d{2}.\d{2}(\:\d\d)?)$/;
+                    let pdRe = /^(\d{2,4}).(\d{2}).(\d{2,4})\s+\|?\s*(\d{2}.\d{2}(\:\d\d)?)$/;
                     let m2;
                     if ((m2 = pdRe.exec(dtmText)) !== null) {
                         // This is necessary to avoid infinite loops with zero-width matches
@@ -99,7 +101,7 @@ function detectDateAndTime(str)
                 }
             }
         });
-    }        
+    }
     document.getElementById('sel_dtm').innerHTML = oHtml;
 }
 
@@ -110,11 +112,12 @@ function detectDateAndTime(str)
  */
 function detectAmount(str)
 {
-    let phRe = /(Итог.\:?)\s+((\d{1,3}[\t ]*){1,3}[\,\.]\d\d[^\.\,])/gim;
+    const phRe = /Итог(.{1,2})?о?\:?\s+(\d+[\,\.]\d{2})/gi;
     let aVars = [];
 
     let oHtml="";
     let m;
+    let iCount = 0;
 
     while ((m = phRe.exec(str)) !== null) {
         // This is necessary to avoid infinite loops with zero-width matches
@@ -149,6 +152,7 @@ function detectAmount(str)
                     s2 = s2.replace(/\s+$/g,'');
                     oHtml += "                                " +
                             "<option value='"+s1+"'>" + s2 + "</option>\n";
+                    iCount ++;
                 }
                 console.log("s1='"+s1+"', match='"+match+"'");
             }
@@ -164,7 +168,9 @@ function detectAmount(str)
  */
 function detectWhere(str)
 {
-    let phRe = /(ИНН(\s+)?([^\s]+)?\:?\s+\d+)/gm;
+    console.log('Looking for INN');
+    let phRe = /(ИНН(:\s+)?([^\s]+)?\:?\s+\d+)/gm;
+    //let phRe = /(ИНН\s*\S*\s*(\d+))/gm;
     let aVars = [];
 
     let oHtml="";
@@ -177,7 +183,7 @@ function detectWhere(str)
         }
         // The result can be accessed through the `m`-variable.
         m.forEach((match, groupIndex) => {
-            //console.log(`Found match, group ${groupIndex}: ${match}`);
+            console.log(`Found INN match, group ${groupIndex}: ${match}`);
             if(groupIndex===1)   {
                 let fLen = aVars.length;
                 let gotThis = false;
@@ -200,6 +206,7 @@ function detectWhere(str)
             }
         });
     }
+    console.log('Finished for INN');
     document.getElementById('sel_where').innerHTML = oHtml;
 }
 
@@ -347,36 +354,60 @@ function    parsePlaceResponse(jsonData, textStatus, jqXHR, txtID)
     }
 }        
 
+function selValueOrText(opt)    {
+    if(opt.value)   {
+        return opt.value;
+    }
+    return opt.text;
+}
 /**
  * transfer selected data into main form, issues a place lookup request
  * @param {string} mainDialogID dialog to activate
  * @param {string} importDialogID dialog to passivate
+ * @param {string} acUrl autocomplete URL
  * @returns {nothing}
  */
 function transferData(mainDialogID, importDialogID, acUrl)
 {
     let opt = getSelectedOptionT('sel_amount');
+    const NameSplitter = ",";
+    const FracSplitter = ".";
+    const DtmPartSplitter = " ";
+    const SplitFieldList = "split_to";
     if(opt)
     {
-        if(opt.value)
-        {
-            document.getElementById("t_sum").value = opt.value;
-        }
-        else
-        {
-            document.getElementById("t_sum").value = opt.text;
+        var vSum = selValueOrText(opt);
+        var vtSum = document.getElementById("t_sum");
+        if(vtSum)   {
+            vtSum.value = vSum;
+            try {
+                var sp = vtSum.getAttribute(SplitFieldList);
+                var aSnames = sp.split(NameSplitter);
+                var aSum = vSum.split(FracSplitter);
+                document.getElementById(aSnames[0]).value = aSum[0];
+                document.getElementById(aSnames[1]).value = aSum[1];
+            } catch (e) {
+                console.log(e);
+            }
         }
     }
     opt = getSelectedOptionT('sel_dtm');
     if(opt)
     {
-        if(opt.value)
-        {
-            document.getElementById("t_date").value = opt.value;
-        }
-        else
-        {
-            document.getElementById("t_date").value = opt.text;
+        var vtDtm = selValueOrText(opt);
+        var vtDate = document.getElementById("t_date");
+        if(vtDate)  {
+            vtDate.value = vtDtm;
+            try {
+                var sdtm = vtDate.getAttribute(SplitFieldList);
+                var aDtnames = sdtm.split(NameSplitter);
+                var aDtm = vtDtm.split(DtmPartSplitter);
+                document.getElementById(aDtnames[0]).value = aDtm[0];
+                document.getElementById(aDtnames[1]).value = aDtm[1];
+            } catch (e) {
+                console.log(e);
+            }
+
         }
     }
     opt = getSelectedOptionT('sel_for');
@@ -427,9 +458,10 @@ function transferData(mainDialogID, importDialogID, acUrl)
  * opens import dialog
  * @param {string} mainDialogID dialog to passivate
  * @param {string} importDialogID dialog to activate
+ * @param {string} focusItem dialog item to activate
  * @returns {nothing}
  */
-function openImport(mainDialogID, importDialogID)
+function openImport(mainDialogID, importDialogID, focusItem)
 {
     if(!mainDialogID)
     {
@@ -441,6 +473,11 @@ function openImport(mainDialogID, importDialogID)
     }
     $(mainDialogID).removeClass("modal");
     $(importDialogID).modal('show');
+    if(!focusItem)
+    {
+        focusItem = "#txt2Import";
+    }
+    $(focusItem).focus();
 }
 
 /**
