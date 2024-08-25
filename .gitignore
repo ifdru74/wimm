@@ -19,3 +19,10 @@ cmake-build-*/*
 fuck.*
 *.gz
 */nbproject/*
+wimm/fonts/glyphicons-halflings-regular.ttf
+wimm/fonts/glyphicons-halflings-regular.eot
+*.svg
+*.woff
+*.woff2
+wimm/parse_cheq.html
+wimm/trunk/21_07_2023_01_46_134376936769057480767.json
