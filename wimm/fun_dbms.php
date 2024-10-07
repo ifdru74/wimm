@@ -19,8 +19,9 @@ function f_get_connection()
         {
             foreach ($conn_cfg as $key => $sqln)
             {
-                if(strlen($sqln)>0)
+                if (strlen($sqln) > 0) {
                     $conn->exec($sqln);
+                }
             }
         }
     } catch (PDOException $e) {
@@ -38,8 +39,9 @@ function f_get_connection()
  */
 function f_get_error_text($conn,$caption)
 {
-    if(strlen($caption)<1)
-		$caption = "Invalid query:";
+    if (is_null($caption) || strlen($caption) < 1) {
+        $caption = "Invalid query:";
+    }
     $err = $conn->errorInfo();
     $message  = $caption . $err[2];
     return $message;
@@ -53,13 +55,14 @@ function f_get_error_text($conn,$caption)
 function f_get_disp_date($sdate)
 {
     $s = "";
-    if(strlen($sdate)>0)	{
+    if(!is_null($sdate) && strlen($sdate)>0)	{
         $s = substr($sdate,8,2);
         $s = $s . "/" . substr($sdate,5,2);
         $s = $s . " " . substr($sdate,11,8);
     }
-    if(strlen($s)<1)
+    if (strlen($s) < 1) {
         $s = "&nbsp;";
+    }
     return $s;
 }
 
@@ -73,7 +76,7 @@ function f_get_disp_date($sdate)
 function f_get_col($row,$colname,$def_val)
 {
     $s = $def_val;
-    if(strlen($colname)>0)	{
+    if(!is_null($colname) && strlen($colname)>0)	{
         if(isset($row))	{
             if(isset($row[$colname]))	{
                 if(!is_null($row[$colname]))	{
@@ -96,8 +99,9 @@ function f_get_col($row,$colname,$def_val)
 function f_set_sel_options2($conn, $sql, $sel, $sel2, $indent=2)
 {
     $ind_s = "\t";
-    for($i=1; $i<$indent; $i++)
+    for ($i = 1; $i < $indent; $i++) {
         $ind_s .= "\t";
+    }
     print "$ind_s<OPTION value=\"0\">-Не выбран-</OPTION>\r\n";
     $sql2 = $sql . " order by 2";
     try {
@@ -107,15 +111,18 @@ function f_set_sel_options2($conn, $sql, $sel, $sel2, $indent=2)
         {
             $o = "";
             foreach ($line as $col_value) {
-                if(strlen($o)>0)
+                if (strlen($o) > 0) {
                     $odn = $col_value;
-                else
+                } else  {
                     $o = $col_value;
+                }
             }
-            if(strcmp($o,$sel)==0||strcmp($odn,$sel2)==0)
-                $selitem = "selected";//print "$ind_s<OPTION value=\"$o\" selected>$odn</OPTION>\r\n";
-            else
-                $selitem = "";//print "$ind_s<OPTION value=\"$o\">$odn</OPTION>\r\n";
+            if (strcmp($o, $sel) == 0 || strcmp($odn, $sel2) == 0) {
+                $selitem = "selected";
+            }//print "$ind_s<OPTION value=\"$o\" selected>$odn</OPTION>\r\n";
+            else {
+                $selitem = "";
+            } //print "$ind_s<OPTION value=\"$o\">$odn</OPTION>\r\n";
             printf($opt_fmt,$ind_s, $o, $selitem, $odn);
         }        
     } catch (PDOException $ex) {
@@ -181,7 +188,7 @@ function value4db($val)
 /**
  * 
  * @param PDO $conn
- * @param string $val
+ * @param string $sql
  * @return string
  */
 function formatSQL($conn, $sql) {
@@ -234,8 +241,9 @@ function f_get_single_value($conn, $sql, $def_val)
             $res = $conn->query($sql);
             if($res)    {
                 $row = $res->fetch(PDO::FETCH_NUM);
-                if(is_array($row) && count($row)>0)
+                if (is_array($row) && count($row) > 0) {
                     $ret = $row[0];
+                }
                 $res->closeCursor();
             }
         } catch (PDOException $ex) {

@@ -1,8 +1,10 @@
 <?php
     include_once ("fun_web.php");
+    include_once 'wimm_config.php';
     $uid = page_pre();
-    if($uid===FALSE)
+    if($uid===FALSE)    {
         die();
+    }
     include_once 'fun_dbms.php';
     include_once 'table.php';
     $p_title = "Редактор мест, где тратятся деньги";
@@ -19,6 +21,7 @@
     </head>
     <body onload="onLoad();">
         <script language="JavaScript" type="text/JavaScript" src="js/form_common.js"></script>
+        <script language="JavaScript" type="text/JavaScript" src="js/index_aj.js"></script>
 <?php    
     if(isMSIE())   {
 ?>        
@@ -210,20 +213,19 @@ if($conn)	{
         $tb->addColumn(new tcol("<label class='td' id=\"USR_=place_id\" FOR=\"=place_id\" title=\"user_id\">=user_name</label>"), FALSE);
 	$sql = "select place_id, place_name, tp.open_date, tp.close_date, "
                 . "place_descr, tp.user_id, user_name, inn "
-                . "from m_places tp, m_users tu where tp.user_id=tu.user_id and "
-                . "tp.close_date is null order by place_name";
-	$res = $conn->query($sql);
+                . "from m_places tp "
+                . "join m_users tu on tp.user_id=tu.user_id "
+                . "where tp.close_date is null order by place_name";
+        include_once 'QueryRunner.php';
+        $query = new QueryRunner($conn, $sql, FALSE);
 	$sm = 0;
 	$sd = 0;
 	echo $tb->htmlOpen();
-	if($res)
-        {
-            while ($row = $res->fetch(PDO::FETCH_ASSOC)) 
-            {
-                if(key_exists('dup_id', $a_dml))
-                {
-                    if(strcmp($row['place_id'],$a_dml['dup_id'])==0 )
-                    {
+	if($query->isGood())    {
+            $query->execute();
+            while ($row = $query->fetch())  {
+                if(key_exists('dup_id', $a_dml))    {
+                    if(strcmp($row['place_id'],$a_dml['dup_id'])==0 )   {
                         $row['checked']='checked';
                     }
                 }
@@ -232,12 +234,13 @@ if($conn)	{
                 echo $tb->htmlRow($row);
                 $sm ++;
             }
-        }
-	else	{
+        }   else    {
             $message  = f_get_error_text($conn, "Invalid query: ");
             echo $tb->htmlError($message);
 	}
-        print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . date("d.m.Y H:i:s") . "\">Количество мест</TD><TD COLSPAN=\"3\">$sm</TD></TR>\n";
+        print "<TR class=\"white_bold\"><TD COLSPAN=\"2\" TITLE=\"Запрос выполнен " . 
+                date("d.m.Y H:i:s") . 
+                "\">Количество мест</TD><TD COLSPAN=\"3\">$sm</TD></TR>\n";
         if(key_exists('retcode', $a_dml) && $a_dml['retcode']<0)
         {
             foreach ($a_dml as $kdml => $vdml) {
